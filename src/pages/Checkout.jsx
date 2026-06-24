@@ -171,7 +171,7 @@ const Checkout = () => {
             </div>
 
             <button type="submit" className="btn-pay" disabled={isLoading}>
-              {isLoading ? 'Memproses...' : `Bayar ${currentPlan.price} & Buat Akun`}
+              {isLoading ? 'Memproses...' : 'Verifikasi Pembayaran Anda'}
             </button>
 
             <div className="secure-badge">
