@@ -33,6 +33,20 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  const totalCompanies = companies.length;
+  const activeLicenses = companies.filter(c => c.status === 'active').length;
+  const expiredLicenses = companies.filter(c => c.status === 'expired').length;
+  const monthlyRevenue = companies.reduce((acc, curr) => {
+    if (curr.status === 'active') {
+      return acc + (curr.plan === 'standar' ? 499000 : 999000);
+    }
+    return acc;
+  }, 0);
+
+  const formatRupiah = (number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+  };
+
   return (
     <div>
       <h2 style={{ marginBottom: '2rem' }}>Ringkasan SaaS i-rekap</h2>
@@ -44,7 +58,7 @@ const SuperAdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Total Perusahaan</h4>
-            <p>42</p>
+            <p>{totalCompanies}</p>
           </div>
         </div>
         
@@ -54,7 +68,7 @@ const SuperAdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Lisensi Aktif</h4>
-            <p>38</p>
+            <p>{activeLicenses}</p>
           </div>
         </div>
 
@@ -64,7 +78,7 @@ const SuperAdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Lisensi Kedaluwarsa</h4>
-            <p>4</p>
+            <p>{expiredLicenses}</p>
           </div>
         </div>
 
@@ -74,7 +88,7 @@ const SuperAdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Pendapatan Bulanan</h4>
-            <p>Rp 45.5M</p>
+            <p>{formatRupiah(monthlyRevenue)}</p>
           </div>
         </div>
       </div>
