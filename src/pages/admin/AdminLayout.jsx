@@ -60,6 +60,15 @@ const AdminLayout = () => {
     name: localStorage.getItem('company-name') || 'PT Maju Bersama'
   });
 
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+  
+  const handleRestrictedAccess = (e) => {
+    if (adminRole === 'demo') {
+      e.preventDefault();
+      alert('🔒 Fitur ini dikunci. Silakan upgrade ke paket Standar atau Pro untuk mengakses fitur ini.');
+    }
+  };
+
   useEffect(() => {
     const handleProfileUpdate = () => {
       setProfile({
@@ -142,17 +151,17 @@ const AdminLayout = () => {
             <Wallet size={20} />
             <span>Kasbon</span>
           </NavLink>
-          <NavLink to="/admin/shift" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Jadwal Shift">
+          <NavLink to="/admin/shift" onClick={handleRestrictedAccess} className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Jadwal Shift">
             <CalendarDays size={20} />
-            <span>Jadwal Shift</span>
+            <span>Jadwal Shift {adminRole === 'demo' && '🔒'}</span>
           </NavLink>
-          <NavLink to="/admin/payroll" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Penggajian & Lembur">
+          <NavLink to="/admin/payroll" onClick={handleRestrictedAccess} className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Penggajian & Lembur">
             <DollarSign size={20} />
-            <span>Penggajian & Lembur</span>
+            <span>Penggajian & Lembur {adminRole === 'demo' && '🔒'}</span>
           </NavLink>
-          <NavLink to="/admin/settings" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Pengaturan">
+          <NavLink to="/admin/settings" onClick={handleRestrictedAccess} className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Pengaturan">
             <SettingsIcon size={20} />
-            <span>Pengaturan</span>
+            <span>Pengaturan {adminRole === 'demo' && '🔒'}</span>
           </NavLink>
         </nav>
 

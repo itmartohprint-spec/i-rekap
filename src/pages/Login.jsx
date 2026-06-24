@@ -14,6 +14,16 @@ const Login = () => {
     if (username === 'superadmin' || username === 'penyedia') {
       navigate('/super-admin/dashboard');
     } else if (username === 'admin') {
+      localStorage.setItem('admin-role', 'pro');
+      navigate('/admin/dashboard');
+    } else if (username === localStorage.getItem('demo-username') && password === localStorage.getItem('demo-password')) {
+      // Periksa masa aktif demo
+      const expiryDate = new Date(localStorage.getItem('demo-expiry-date'));
+      if (new Date() > expiryDate) {
+        alert('Masa percobaan Demo Anda sudah habis. Silakan langganan paket Standar/Pro.');
+        return;
+      }
+      localStorage.setItem('admin-role', 'demo');
       navigate('/admin/dashboard');
     } else {
       // Verify with Supabase

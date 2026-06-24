@@ -14,6 +14,7 @@ import AttendanceReports from './pages/admin/AttendanceReports';
 import Settings from './pages/admin/Settings';
 
 import LandingPage from './pages/LandingPage';
+import RegisterDemo from './pages/RegisterDemo';
 import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import CompanyList from './pages/superadmin/CompanyList';
@@ -31,6 +32,9 @@ function App() {
       <Routes>
         {/* Landing Page for SaaS */}
         <Route path="/" element={<LandingPage />} />
+        
+        {/* Demo Registration */}
+        <Route path="/register-demo" element={<RegisterDemo />} />
         
         {/* Login */}
         <Route path="/login" element={<Login />} />

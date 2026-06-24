@@ -93,7 +93,7 @@ const LandingPage = () => {
               <li><CheckCircle size={16} color="var(--success-color)"/> Maksimal 10 Karyawan</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> Tanpa Kartu Kredit</li>
             </ul>
-            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Mulai Demo</button>
+            <button className="btn-secondary plan-btn" onClick={() => navigate('/register-demo')}>Mulai Demo</button>
           </div>
 
           <div className="pricing-card">
