@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Lock, CreditCard, Building } from 'lucide-react';
+import { CheckCircle, Lock, QrCode, Building } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import './Checkout.css';
 
@@ -8,8 +8,22 @@ const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [plan, setPlan] = useState('pro');
-  const [paymentMethod, setPaymentMethod] = useState('card');
   const [isLoading, setIsLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(9 * 60);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timerId = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+    return () => clearInterval(timerId);
+  }, [timeLeft]);
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -140,22 +154,21 @@ const Checkout = () => {
 
             <h3 style={{ fontSize: '1.1rem', margin: '2rem 0 1rem', color: 'var(--text-primary)' }}>Metode Pembayaran</h3>
             <div className="payment-methods">
-              <div className={`payment-method ${paymentMethod === 'card' ? 'active' : ''}`} onClick={() => setPaymentMethod('card')}>
-                <CreditCard size={24} />
-                Kartu Kredit / Debit
-              </div>
-              <div className={`payment-method ${paymentMethod === 'transfer' ? 'active' : ''}`} onClick={() => setPaymentMethod('transfer')}>
-                <Building size={24} />
-                Virtual Account
+              <div className="payment-method active" style={{ cursor: 'default' }}>
+                <QrCode size={24} />
+                QRIS
               </div>
             </div>
 
-            {paymentMethod === 'card' && (
-              <div className="form-group">
-                <label>Nomor Kartu (Simulasi)</label>
-                <input type="text" className="checkout-input" placeholder="4111 1111 1111 1111" required />
+            <div className="qris-payment-section" style={{ textAlign: 'center', margin: '1.5rem 0', padding: '1.5rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+              <p style={{ marginBottom: '1rem', fontWeight: '500', color: '#334155' }}>Scan QR Code ini untuk membayar</p>
+              <div style={{ width: '100%', maxWidth: '300px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', overflow: 'hidden' }}>
+                <img src="/qris.png" alt="QRIS Pembayaran" style={{ width: '100%', height: 'auto', display: 'block' }} />
               </div>
-            )}
+              <p style={{ marginTop: '1.5rem', fontSize: '1.1rem', color: timeLeft <= 60 ? '#dc2626' : '#334155', fontWeight: 'bold' }}>
+                Selesaikan dalam: {formatTime(timeLeft)}
+              </p>
+            </div>
 
             <button type="submit" className="btn-pay" disabled={isLoading}>
               {isLoading ? 'Memproses...' : `Bayar ${currentPlan.price} & Buat Akun`}
