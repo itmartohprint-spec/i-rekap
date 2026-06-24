@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText } from 'lucide-react';
+import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText, DollarSign, CalendarRange, Users, Banknote } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -47,36 +47,62 @@ const LandingPage = () => {
 
       <section id="fitur" className="features-section">
         <h2 className="section-title">Fitur Unggulan Kami</h2>
-        <div className="features-grid">
+        
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'left', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+            <Users size={28} color="var(--primary-color)" />
+            <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>Fitur untuk Karyawan</h3>
+          </div>
+        </div>
+        <div className="features-grid" style={{ marginBottom: '5rem' }}>
           <div className="feature-card">
             <div className="feature-icon"><MapPin size={32} /></div>
-            <h3>Validasi Lokasi (GPS)</h3>
-            <p>Pastikan karyawan berada di lokasi yang tepat saat absen dengan deteksi koordinat GPS presisi.</p>
+            <h3>Absensi Mobile (GPS & Selfie)</h3>
+            <p>Absen mudah dari HP dengan deteksi lokasi akurat (GPS) dan verifikasi wajah (Selfie) untuk menghindari penitipan absen.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon"><Camera size={32} /></div>
-            <h3>Verifikasi Selfie</h3>
-            <p>Bukti foto langsung dari kamera untuk menghindari kecurangan dan penitipan absen.</p>
+            <div className="feature-icon"><CalendarRange size={32} /></div>
+            <h3>Pengajuan Cuti & Izin</h3>
+            <p>Ajukan cuti, izin, atau sakit langsung dari genggaman tanpa perlu mengisi form kertas lagi. Pantau status persetujuannya secara real-time.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon"><Wifi size={32} /></div>
-            <h3>Pelacakan IP Address</h3>
-            <p>Sistem memvalidasi jaringan internet (IP) yang digunakan karyawan untuk keamanan ganda.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><Clock size={32} /></div>
-            <h3>Manajemen Lembur & Cuti</h3>
-            <p>Proses pengajuan cuti, izin, dan lembur lebih mudah dengan alur persetujuan otomatis.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon"><Shield size={32} /></div>
-            <h3>Cloud Database Aman</h3>
-            <p>Seluruh data karyawan dan log absensi tersimpan aman di server cloud terenkripsi penuh.</p>
+            <div className="feature-icon"><Banknote size={32} /></div>
+            <h3>Pengajuan Kasbon (Cash Advance)</h3>
+            <p>Fasilitas pengajuan pinjaman karyawan/kasbon dengan sistem pemotongan otomatis pada saat penggajian.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon"><FileText size={32} /></div>
-            <h3>Laporan Otomatis</h3>
-            <p>Ekspor laporan absensi lengkap ke format PDF atau Excel hanya dalam sekali klik.</p>
+            <h3>Riwayat & Slip Gaji Digital</h3>
+            <p>Pantau riwayat absensi harian dan unduh slip gaji bulanan secara mandiri dengan mudah dan aman.</p>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'left', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+            <Shield size={28} color="var(--primary-color)" />
+            <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>Fitur untuk HR & Admin</h3>
+          </div>
+        </div>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon"><Wifi size={32} /></div>
+            <h3>Live Tracking & Validasi IP</h3>
+            <p>Pantau lokasi karyawan secara langsung dan validasi jaringan internet (IP Address) yang mereka gunakan saat absen.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Clock size={32} /></div>
+            <h3>Manajemen Shift & Jadwal</h3>
+            <p>Atur jadwal kerja fleksibel, shift bergulir, dan toleransi keterlambatan sesuai kebijakan perusahaan Anda.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><CheckCircle size={32} /></div>
+            <h3>Approval System 1-Klik</h3>
+            <p>Setujui atau tolak pengajuan cuti, lembur, dan kasbon karyawan hanya dengan satu klik dari dashboard Anda.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><DollarSign size={32} /></div>
+            <h3>Payroll & Ekspor Laporan Otomatis</h3>
+            <p>Sistem rekap gaji otomatis berdasarkan kehadiran dan kasbon. Ekspor laporan ke PDF atau Excel dengan instan.</p>
           </div>
         </div>
       </section>
