@@ -129,7 +129,7 @@ const LandingPage = () => {
               <li><CheckCircle size={16} color="var(--success-color)"/> Dedicated Server</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> API Integration</li>
             </ul>
-            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Hubungi Sales</button>
+            <button className="btn-secondary plan-btn" onClick={() => window.open('https://wa.me/6289628003344', '_blank')}>Hubungi Sales</button>
           </div>
 
         </div>
