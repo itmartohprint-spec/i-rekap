@@ -36,7 +36,7 @@ const LandingPage = () => {
               Kelola kehadiran karyawan dengan mudah melalui deteksi Lokasi (GPS), jaringan IP, dan foto Selfie dalam satu platform cloud yang terintegrasi.
             </p>
             <div className="hero-buttons">
-              <button className="btn-primary" onClick={() => navigate('/login')} style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Mulai Berlangganan (Gratis 14 Hari)</button>
+              <button className="btn-primary" onClick={() => document.getElementById('harga')?.scrollIntoView({ behavior: 'smooth' })} style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Mulai Berlangganan (Gratis 14 Hari)</button>
             </div>
           </div>
           <div className="hero-image-container">
