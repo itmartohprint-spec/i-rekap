@@ -10,6 +10,8 @@ const Checkout = () => {
   const [plan, setPlan] = useState('pro');
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(9 * 60);
+  const [showUpload, setShowUpload] = useState(false);
+  const [paymentProof, setPaymentProof] = useState('');
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -59,6 +61,17 @@ const Checkout = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPaymentProof(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -74,21 +87,16 @@ const Checkout = () => {
         admin_name: formData.adminName,
         email: formData.email,
         plan: plan,
-        status: 'active'
+        status: 'pending',
+        payment_proof: paymentProof
       }]);
 
       if (error) {
         console.warn("Catatan: Tabel 'companies' mungkin belum ada di Supabase.", error.message);
       }
 
-      // 3. Set sesi login untuk Admin Pro
-      localStorage.setItem('admin-role', 'pro');
-      localStorage.setItem('company-name', formData.companyName);
-      localStorage.setItem('company-hr-email', formData.email);
-      localStorage.setItem('admin-password', formData.password);
-      
-      alert(`Pembayaran Berhasil! Selamat datang di i-Rekap, ${formData.companyName}.`);
-      navigate('/admin/dashboard');
+      alert(`Pendaftaran Berhasil! Bukti pembayaran telah diterima. Silakan tunggu verifikasi admin untuk mengaktifkan akun ${formData.companyName}.`);
+      navigate('/');
 
     } catch (err) {
       alert('Terjadi kesalahan saat memproses pembayaran.');
@@ -170,9 +178,20 @@ const Checkout = () => {
               </p>
             </div>
 
-            <button type="submit" className="btn-pay" disabled={isLoading}>
-              {isLoading ? 'Memproses...' : 'Verifikasi Pembayaran Anda'}
-            </button>
+            {!showUpload ? (
+              <button type="button" className="btn-pay" onClick={() => setShowUpload(true)}>
+                Verifikasi Pembayaran Anda
+              </button>
+            ) : (
+              <div className="upload-section" style={{ marginTop: '1.5rem', padding: '1.5rem', backgroundColor: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Unggah Bukti Transfer</label>
+                <input type="file" accept="image/*" onChange={handleFileChange} style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem', background: 'white', borderRadius: '4px' }} required />
+                
+                <button type="submit" className="btn-pay" disabled={isLoading || !paymentProof}>
+                  {isLoading ? 'Memproses...' : 'Kirim Bukti Pembayaran'}
+                </button>
+              </div>
+            )}
 
             <div className="secure-badge">
               <Lock size={16} /> Pembayaran aman terenkripsi 256-bit

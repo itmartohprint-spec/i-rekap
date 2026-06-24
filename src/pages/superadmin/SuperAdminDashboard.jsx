@@ -1,7 +1,38 @@
-import React from 'react';
-import { Building2, CheckCircle, Clock, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Building2, CheckCircle, Clock, DollarSign, Image } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const SuperAdminDashboard = () => {
+  const [companies, setCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [selectedProof, setSelectedProof] = useState(null);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching companies:', error);
+    } else {
+      setCompanies(data || []);
+    }
+    setIsLoading(false);
+  };
+
+  const approveCompany = async (id) => {
+    const { error } = await supabase.from('companies').update({ status: 'active' }).eq('id', id);
+    if (!error) {
+      alert('Perusahaan berhasil diverifikasi!');
+      fetchCompanies();
+    } else {
+      alert('Gagal memverifikasi: ' + error.message);
+    }
+  };
+
   return (
     <div>
       <h2 style={{ marginBottom: '2rem' }}>Ringkasan SaaS i-rekap</h2>
@@ -50,41 +81,79 @@ const SuperAdminDashboard = () => {
 
       <div className="admin-table-container">
         <h3 style={{ marginBottom: '1.5rem' }}>Pendaftaran Perusahaan Terbaru</h3>
+        {isLoading ? <p style={{ padding: '2rem', textAlign: 'center' }}>Memuat data...</p> : (
         <table className="admin-table">
           <thead>
             <tr>
               <th>Nama Perusahaan</th>
-              <th>Kode Tenant</th>
+              <th>Admin HR</th>
               <th>Paket Langganan</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>PT Angin Ribut</td>
-              <td>ANGIN</td>
-              <td>Enterprise (500 User)</td>
-              <td><span className="status-badge badge-success">Aktif</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
-            <tr>
-              <td>CV Makmur Jaya</td>
-              <td>MAKMUR</td>
-              <td>Basic (50 User)</td>
-              <td><span className="status-badge badge-warning">Menunggu Pembayaran</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
-            <tr>
-              <td>PT Sentosa Abadi</td>
-              <td>SENTOSA</td>
-              <td>Pro (200 User)</td>
-              <td><span className="status-badge badge-danger">Kedaluwarsa</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
+            {companies.map((company) => (
+              <tr key={company.id}>
+                <td>{company.name}</td>
+                <td>{company.admin_name}</td>
+                <td style={{ textTransform: 'capitalize' }}>{company.plan}</td>
+                <td>
+                  {company.status === 'active' ? (
+                    <span className="status-badge badge-success">Aktif</span>
+                  ) : company.status === 'pending' ? (
+                    <span className="status-badge badge-warning">Menunggu Verifikasi</span>
+                  ) : (
+                    <span className="status-badge badge-danger">{company.status}</span>
+                  )}
+                </td>
+                <td>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {company.payment_proof && (
+                      <button 
+                        type="button"
+                        className="btn-secondary" 
+                        style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px'}}
+                        onClick={() => { setSelectedProof(company.payment_proof); setShowProofModal(true); }}
+                      >
+                        <Image size={14} /> Bukti
+                      </button>
+                    )}
+                    {company.status === 'pending' && (
+                      <button 
+                        type="button"
+                        className="btn-primary" 
+                        style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#10b981', border: 'none'}}
+                        onClick={() => approveCompany(company.id)}
+                      >
+                        Setujui
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {companies.length === 0 && (
+              <tr>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data perusahaan terdaftar.</td>
+              </tr>
+            )}
           </tbody>
         </table>
+        )}
       </div>
+
+      {showProofModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 style={{ marginBottom: '1rem' }}>Bukti Pembayaran</h3>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
+              <img src={selectedProof} alt="Bukti" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain' }} />
+            </div>
+            <button type="button" className="btn-secondary" onClick={() => setShowProofModal(false)} style={{ width: '100%' }}>Tutup</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
