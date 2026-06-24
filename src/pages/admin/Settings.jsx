@@ -6,7 +6,7 @@ const Settings = () => {
   const fileInputRef = useRef(null);
 
   const [companyProfile, setCompanyProfile] = useState({
-    logo: localStorage.getItem('company-logo') || '/logo.png',
+    logo: localStorage.getItem('company-logo') || '/maskot.png',
     name: localStorage.getItem('company-name') || 'PT Maju Bersama',
     hrEmail: localStorage.getItem('company-hr-email') || 'hr@majubersama.com'
   });

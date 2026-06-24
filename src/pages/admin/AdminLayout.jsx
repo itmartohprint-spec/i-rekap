@@ -56,7 +56,7 @@ const AdminLayout = () => {
   const [passwords, setPasswords] = useState({ old: '', new: '', confirm: '' });
   const photoInputRef = useRef(null);
   const [profile, setProfile] = useState({
-    logo: localStorage.getItem('company-logo') || '/logo.png',
+    logo: localStorage.getItem('company-logo') || '/maskot.png',
     name: localStorage.getItem('company-name') || 'PT Maju Bersama'
   });
 
@@ -72,7 +72,7 @@ const AdminLayout = () => {
   useEffect(() => {
     const handleProfileUpdate = () => {
       setProfile({
-        logo: localStorage.getItem('company-logo') || '/logo.png',
+        logo: localStorage.getItem('company-logo') || '/maskot.png',
         name: localStorage.getItem('company-name') || 'PT Maju Bersama'
       });
     };
@@ -119,7 +119,7 @@ const AdminLayout = () => {
       <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo" style={{ overflow: 'visible', width: '100%' }}>
-            <MagicLogo className="logo-animated" src={profile.logo} style={{ height: '80px', width: 'auto', maxWidth: '220px', objectFit: 'contain' }} />
+            <img className="logo-animated" src={profile.logo} style={{ height: '80px', width: 'auto', maxWidth: '220px', objectFit: 'contain' }} alt="Company Logo" />
           </div>
           <button className="btn-collapse" onClick={() => setCollapsed(!collapsed)}>
             {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
