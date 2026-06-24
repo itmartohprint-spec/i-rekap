@@ -1,6 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 
 const CompanyList = () => {
+  const [companies, setCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching companies:', error);
+    } else {
+      setCompanies(data || []);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -21,30 +40,34 @@ const CompanyList = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>ANGIN-001</td>
-              <td>PT Angin Ribut</td>
-              <td>admin@anginribut.com</td>
-              <td>150</td>
-              <td><span className="status-badge badge-success">Aktif</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
-            <tr>
-              <td>MAKMUR-002</td>
-              <td>CV Makmur Jaya</td>
-              <td>hr@makmurjaya.co.id</td>
-              <td>45</td>
-              <td><span className="status-badge badge-warning">Menunggu Pembayaran</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
-            <tr>
-              <td>SENTOSA-003</td>
-              <td>PT Sentosa Abadi</td>
-              <td>owner@sentosa.com</td>
-              <td>120</td>
-              <td><span className="status-badge badge-danger">Kedaluwarsa</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
+              </tr>
+            ) : companies.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data perusahaan terdaftar.</td>
+              </tr>
+            ) : (
+              companies.map((company) => (
+                <tr key={company.id}>
+                  <td>{company.id || '-'}</td>
+                  <td>{company.name}</td>
+                  <td>{company.email}</td>
+                  <td>{company.plan === 'standar' ? 'Maks 50' : 'Maks 200'}</td>
+                  <td>
+                    {company.status === 'active' ? (
+                      <span className="status-badge badge-success">Aktif</span>
+                    ) : company.status === 'pending' ? (
+                      <span className="status-badge badge-warning">Menunggu Pembayaran</span>
+                    ) : (
+                      <span className="status-badge badge-danger">{company.status}</span>
+                    )}
+                  </td>
+                  <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kelola</button></td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
