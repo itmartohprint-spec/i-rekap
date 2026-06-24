@@ -55,12 +55,12 @@ const AdminLayout = () => {
   const [adminPhoto, setAdminPhoto] = useState(localStorage.getItem('admin-photo') || '');
   const [passwords, setPasswords] = useState({ old: '', new: '', confirm: '' });
   const photoInputRef = useRef(null);
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+  
   const [profile, setProfile] = useState({
     logo: localStorage.getItem('company-logo') || '/maskot.png',
-    name: localStorage.getItem('company-name') || 'PT Maju Bersama'
+    name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama')
   });
-
-  const adminRole = localStorage.getItem('admin-role') || 'pro';
   
   const handleRestrictedAccess = (e) => {
     if (adminRole === 'demo') {
@@ -73,7 +73,7 @@ const AdminLayout = () => {
     const handleProfileUpdate = () => {
       setProfile({
         logo: localStorage.getItem('company-logo') || '/maskot.png',
-        name: localStorage.getItem('company-name') || 'PT Maju Bersama'
+        name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama')
       });
     };
     window.addEventListener('profileUpdated', handleProfileUpdate);
@@ -179,8 +179,14 @@ const AdminLayout = () => {
             <span className="company-name-animated" style={{ display: 'block', fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>{profile.name}</span>
             <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Gedung i-rekap, Jl. Jend. Sudirman Kav. 21</span>
           </div>
-          <div className="admin-profile" onClick={() => setShowAdminModal(true)}>
-            <span>HR Manager</span>
+          <div className="admin-profile" onClick={(e) => {
+            if (adminRole === 'demo') {
+              handleRestrictedAccess(e);
+            } else {
+              setShowAdminModal(true);
+            }
+          }} style={{ cursor: adminRole === 'demo' ? 'not-allowed' : 'pointer' }}>
+            <span>HR Manager {adminRole === 'demo' && '🔒'}</span>
             <div className="avatar">
               {adminPhoto ? (
                 <img src={adminPhoto} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
