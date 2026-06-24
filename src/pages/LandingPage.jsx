@@ -28,15 +28,22 @@ const LandingPage = () => {
         </nav>
       </header>
 
-      <section className="hero-section">
-        <h1 className="hero-title">Solusi Absensi <span>Modern & Cerdas</span><br/>untuk Perusahaan Anda</h1>
-        <p className="hero-subtitle">
-          Kelola kehadiran karyawan dengan mudah melalui deteksi Lokasi (GPS), jaringan IP, dan foto Selfie dalam satu platform cloud yang terintegrasi.
-        </p>
-        <div className="hero-buttons">
-          <button className="btn-primary" onClick={() => navigate('/login')} style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Mulai Berlangganan (Gratis 14 Hari)</button>
-        </div>
-      </section>
+      <div className="hero-wrapper">
+        <section className="hero-section">
+          <div className="hero-content">
+            <h1 className="hero-title">Solusi Absensi <span>Modern & Cerdas</span><br/>untuk Perusahaan Anda</h1>
+            <p className="hero-subtitle">
+              Kelola kehadiran karyawan dengan mudah melalui deteksi Lokasi (GPS), jaringan IP, dan foto Selfie dalam satu platform cloud yang terintegrasi.
+            </p>
+            <div className="hero-buttons">
+              <button className="btn-primary" onClick={() => navigate('/login')} style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Mulai Berlangganan (Gratis 14 Hari)</button>
+            </div>
+          </div>
+          <div className="hero-image-container">
+            <img src="/maskot.png" alt="i-Rekap Mascot" className="hero-mascot" />
+          </div>
+        </section>
+      </div>
 
       <section id="fitur" className="features-section">
         <h2 className="section-title">Fitur Unggulan Kami</h2>
