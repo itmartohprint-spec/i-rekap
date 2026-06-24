@@ -17,7 +17,7 @@ const LandingPage = () => {
     <div className="landing-container">
       <header className="landing-header">
         <div className="landing-logo">
-          <img src="/logo.png" alt="i-rekap logo" style={{ height: '40px', objectFit: 'contain' }} />
+          i-Rekap
         </div>
         <nav className="landing-nav">
           <button onClick={() => scrollToSection('fitur')} className="nav-link-btn">Fitur</button>

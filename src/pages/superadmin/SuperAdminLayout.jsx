@@ -14,7 +14,7 @@ const SuperAdminLayout = () => {
     <div className="super-admin-layout">
       <aside className="super-sidebar">
         <div className="super-logo">
-          <img src="/logo.png" alt="i-rekap logo" style={{ height: '40px', objectFit: 'contain' }} />
+          <h2 style={{margin:0}}>i-Rekap</h2>
         </div>
         
         <nav className="super-nav">
