@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fingerprint, CheckCircle } from 'lucide-react';
+import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -28,13 +28,49 @@ const LandingPage = () => {
         </nav>
       </header>
 
-      <section id="fitur" className="hero-section">
+      <section className="hero-section">
         <h1 className="hero-title">Solusi Absensi <span>Modern & Cerdas</span><br/>untuk Perusahaan Anda</h1>
         <p className="hero-subtitle">
           Kelola kehadiran karyawan dengan mudah melalui deteksi Lokasi (GPS), jaringan IP, dan foto Selfie dalam satu platform cloud yang terintegrasi.
         </p>
         <div className="hero-buttons">
           <button className="btn-primary" onClick={() => navigate('/login')} style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Mulai Berlangganan (Gratis 14 Hari)</button>
+        </div>
+      </section>
+
+      <section id="fitur" className="features-section">
+        <h2 className="section-title">Fitur Unggulan Kami</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon"><MapPin size={32} /></div>
+            <h3>Validasi Lokasi (GPS)</h3>
+            <p>Pastikan karyawan berada di lokasi yang tepat saat absen dengan deteksi koordinat GPS presisi.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Camera size={32} /></div>
+            <h3>Verifikasi Selfie</h3>
+            <p>Bukti foto langsung dari kamera untuk menghindari kecurangan dan penitipan absen.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Wifi size={32} /></div>
+            <h3>Pelacakan IP Address</h3>
+            <p>Sistem memvalidasi jaringan internet (IP) yang digunakan karyawan untuk keamanan ganda.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Clock size={32} /></div>
+            <h3>Manajemen Lembur & Cuti</h3>
+            <p>Proses pengajuan cuti, izin, dan lembur lebih mudah dengan alur persetujuan otomatis.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><Shield size={32} /></div>
+            <h3>Cloud Database Aman</h3>
+            <p>Seluruh data karyawan dan log absensi tersimpan aman di server cloud terenkripsi penuh.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon"><FileText size={32} /></div>
+            <h3>Laporan Otomatis</h3>
+            <p>Ekspor laporan absensi lengkap ke format PDF atau Excel hanya dalam sekali klik.</p>
+          </div>
         </div>
       </section>
 
