@@ -1,6 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 
 const LicenseManagement = () => {
+  const [companies, setCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching companies:', error);
+    } else {
+      setCompanies(data || []);
+    }
+    setIsLoading(false);
+  };
+
+  const activeLicenses = companies.filter(c => c.status === 'active').length;
+  const expiringLicenses = 0; // Placeholder until expiry logic is added
+  const suspendedLicenses = companies.filter(c => c.status === 'suspended' || c.status === 'inactive' || c.status === 'expired').length;
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -11,15 +34,15 @@ const LicenseManagement = () => {
       <div className="dashboard-grid" style={{ marginBottom: '2rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
           <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Lisensi Aktif</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success-color)' }}>38</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success-color)' }}>{activeLicenses}</p>
         </div>
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
           <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Akan Kedaluwarsa (7 Hari)</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--warning-color)' }}>5</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--warning-color)' }}>{expiringLicenses}</p>
         </div>
         <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
           <h3 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Lisensi Suspend / Mati</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--danger-color)' }}>4</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--danger-color)' }}>{suspendedLicenses}</p>
         </div>
       </div>
 
@@ -37,30 +60,42 @@ const LicenseManagement = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>LIC-2026-001</td>
-              <td>PT Angin Ribut</td>
-              <td>Enterprise</td>
-              <td>31 Des 2026</td>
-              <td><span className="status-badge badge-success">Lunas</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Perpanjang</button></td>
-            </tr>
-            <tr>
-              <td>LIC-2026-002</td>
-              <td>CV Makmur Jaya</td>
-              <td>Basic</td>
-              <td>25 Jun 2026</td>
-              <td><span className="status-badge badge-warning">Pending Invoice</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kirim Pengingat</button></td>
-            </tr>
-            <tr>
-              <td>LIC-2026-003</td>
-              <td>PT Sentosa Abadi</td>
-              <td>Pro</td>
-              <td>01 Jan 2026</td>
-              <td><span className="status-badge badge-danger">Suspend</span></td>
-              <td><button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Re-aktivasi</button></td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
+              </tr>
+            ) : companies.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data lisensi/perusahaan.</td>
+              </tr>
+            ) : (
+              companies.map((company) => (
+                <tr key={company.id}>
+                  <td>{company.id ? `LIC-${company.id.toString().substring(0,6).toUpperCase()}` : '-'}</td>
+                  <td>{company.name}</td>
+                  <td style={{ textTransform: 'capitalize' }}>{company.plan}</td>
+                  <td>-</td>
+                  <td>
+                    {company.status === 'active' ? (
+                      <span className="status-badge badge-success">Lunas</span>
+                    ) : company.status === 'pending' ? (
+                      <span className="status-badge badge-warning">Pending Invoice</span>
+                    ) : (
+                      <span className="status-badge badge-danger">Suspend</span>
+                    )}
+                  </td>
+                  <td>
+                    {company.status === 'active' ? (
+                      <button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Perpanjang</button>
+                    ) : company.status === 'pending' ? (
+                      <button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Kirim Pengingat</button>
+                    ) : (
+                      <button className="btn-secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Re-aktivasi</button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
