@@ -5,8 +5,11 @@ const AdminDashboard = () => {
   const [announcement, setAnnouncement] = useState({ title: '', content: '', type: 'info' });
   const [recentLogs, setRecentLogs] = useState([]);
 
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+
   useEffect(() => {
-    const rawLogs = JSON.parse(localStorage.getItem('attendance_logs')) || [];
+    const logsKey = adminRole === 'demo' ? 'demo-attendance_logs' : 'attendance_logs';
+    const rawLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
     setRecentLogs(rawLogs.slice(0, 5)); // Show latest 5
 
     // Listen for storage changes if same window, but usually handled by reload in simple mocks
@@ -24,9 +27,10 @@ const AdminDashboard = () => {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
     };
 
-    const existing = JSON.parse(localStorage.getItem('hr-announcements') || '[]');
+    const annKey = adminRole === 'demo' ? 'demo-hr-announcements' : 'hr-announcements';
+    const existing = JSON.parse(localStorage.getItem(annKey) || '[]');
     const updated = [newAnnouncement, ...existing];
-    localStorage.setItem('hr-announcements', JSON.stringify(updated));
+    localStorage.setItem(annKey, JSON.stringify(updated));
 
     // trigger custom event
     window.dispatchEvent(new Event('hrAnnouncementSent'));

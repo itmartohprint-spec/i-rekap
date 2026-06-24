@@ -22,8 +22,11 @@ const TrackGPS = () => {
   const officeLocation = [-6.200000, 106.816666]; // Latitude, Longitude Kantor
   const [logs, setLogs] = useState([]);
 
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+  const logsKey = adminRole === 'demo' ? 'demo-attendance_logs' : 'attendance_logs';
+
   useEffect(() => {
-    const rawLogs = JSON.parse(localStorage.getItem('attendance_logs')) || [];
+    const rawLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
     setLogs(rawLogs.filter(log => log.location));
   }, []);
 

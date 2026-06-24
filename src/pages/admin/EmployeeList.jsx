@@ -25,7 +25,14 @@ const EmployeeList = () => {
     if (pass) setBudiPassword(pass);
   };
 
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+
   const loadEmployees = async () => {
+    if (adminRole === 'demo') {
+      const demoEmployees = JSON.parse(localStorage.getItem('demo-hr-employees')) || [];
+      setEmployees(demoEmployees);
+      return;
+    }
     const { data, error } = await supabase.from('employees').select('*').order('created_at');
     if (data && !error) {
       const formattedData = data.map(emp => ({
@@ -49,6 +56,11 @@ const EmployeeList = () => {
   };
 
   const loadDivisions = async () => {
+    if (adminRole === 'demo') {
+      const demoDivisions = JSON.parse(localStorage.getItem('demo-divisions')) || [];
+      setDivisions(demoDivisions);
+      return;
+    }
     const { data, error } = await supabase.from('divisions').select('*').order('name');
     if (data && !error) {
       setDivisions(data.map(d => d.name));
@@ -93,6 +105,12 @@ const EmployeeList = () => {
     if (newDiv && newDiv.trim() !== '') {
       const trimmed = newDiv.trim();
       if (!divisions.includes(trimmed)) {
+        if (adminRole === 'demo') {
+          const newDivs = [...divisions, trimmed];
+          setDivisions(newDivs);
+          localStorage.setItem('demo-divisions', JSON.stringify(newDivs));
+          return;
+        }
         const { error } = await supabase.from('divisions').insert([{ name: trimmed }]);
         if (!error) {
           setDivisions([...divisions, trimmed]);
@@ -104,7 +122,19 @@ const EmployeeList = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
+    if (adminRole === 'demo') {
+      let updated;
+      if (editMode) {
+        updated = employees.map(emp => emp.id === formData.id ? formData : emp);
+      } else {
+        updated = [...employees, formData];
+      }
+      setEmployees(updated);
+      localStorage.setItem('demo-hr-employees', JSON.stringify(updated));
+      setShowModal(false);
+      return;
+    }
+
     const dbPayload = {
       id: formData.id,
       name: formData.name,

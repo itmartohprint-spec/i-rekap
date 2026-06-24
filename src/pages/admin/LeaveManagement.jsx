@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 const LeaveManagement = () => {
   const [requests, setRequests] = useState([]);
+  const adminRole = localStorage.getItem('admin-role') || 'pro';
+  const reqKey = adminRole === 'demo' ? 'demo-leave_requests' : 'leave_requests';
 
   useEffect(() => {
-    const rawRequests = JSON.parse(localStorage.getItem('leave_requests')) || [];
+    const rawRequests = JSON.parse(localStorage.getItem(reqKey)) || [];
     setRequests(rawRequests);
   }, []);
 
   const handleApprove = (id) => {
     const updated = requests.map(req => req.id === id ? { ...req, status: 'Disetujui' } : req);
     setRequests(updated);
-    localStorage.setItem('leave_requests', JSON.stringify(updated));
+    localStorage.setItem(reqKey, JSON.stringify(updated));
   };
 
   const handleReject = (id) => {
     const updated = requests.map(req => req.id === id ? { ...req, status: 'Ditolak' } : req);
     setRequests(updated);
-    localStorage.setItem('leave_requests', JSON.stringify(updated));
+    localStorage.setItem(reqKey, JSON.stringify(updated));
   };
   return (
     <div>
