@@ -15,6 +15,7 @@ import Settings from './pages/admin/Settings';
 
 import LandingPage from './pages/LandingPage';
 import RegisterDemo from './pages/RegisterDemo';
+import Checkout from './pages/Checkout';
 import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import CompanyList from './pages/superadmin/CompanyList';
@@ -35,6 +36,9 @@ function App() {
         
         {/* Demo Registration */}
         <Route path="/register-demo" element={<RegisterDemo />} />
+        
+        {/* Checkout */}
+        <Route path="/checkout" element={<Checkout />} />
         
         {/* Login */}
         <Route path="/login" element={<Login />} />

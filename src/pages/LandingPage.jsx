@@ -104,7 +104,7 @@ const LandingPage = () => {
               <li><CheckCircle size={16} color="var(--success-color)"/> Validasi Lokasi (GPS)</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> Laporan Standar</li>
             </ul>
-            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Pilih Standar</button>
+            <button className="btn-secondary plan-btn" onClick={() => navigate('/checkout?plan=standar')}>Pilih Standar</button>
           </div>
 
           <div className="pricing-card popular">
@@ -117,7 +117,7 @@ const LandingPage = () => {
               <li><CheckCircle size={16} color="var(--success-color)"/> Verifikasi Selfie</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> Ekspor PDF & Excel</li>
             </ul>
-            <button className="btn-primary plan-btn" onClick={() => navigate('/login')}>Pilih Pro</button>
+            <button className="btn-primary plan-btn" onClick={() => navigate('/checkout?plan=pro')}>Pilih Pro</button>
           </div>
 
           <div className="pricing-card">
