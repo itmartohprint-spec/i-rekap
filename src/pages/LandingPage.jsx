@@ -86,14 +86,25 @@ const LandingPage = () => {
         <div className="pricing-cards">
           
           <div className="pricing-card">
-            <h3 className="plan-name">Basic</h3>
+            <h3 className="plan-name">Demo</h3>
+            <div className="plan-price">Gratis<span>/14 hari</span></div>
+            <ul className="plan-features">
+              <li><CheckCircle size={16} color="var(--success-color)"/> Coba Semua Fitur</li>
+              <li><CheckCircle size={16} color="var(--success-color)"/> Maksimal 10 Karyawan</li>
+              <li><CheckCircle size={16} color="var(--success-color)"/> Tanpa Kartu Kredit</li>
+            </ul>
+            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Mulai Demo</button>
+          </div>
+
+          <div className="pricing-card">
+            <h3 className="plan-name">Standar</h3>
             <div className="plan-price">Rp 499rb<span>/bulan</span></div>
             <ul className="plan-features">
               <li><CheckCircle size={16} color="var(--success-color)"/> Hingga 50 Karyawan</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> Validasi Lokasi (GPS)</li>
               <li><CheckCircle size={16} color="var(--success-color)"/> Laporan Standar</li>
             </ul>
-            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Pilih Basic</button>
+            <button className="btn-secondary plan-btn" onClick={() => navigate('/login')}>Pilih Standar</button>
           </div>
 
           <div className="pricing-card popular">
