@@ -43,7 +43,7 @@ const Login = () => {
       {/* Left Abstract Visual */}
       <div className="login-visual">
         <div className="visual-content">
-          <img src="/logo.png" alt="i-rekap logo" style={{ height: '120px', objectFit: 'contain', marginBottom: '2rem', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))' }} />
+          <img src="/maskot.png" alt="i-rekap mascot" style={{ height: '280px', objectFit: 'contain', marginBottom: '2rem', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.3))' }} />
           <h1 className="visual-title" style={{ display: 'none' }}>i-rekap</h1>
           <p className="visual-subtitle">Platform Absensi & HRIS Generasi Baru</p>
         </div>
