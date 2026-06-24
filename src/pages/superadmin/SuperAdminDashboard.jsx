@@ -23,11 +23,27 @@ const SuperAdminDashboard = () => {
     setIsLoading(false);
   };
 
-  const approveCompany = async (id) => {
-    const { error } = await supabase.from('companies').update({ status: 'active' }).eq('id', id);
+  const approveCompany = async (company) => {
+    const { error } = await supabase.from('companies').update({ status: 'active' }).eq('id', company.id);
     if (!error) {
       alert('Perusahaan berhasil diverifikasi!');
       fetchCompanies();
+
+      // Fitur Auto-Email via mailto
+      const licenseCode = company.id ? `LIC-${company.id.toString().substring(0,6).toUpperCase()}` : 'LIC-NEW001';
+      const subject = encodeURIComponent('Pendaftaran i-Rekap Berhasil Disetujui!');
+      const body = encodeURIComponent(
+        `Halo Tim HR ${company.name},\n\n` +
+        `Pembayaran Anda telah kami terima dan lisensi akun perusahaan Anda sudah AKTIF.\n\n` +
+        `Berikut adalah detail akses Anda:\n` +
+        `URL Portal: https://i-rekap.com\n` +
+        `Username Portal HR: admin\n` +
+        `Kode Lisensi: ${licenseCode}\n\n` +
+        `Silakan login dan lengkapi profil serta data karyawan Anda untuk mulai menggunakan aplikasi i-Rekap.\n\n` +
+        `Terima kasih,\nTim i-Rekap`
+      );
+      
+      window.location.href = `mailto:${company.email || ''}?subject=${subject}&body=${body}`;
     } else {
       alert('Gagal memverifikasi: ' + error.message);
     }
@@ -138,7 +154,7 @@ const SuperAdminDashboard = () => {
                         type="button"
                         className="btn-primary" 
                         style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#10b981', border: 'none'}}
-                        onClick={() => approveCompany(company.id)}
+                        onClick={() => approveCompany(company)}
                       >
                         Setujui
                       </button>
