@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>i-Rekap - Attendance Mobile</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        const primary = localStorage.getItem('theme-primary');
+        const secondary = localStorage.getItem('theme-secondary');
+        const font = localStorage.getItem('theme-font');
+        const bg = localStorage.getItem('theme-bg');
+        
+        if (primary && secondary) {
+          document.documentElement.style.setProperty('--primary-color', primary);
+          document.documentElement.style.setProperty('--secondary-color', secondary);
+        }
+        if (font) {
+          document.documentElement.style.setProperty('--font-family', font);
+        }
+        if (bg) {
+          document.body.className = bg;
+        }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

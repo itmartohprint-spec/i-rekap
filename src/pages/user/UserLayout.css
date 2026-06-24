@@ -1,0 +1,76 @@
+.mobile-app-container {
+  width: 100%;
+  max-width: 414px;
+  margin: 0 auto;
+  height: 100vh; /* Fixed height for the app container */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: #f8fafc;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  overflow: hidden; /* Prevent body scrolling */
+}
+
+.mobile-main-content {
+  flex: 1;
+  overflow-y: auto; /* Enable internal scrolling */
+  scrollbar-width: none; /* Firefox */
+}
+
+.mobile-main-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.bottom-nav {
+  /* It sits at the bottom of the flex container */
+  width: 100%;
+  min-height: 60px;
+  height: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-top: 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+  flex-shrink: 0;
+}
+
+.bottom-nav .mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bottom-nav .mobile-nav-item span {
+  display: block !important;
+  color: inherit !important;
+  line-height: 1.2;
+}
+
+.bottom-nav .mobile-nav-item:hover {
+  color: #3b82f6;
+}
+
+.bottom-nav .mobile-nav-item.active {
+  color: var(--primary-color, #0062ff);
+  font-weight: 700;
+}
+
+.bottom-nav .mobile-nav-item.active svg {
+  transform: translateY(-2px) scale(1.1);
+  filter: drop-shadow(0 4px 6px rgba(0, 98, 255, 0.3));
+}

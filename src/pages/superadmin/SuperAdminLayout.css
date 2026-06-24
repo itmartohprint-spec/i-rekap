@@ -1,0 +1,168 @@
+/* Super Admin - Obsidian Floating Sidebar Look */
+.super-admin-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #0f172a; /* Slate 900 */
+  color: #f8fafc;
+  padding: 1rem;
+  gap: 1.5rem;
+}
+
+.super-sidebar {
+  width: 280px;
+  background-color: #1e293b; /* Slate 800 */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 10;
+}
+
+.super-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 1.5rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.super-logo {
+  padding: 0 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.super-logo-icon {
+  color: #06b6d4; /* Cyan 500 */
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5));
+}
+
+.super-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1.25rem;
+  flex: 1;
+}
+
+.super-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  color: #94a3b8;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.super-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: #e2e8f0;
+}
+
+.super-nav-item.active {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+  border-color: rgba(6, 182, 212, 0.2);
+  box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.05);
+}
+
+.super-footer {
+  padding: 1.5rem 2rem;
+  margin-top: auto;
+}
+
+.super-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ef4444;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.super-logout:hover {
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.super-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #0f172a;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.super-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 2rem;
+}
+
+.super-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #1e293b;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.super-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; color: white;
+}
+
+.super-main {
+  padding: 1rem 2rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Override cards for super admin */
+.super-admin-layout .glass-panel {
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+}
+
+.super-admin-layout .admin-table-container {
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.super-admin-layout .admin-table th {
+  background: rgba(0,0,0,0.2);
+  color: #94a3b8;
+}
+
+.super-admin-layout .admin-table td {
+  border-bottom-color: rgba(255,255,255,0.05);
+}
+
+.super-admin-layout h2, .super-admin-layout h3, .super-admin-layout h4 {
+  color: #f8fafc;
+}

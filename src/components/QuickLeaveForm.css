@@ -1,0 +1,140 @@
+.quick-leave-form {
+  background-color: white;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  color: #0f172a;
+}
+
+.quick-leave-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.quick-leave-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-selector {
+  display: flex;
+  gap: 1rem;
+}
+
+.type-option {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-option span {
+  color: inherit !important;
+}
+
+.type-option.active.izin {
+  border-color: #f59e0b;
+  background-color: #fef3c7;
+  color: #b45309 !important;
+}
+
+.type-option.active.sakit {
+  border-color: #ef4444;
+  background-color: #fee2e2;
+  color: #b91c1c !important;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155 !important;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  background: white;
+  font-size: 0.95rem;
+  resize: none;
+  font-family: inherit;
+  color: #0f172a !important;
+  box-sizing: border-box;
+}
+
+.form-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.upload-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-area:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #0062ff, #3b82f6);
+  color: white;
+  padding: 1rem;
+  border-radius: 14px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 98, 255, 0.2);
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
