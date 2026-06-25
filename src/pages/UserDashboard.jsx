@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogIn, LogOut, Clock, MapPin, Camera, RefreshCcw, Bell, Upload, X, Activity, Timer, Zap, ZapOff, Building } from 'lucide-react';
 import AttendanceForm from '../components/AttendanceForm';
 import QuickLeaveForm from '../components/QuickLeaveForm';
+import { supabase } from '../lib/supabaseClient';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -14,12 +15,46 @@ const UserDashboard = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userPhoto, setUserPhoto] = useState(localStorage.getItem('user-photo') || '');
   const [passwords, setPasswords] = useState({ old: '', new: '', confirm: '' });
+  const [todayHistory, setTodayHistory] = useState([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const photoInputRef = useRef(null);
+
+  const userId = localStorage.getItem('user-id');
+  const licenseCode = localStorage.getItem('valid-license');
+  const userName = localStorage.getItem('user-name') || 'Karyawan';
+  const userDept = localStorage.getItem('user-dept') || 'Staff';
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    fetchTodayHistory();
+    
+    // Listen for custom event when attendance is submitted
+    const handleAttendanceUpdate = () => fetchTodayHistory();
+    window.addEventListener('attendanceSubmitted', handleAttendanceUpdate);
+    
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('attendanceSubmitted', handleAttendanceUpdate);
+    };
   }, []);
+
+  const fetchTodayHistory = async () => {
+    setIsLoadingHistory(true);
+    const today = new Date().toLocaleDateString('id-ID');
+    
+    const { data } = await supabase
+      .from('attendance')
+      .select('*')
+      .eq('license_code', licenseCode)
+      .eq('employee_id', userId)
+      .eq('date', today)
+      .order('id', { ascending: false });
+      
+    if (data) {
+      setTodayHistory(data);
+    }
+    setIsLoadingHistory(false);
+  };
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -88,8 +123,8 @@ const UserDashboard = () => {
         </div>
         <header className="dashboard-header">
           <div className="user-greeting">
-            <h1>Halo, Budi!</h1>
-            <p>Staff IT</p>
+            <h1>Halo, {userName.split(' ')[0]}!</h1>
+            <p>{userDept}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             <button 
@@ -178,28 +213,24 @@ const UserDashboard = () => {
         <section className="history-section">
           <h2>Riwayat Hari Ini</h2>
           <div className="history-list">
-            <div className="history-item">
-              <div className="history-icon icon-in">
-                <LogIn size={20} />
-              </div>
-              <div className="history-details">
-                <strong>Absen Masuk</strong>
-                <span>Sesuai Lokasi & IP</span>
-              </div>
-              <div className="history-time">07:55</div>
-            </div>
-            {/* Example empty state for checkout if not done yet
-            <div className="history-item" style={{opacity: 0.5}}>
-              <div className="history-icon icon-out">
-                <LogOut size={20} />
-              </div>
-              <div className="history-details">
-                <strong>Absen Pulang</strong>
-                <span>Belum absen</span>
-              </div>
-              <div className="history-time">--:--</div>
-            </div>
-            */}
+            {isLoadingHistory ? (
+              <p style={{ textAlign: 'center', opacity: 0.7, fontSize: '0.9rem', padding: '1rem' }}>Memuat riwayat...</p>
+            ) : todayHistory.length > 0 ? (
+              todayHistory.map((log) => (
+                <div className="history-item" key={log.id}>
+                  <div className={`history-icon ${log.type === 'check_in' || log.type.includes('in') ? 'icon-in' : 'icon-out'}`}>
+                    {log.type === 'check_in' || log.type.includes('in') ? <LogIn size={20} /> : <LogOut size={20} />}
+                  </div>
+                  <div className="history-details">
+                    <strong style={{ textTransform: 'capitalize' }}>{log.type.replace('_', ' ')}</strong>
+                    <span>{log.status === 'late' ? 'Terlambat' : 'Sesuai Lokasi & IP'}</span>
+                  </div>
+                  <div className="history-time">{log.check_in_time}</div>
+                </div>
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', opacity: 0.7, fontSize: '0.9rem', padding: '1rem' }}>Belum ada presensi hari ini.</p>
+            )}
           </div>
         </section>
       </div>
