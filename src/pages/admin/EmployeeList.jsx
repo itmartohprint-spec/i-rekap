@@ -33,7 +33,15 @@ const EmployeeList = () => {
       setEmployees(demoEmployees);
       return;
     }
-    const { data, error } = await supabase.from('employees').select('*').order('created_at');
+    const validLicense = localStorage.getItem('valid-license');
+    if (!validLicense) return;
+
+    const { data, error } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('license_code', validLicense)
+      .order('created_at');
+      
     if (data && !error) {
       const formattedData = data.map(emp => ({
         id: emp.id,
@@ -135,8 +143,11 @@ const EmployeeList = () => {
       return;
     }
 
+    const validLicense = localStorage.getItem('valid-license');
+
     const dbPayload = {
       id: formData.id,
+      license_code: validLicense,
       name: formData.name,
       nik: formData.nik,
       birth_date: formData.birthDate || null,
