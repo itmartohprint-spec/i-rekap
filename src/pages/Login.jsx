@@ -97,9 +97,7 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="role-hint">
-            Petunjuk: Gunakan "admin" untuk Portal HRD, "penyedia" untuk Portal Pengelola, atau gunakan ID Karyawan yang sudah didaftarkan HR untuk masuk ke Portal Karyawan Mobile.
-          </p>
+
         </div>
       </div>
     </div>
