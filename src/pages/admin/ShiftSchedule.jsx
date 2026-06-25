@@ -1,119 +1,226 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { Plus, Trash2, Clock, Check, X } from 'lucide-react';
 
 const ShiftSchedule = () => {
-  const [scheduleData, setScheduleData] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Generate current week dates
-  const curr = new Date();
-  const first = curr.getDate() - curr.getDay() + 1; // First day is the day of the month - the day of the week
   
-  const weekDates = Array.from({length: 5}).map((_, i) => {
-    const d = new Date(curr.setDate(first + i));
-    return d.toISOString().substring(0, 10);
-  });
+  // Shift Management State
+  const [masterShifts, setMasterShifts] = useState([]);
+  const [showAddShift, setShowAddShift] = useState(false);
+  const [newShift, setNewShift] = useState({ name: '', startTime: '08:00', endTime: '17:00' });
+  const [employeeShifts, setEmployeeShifts] = useState({});
 
-  const formatDateLabel = (dateStr) => {
-    const d = new Date(dateStr);
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    return `${days[d.getDay()]} (${d.getDate()}/${d.getMonth() + 1})`;
-  };
+  const licenseCode = localStorage.getItem('valid-license');
 
   useEffect(() => {
-    fetchSchedule();
-  }, []);
-
-  const fetchSchedule = async () => {
-    setIsLoading(true);
-    const licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) {
+    if (licenseCode) {
+      loadLocalData();
+      fetchEmployees();
+    } else {
       setIsLoading(false);
+    }
+  }, [licenseCode]);
+
+  const loadLocalData = () => {
+    const savedShifts = localStorage.getItem(`master_shifts_${licenseCode}`);
+    if (savedShifts) {
+      setMasterShifts(JSON.parse(savedShifts));
+    } else {
+      // Default shift
+      const defaultShifts = [{ id: 'default', name: 'Shift Reguler (Pagi)', startTime: '08:00', endTime: '17:00' }];
+      setMasterShifts(defaultShifts);
+      localStorage.setItem(`master_shifts_${licenseCode}`, JSON.stringify(defaultShifts));
+    }
+
+    const savedEmpShifts = localStorage.getItem(`employee_shifts_${licenseCode}`);
+    if (savedEmpShifts) {
+      setEmployeeShifts(JSON.parse(savedEmpShifts));
+    }
+  };
+
+  const fetchEmployees = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await supabase
+        .from('employees')
+        .select('id, name')
+        .eq('license_code', licenseCode)
+        .order('name', { ascending: true });
+
+      if (data) {
+        setEmployees(data);
+      }
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+    }
+    setIsLoading(false);
+  };
+
+  const handleAddShift = () => {
+    if (!newShift.name) return alert("Nama shift harus diisi!");
+    
+    const shift = {
+      id: Date.now().toString(),
+      name: newShift.name,
+      startTime: newShift.startTime,
+      endTime: newShift.endTime
+    };
+
+    const updatedShifts = [...masterShifts, shift];
+    setMasterShifts(updatedShifts);
+    localStorage.setItem(`master_shifts_${licenseCode}`, JSON.stringify(updatedShifts));
+    
+    setNewShift({ name: '', startTime: '08:00', endTime: '17:00' });
+    setShowAddShift(false);
+  };
+
+  const handleDeleteShift = (id) => {
+    if (id === 'default') return alert("Shift Reguler bawaan tidak dapat dihapus!");
+    
+    const isUsed = Object.values(employeeShifts).includes(id);
+    if (isUsed && !window.confirm("Shift ini sedang digunakan oleh beberapa karyawan. Yakin ingin menghapus? (Karyawan akan kembali ke Shift Reguler)")) {
       return;
     }
 
-    try {
-      const { data: employees } = await supabase
-        .from('employees')
-        .select('id, name')
-        .eq('license_code', licenseCode);
+    const updatedShifts = masterShifts.filter(s => s.id !== id);
+    setMasterShifts(updatedShifts);
+    localStorage.setItem(`master_shifts_${licenseCode}`, JSON.stringify(updatedShifts));
 
-      const { data: attendances } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('license_code', licenseCode)
-        .gte('date', weekDates[0])
-        .lte('date', weekDates[4])
-        .eq('type', 'in');
-
-      if (employees) {
-        const computedSchedule = employees.map(emp => {
-          const empAttendance = attendances ? attendances.filter(a => a.employee_id === emp.id) : [];
-          
-          const weeklyStatus = weekDates.map(date => {
-            const isPresent = empAttendance.some(a => a.date === date);
-            return isPresent ? 'Hadir' : '-';
-          });
-
-          return {
-            id: emp.id,
-            name: emp.name,
-            weeklyStatus
-          };
-        });
-
-        setScheduleData(computedSchedule);
-      }
-    } catch (err) {
-      console.error("Error fetching shift schedule:", err);
+    if (isUsed) {
+      const newEmpShifts = { ...employeeShifts };
+      Object.keys(newEmpShifts).forEach(empId => {
+        if (newEmpShifts[empId] === id) {
+          newEmpShifts[empId] = 'default';
+        }
+      });
+      setEmployeeShifts(newEmpShifts);
+      localStorage.setItem(`employee_shifts_${licenseCode}`, JSON.stringify(newEmpShifts));
     }
-    
-    setIsLoading(false);
+  };
+
+  const handleAssignShift = (employeeId, shiftId) => {
+    const updated = { ...employeeShifts, [employeeId]: shiftId };
+    setEmployeeShifts(updated);
+    localStorage.setItem(`employee_shifts_${licenseCode}`, JSON.stringify(updated));
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>Jadwal & Kehadiran (Minggu Ini)</h2>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn-primary" onClick={fetchSchedule}>Refresh</button>
+      <div style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Manajemen Jadwal Shift</h2>
+        <p style={{ color: 'var(--text-secondary)' }}>Atur tipe shift (jam kerja) dan tetapkan untuk masing-masing karyawan secara fleksibel.</p>
+      </div>
+
+      <div className="dashboard-grid" style={{ gridTemplateColumns: '1fr', marginBottom: '2rem' }}>
+        {/* Master Shift Panel */}
+        <div className="glass-panel" style={{ padding: '1.5rem', borderRadius: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Clock size={20} color="var(--primary-color)" />
+              Daftar Master Shift
+            </h3>
+            <button className="btn-primary" onClick={() => setShowAddShift(!showAddShift)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>
+              {showAddShift ? <X size={16} /> : <Plus size={16} />}
+              {showAddShift ? 'Batal' : 'Tambah Shift Baru'}
+            </button>
+          </div>
+
+          {showAddShift && (
+            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ margin: 0, flex: '1 1 200px' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem' }}>Nama Shift</label>
+                <input type="text" className="form-input" placeholder="Misal: Shift Malam" value={newShift.name} onChange={e => setNewShift({...newShift, name: e.target.value})} />
+              </div>
+              <div className="form-group" style={{ margin: 0, flex: '1 1 100px' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem' }}>Jam Masuk</label>
+                <input type="time" className="form-input" value={newShift.startTime} onChange={e => setNewShift({...newShift, startTime: e.target.value})} />
+              </div>
+              <div className="form-group" style={{ margin: 0, flex: '1 1 100px' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem' }}>Jam Keluar</label>
+                <input type="time" className="form-input" value={newShift.endTime} onChange={e => setNewShift({...newShift, endTime: e.target.value})} />
+              </div>
+              <button className="btn-primary" onClick={handleAddShift} style={{ background: 'var(--success-color)', height: '42px', padding: '0 1.5rem' }}>
+                Simpan
+              </button>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            {masterShifts.map(shift => (
+              <div key={shift.id} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem', width: '250px', position: 'relative', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <h4 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>{shift.name}</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
+                  <span>Masuk: <strong>{shift.startTime}</strong></span>
+                  <span>Keluar: <strong>{shift.endTime}</strong></span>
+                </div>
+                {shift.id !== 'default' && (
+                  <button 
+                    onClick={() => handleDeleteShift(shift.id)}
+                    style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                    title="Hapus Shift"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="admin-table-container">
+        <h3 style={{ marginBottom: '1.5rem' }}>Penugasan Shift Karyawan</h3>
         <table className="admin-table">
           <thead>
             <tr>
               <th>Nama Karyawan</th>
-              {weekDates.map((date, index) => (
-                <th key={index}>{formatDateLabel(date)}</th>
-              ))}
+              <th>Status</th>
+              <th>Pilihan Shift Kerja</th>
+              <th>Jam Berlaku</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data karyawan...</td>
               </tr>
-            ) : scheduleData.length === 0 ? (
+            ) : employees.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data karyawan</td>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data karyawan. Silakan tambah karyawan di menu Data Karyawan terlebih dahulu.</td>
               </tr>
             ) : (
-              scheduleData.map(row => (
-                <tr key={row.id}>
-                  <td><strong>{row.name}</strong></td>
-                  {row.weeklyStatus.map((status, idx) => (
-                    <td key={idx}>
-                      {status === 'Hadir' ? (
-                        <span className="status-badge badge-success">Hadir</span>
-                      ) : (
-                        <span style={{ color: '#94a3b8' }}>-</span>
-                      )}
+              employees.map(emp => {
+                const currentShiftId = employeeShifts[emp.id] || 'default';
+                const currentShiftObj = masterShifts.find(s => s.id === currentShiftId) || masterShifts[0];
+
+                return (
+                  <tr key={emp.id}>
+                    <td>
+                      <strong>{emp.name}</strong>
                     </td>
-                  ))}
-                </tr>
-              ))
+                    <td><span className="status-badge badge-success">Aktif</span></td>
+                    <td>
+                      <select 
+                        className="form-input" 
+                        style={{ padding: '0.4rem', fontSize: '0.9rem', width: 'auto', margin: 0, minWidth: '180px' }}
+                        value={currentShiftId}
+                        onChange={(e) => handleAssignShift(emp.id, e.target.value)}
+                      >
+                        {masterShifts.map(shift => (
+                          <option key={shift.id} value={shift.id}>{shift.name}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b', background: '#f1f5f9', padding: '0.3rem 0.6rem', borderRadius: '4px' }}>
+                        {currentShiftObj.startTime} - {currentShiftObj.endTime}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>
