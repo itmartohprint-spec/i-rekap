@@ -19,7 +19,8 @@ const dangerIcon = L.divIcon({
 });
 
 const TrackGPS = () => {
-  const officeLocation = [-6.200000, 106.816666]; // Latitude, Longitude Kantor
+  const [officeLocation, setOfficeLocation] = useState(null);
+  const [radiusMeters, setRadiusMeters] = useState(50);
   const [logs, setLogs] = useState([]);
 
   const adminRole = localStorage.getItem('admin-role') || 'pro';
@@ -28,6 +29,25 @@ const TrackGPS = () => {
   useEffect(() => {
     const rawLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
     setLogs(rawLogs.filter(log => log.location));
+    
+    const licenseCode = localStorage.getItem('valid-license');
+    if (licenseCode) {
+      const savedLat = localStorage.getItem(`office_lat_${licenseCode}`);
+      const savedLng = localStorage.getItem(`office_lng_${licenseCode}`);
+      const savedRadius = localStorage.getItem(`radius_meters_${licenseCode}`);
+      
+      if (savedLat && savedLng) {
+        setOfficeLocation([parseFloat(savedLat), parseFloat(savedLng)]);
+      } else {
+        setOfficeLocation([-6.200000, 106.816666]);
+      }
+      
+      if (savedRadius) {
+        setRadiusMeters(parseInt(savedRadius));
+      }
+    } else {
+      setOfficeLocation([-6.200000, 106.816666]);
+    }
   }, []);
 
   return (
@@ -47,22 +67,24 @@ const TrackGPS = () => {
       <h2 style={{ marginBottom: '2rem' }}>Lacak GPS Karyawan Live</h2>
       
       <div className="glass-panel" style={{ padding: '0.5rem', borderRadius: 'var(--radius-lg)', height: '500px', overflow: 'hidden' }}>
-        <MapContainer 
-          center={officeLocation} 
-          zoom={15} 
-          style={{ height: '100%', width: '100%', borderRadius: '1rem' }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          />
-          
-          {/* Radius Kantor */}
-          <Circle 
+        {officeLocation && (
+          <MapContainer 
+            key={officeLocation.join(',')}
             center={officeLocation} 
-            radius={150} 
-            pathOptions={{ color: '#0062ff', fillColor: '#0062ff', fillOpacity: 0.1 }} 
-          />
+            zoom={15} 
+            style={{ height: '100%', width: '100%', borderRadius: '1rem' }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            />
+            
+            {/* Radius Kantor */}
+            <Circle 
+              center={officeLocation} 
+              radius={radiusMeters} 
+              pathOptions={{ color: '#0062ff', fillColor: '#0062ff', fillOpacity: 0.1 }} 
+            />
 
           {logs.map((log, index) => (
             <Marker 
@@ -76,8 +98,9 @@ const TrackGPS = () => {
                 Waktu: {log.time}
               </Popup>
             </Marker>
-          ))}
-        </MapContainer>
+            ))}
+          </MapContainer>
+        )}
       </div>
       
       <div className="admin-table-container" style={{ marginTop: '2rem' }}>
