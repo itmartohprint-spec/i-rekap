@@ -72,7 +72,10 @@ const Settings = () => {
 
   const handleSaveNetwork = () => {
     const licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) return;
+    if (!licenseCode) {
+      alert("Gagal: Kode lisensi tidak ditemukan!");
+      return;
+    }
     localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
     localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
     alert("✅ Pengaturan Jaringan berhasil disimpan!");
