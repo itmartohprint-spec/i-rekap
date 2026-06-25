@@ -80,22 +80,26 @@ const Checkout = () => {
       // 1. Simulasikan proses pembayaran
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 2. Insert ke Supabase (tabel companies)
-      // Note: Jika tabel belum ada, kita tangkap errornya dan tetap lanjut untuk MVP
+      // 2. Generate License Code
+      const generatedLicense = 'LIC-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      localStorage.setItem('valid-license', generatedLicense);
+
+      // 3. Insert ke Supabase (tabel companies)
       const { error } = await supabase.from('companies').insert([{
         name: formData.companyName,
         admin_name: formData.adminName,
         email: formData.email,
         plan: plan,
-        status: 'pending',
-        payment_proof: paymentProof
+        status: 'active', // Langsung aktif karena sudah dapat lisensi (MVP)
+        payment_proof: paymentProof,
+        license_code: generatedLicense
       }]);
 
       if (error) {
         console.warn("Catatan: Tabel 'companies' mungkin belum ada di Supabase.", error.message);
       }
 
-      alert(`Pendaftaran Berhasil! Bukti pembayaran telah diterima. Silakan tunggu verifikasi admin untuk mengaktifkan akun ${formData.companyName}.`);
+      alert(`Pendaftaran Berhasil! Bukti pembayaran telah diterima.\n\nKODE LISENSI ANDA: ${generatedLicense}\n\nSilakan simpan kode ini dengan baik, kode ini dibutuhkan untuk login ke portal HRD dan Karyawan.`);
       navigate('/');
 
     } catch (err) {

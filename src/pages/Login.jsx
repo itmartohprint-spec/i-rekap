@@ -7,10 +7,28 @@ import './Login.css';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [licenseCode, setLicenseCode] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    const isDemo = username === localStorage.getItem('demo-username') && password === localStorage.getItem('demo-password');
+
+    // Validasi Kode Lisensi untuk akun selain demo
+    if (!isDemo) {
+      if (!licenseCode) {
+        alert('Silakan masukkan Kode Lisensi terlebih dahulu.');
+        return;
+      }
+      
+      const validLicense = localStorage.getItem('valid-license');
+      if (licenseCode !== validLicense) {
+        alert('Kode Lisensi tidak valid atau belum terdaftar di perangkat ini.');
+        return;
+      }
+    }
+
     if (username === 'superadmin' || username === 'penyedia') {
       navigate('/super-admin/dashboard');
     } else if (username === 'admin') {
@@ -90,6 +108,17 @@ const Login = () => {
                 required 
               />
               <label className="modern-label">Password</label>
+            </div>
+
+            <div className="modern-input-group">
+              <input 
+                type="text" 
+                className="modern-input" 
+                value={licenseCode}
+                onChange={(e) => setLicenseCode(e.target.value)}
+                placeholder="Kosongkan jika akun demo"
+              />
+              <label className="modern-label">Kode Lisensi (Cth: LIC-XXXX-XXXX)</label>
             </div>
 
             <button type="submit" className="btn-modern-login">
