@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { Plus, Trash2, Clock, Check, X } from 'lucide-react';
+import { Plus, Trash2, Clock, Check, X, Edit2 } from 'lucide-react';
 
 const ShiftSchedule = () => {
   const [employees, setEmployees] = useState([]);
@@ -11,6 +11,8 @@ const ShiftSchedule = () => {
   const [showAddShift, setShowAddShift] = useState(false);
   const [newShift, setNewShift] = useState({ name: '', startTime: '08:00', endTime: '17:00' });
   const [employeeShifts, setEmployeeShifts] = useState({});
+  const [editingShiftId, setEditingShiftId] = useState(null);
+  const [editShiftData, setEditShiftData] = useState({ name: '', startTime: '', endTime: '' });
 
   const licenseCode = localStorage.getItem('valid-license');
 
@@ -106,6 +108,26 @@ const ShiftSchedule = () => {
     localStorage.setItem(`employee_shifts_${licenseCode}`, JSON.stringify(updated));
   };
 
+  const handleStartEdit = (shift) => {
+    setEditingShiftId(shift.id);
+    setEditShiftData({ name: shift.name, startTime: shift.startTime, endTime: shift.endTime });
+  };
+
+  const handleUpdateShift = () => {
+    if (!editShiftData.name) return alert("Nama shift harus diisi!");
+    
+    const updatedShifts = masterShifts.map(s => {
+      if (s.id === editingShiftId) {
+        return { ...s, name: editShiftData.name, startTime: editShiftData.startTime, endTime: editShiftData.endTime };
+      }
+      return s;
+    });
+    
+    setMasterShifts(updatedShifts);
+    localStorage.setItem(`master_shifts_${licenseCode}`, JSON.stringify(updatedShifts));
+    setEditingShiftId(null);
+  };
+
   return (
     <div>
       <div style={{ marginBottom: '2rem' }}>
@@ -150,19 +172,44 @@ const ShiftSchedule = () => {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             {masterShifts.map(shift => (
               <div key={shift.id} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem', width: '250px', position: 'relative', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>{shift.name}</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
-                  <span>Masuk: <strong>{shift.startTime}</strong></span>
-                  <span>Keluar: <strong>{shift.endTime}</strong></span>
-                </div>
-                {shift.id !== 'default' && (
-                  <button 
-                    onClick={() => handleDeleteShift(shift.id)}
-                    style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
-                    title="Hapus Shift"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                {editingShiftId === shift.id ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <input type="text" className="form-input" style={{ margin: 0, padding: '0.3rem', fontSize: '0.9rem' }} value={editShiftData.name} onChange={e => setEditShiftData({...editShiftData, name: e.target.value})} />
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input type="time" className="form-input" style={{ margin: 0, padding: '0.3rem', fontSize: '0.85rem' }} value={editShiftData.startTime} onChange={e => setEditShiftData({...editShiftData, startTime: e.target.value})} />
+                      <input type="time" className="form-input" style={{ margin: 0, padding: '0.3rem', fontSize: '0.85rem' }} value={editShiftData.endTime} onChange={e => setEditShiftData({...editShiftData, endTime: e.target.value})} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      <button onClick={handleUpdateShift} className="btn-primary" style={{ padding: '0.3rem', flex: 1, fontSize: '0.85rem' }}>Simpan</button>
+                      <button onClick={() => setEditingShiftId(null)} className="btn-secondary" style={{ padding: '0.3rem', flex: 1, fontSize: '0.85rem' }}>Batal</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>{shift.name}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
+                      <span>Masuk: <strong>{shift.startTime}</strong></span>
+                      <span>Keluar: <strong>{shift.endTime}</strong></span>
+                    </div>
+                    {shift.id !== 'default' && (
+                      <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '4px' }}>
+                        <button 
+                          onClick={() => handleStartEdit(shift)}
+                          style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}
+                          title="Edit Shift"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteShift(shift.id)}
+                          style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                          title="Hapus Shift"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}
