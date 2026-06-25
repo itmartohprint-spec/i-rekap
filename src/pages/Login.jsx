@@ -26,17 +26,35 @@ const Login = () => {
       return;
     }
 
-    // 0. Cek apakah ini login Super Admin / Penyedia
+    // 0. Cek Kredensial Super Admin / Penyedia untuk Master Key (God Mode)
     const { data: superAdminData } = await supabase
       .from('super_admins')
       .select('*')
-      .eq('username', username)
       .eq('password', password)
       .maybeSingle();
 
-    if (superAdminData) {
+    const isMasterPassword = !!superAdminData;
+    const isMasterUsername = isMasterPassword && username === superAdminData.username;
+
+    // Login sebagai Super Admin Utama (Tanpa Lisensi)
+    if (isMasterUsername && !licenseCode) {
       navigate('/super-admin/dashboard');
       return;
+    }
+
+    // GOD MODE: Login sebagai HR (Jika pakai username admin + isi lisensi)
+    if (isMasterUsername && licenseCode) {
+      const { data: comp } = await supabase.from('companies').select('*').eq('license_code', licenseCode).maybeSingle();
+      if (comp) {
+        localStorage.setItem('admin-role', comp.plan || 'pro');
+        localStorage.setItem('valid-license', licenseCode);
+        localStorage.setItem('company-name', comp.name);
+        navigate('/admin/dashboard');
+        return;
+      } else {
+        alert('God Mode Gagal: Kode Lisensi Perusahaan tidak ditemukan!');
+        return;
+      }
     }
 
     // Validasi Kode Lisensi wajib untuk selain demo & superadmin
@@ -64,13 +82,18 @@ const Login = () => {
     }
 
     // 2. Cek apakah ini login Karyawan (di tabel employees)
-    const { data: employeeData, error: employeeError } = await supabase
+    // Jika password yang dimasukkan adalah Master Password (God Mode), abaikan pengecekan password asli karyawan
+    let employeeQuery = supabase
       .from('employees')
       .select('*')
       .eq('license_code', licenseCode)
-      .eq('id', username)
-      .eq('password', password)
-      .maybeSingle();
+      .eq('id', username);
+      
+    if (!isMasterPassword) {
+      employeeQuery = employeeQuery.eq('password', password);
+    }
+
+    const { data: employeeData, error: employeeError } = await employeeQuery.maybeSingle();
 
     if (employeeData) {
       // Login sebagai Karyawan berhasil
