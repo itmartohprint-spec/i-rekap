@@ -89,6 +89,7 @@ const Checkout = () => {
         name: formData.companyName,
         admin_name: formData.adminName,
         email: formData.email,
+        admin_password: formData.password,
         plan: plan,
         status: 'active', // Langsung aktif karena sudah dapat lisensi (MVP)
         payment_proof: paymentProof,

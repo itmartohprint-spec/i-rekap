@@ -15,27 +15,7 @@ const Login = () => {
 
     const isDemo = username === localStorage.getItem('demo-username') && password === localStorage.getItem('demo-password');
 
-    // Validasi Kode Lisensi untuk akun selain demo
-    if (!isDemo) {
-      if (!licenseCode) {
-        alert('Silakan masukkan Kode Lisensi terlebih dahulu.');
-        return;
-      }
-      
-      const validLicense = localStorage.getItem('valid-license');
-      if (licenseCode !== validLicense) {
-        alert('Kode Lisensi tidak valid atau belum terdaftar di perangkat ini.');
-        return;
-      }
-    }
-
-    if (username === 'superadmin' || username === 'penyedia') {
-      navigate('/super-admin/dashboard');
-    } else if (username === 'admin') {
-      localStorage.setItem('admin-role', 'pro');
-      navigate('/admin/dashboard');
-    } else if (username === localStorage.getItem('demo-username') && password === localStorage.getItem('demo-password')) {
-      // Periksa masa aktif demo
+    if (isDemo) {
       const expiryDate = new Date(localStorage.getItem('demo-expiry-date'));
       if (new Date() > expiryDate) {
         alert('Masa percobaan Demo Anda sudah habis. Silakan langganan paket Standar/Pro.');
@@ -43,27 +23,62 @@ const Login = () => {
       }
       localStorage.setItem('admin-role', 'demo');
       navigate('/admin/dashboard');
-    } else {
-      // Verify with Supabase
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*')
-        .eq('id', username)
-        .eq('password', password)
-        .single();
-
-      if (data) {
-        localStorage.setItem('user-id', data.id);
-        localStorage.setItem('user-name', data.name);
-        localStorage.setItem('user-password', data.password);
-        localStorage.setItem('user-dept', data.dept);
-        
-        window.dispatchEvent(new Event('userProfileUpdated'));
-        navigate('/user/dashboard');
-      } else {
-        alert('Login Gagal: ID Karyawan atau Password salah!');
-      }
+      return;
     }
+
+    if (username === 'superadmin' || username === 'penyedia') {
+      navigate('/super-admin/dashboard');
+      return;
+    }
+
+    // Validasi Kode Lisensi wajib untuk selain demo & superadmin
+    if (!licenseCode) {
+      alert('Silakan masukkan Kode Lisensi terlebih dahulu.');
+      return;
+    }
+
+    // 1. Cek apakah ini login HR Admin (di tabel companies)
+    const { data: companyData, error: companyError } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('license_code', licenseCode)
+      .eq('email', username)
+      .eq('admin_password', password)
+      .maybeSingle();
+
+    if (companyData) {
+      // Login sebagai HR Admin berhasil
+      localStorage.setItem('admin-role', companyData.plan || 'pro');
+      localStorage.setItem('valid-license', licenseCode);
+      localStorage.setItem('company-name', companyData.name);
+      navigate('/admin/dashboard');
+      return;
+    }
+
+    // 2. Cek apakah ini login Karyawan (di tabel employees)
+    const { data: employeeData, error: employeeError } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('license_code', licenseCode)
+      .eq('id', username)
+      .eq('password', password)
+      .maybeSingle();
+
+    if (employeeData) {
+      // Login sebagai Karyawan berhasil
+      localStorage.setItem('user-id', employeeData.id);
+      localStorage.setItem('user-name', employeeData.name);
+      localStorage.setItem('user-password', employeeData.password);
+      localStorage.setItem('user-dept', employeeData.dept);
+      localStorage.setItem('valid-license', licenseCode);
+      
+      window.dispatchEvent(new Event('userProfileUpdated'));
+      navigate('/user/dashboard');
+      return;
+    }
+
+    // Jika tidak ada yang cocok
+    alert('Login Gagal: Kombinasi Username/Email, Password, atau Kode Lisensi salah!');
   };
 
   return (
