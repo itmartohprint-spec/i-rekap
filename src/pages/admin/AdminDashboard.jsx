@@ -1,21 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import { Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const AdminDashboard = () => {
   const [announcement, setAnnouncement] = useState({ title: '', content: '', type: 'info' });
   const [recentLogs, setRecentLogs] = useState([]);
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    presentToday: 0,
+    lateToday: 0,
+    absentToday: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   const adminRole = localStorage.getItem('admin-role') || 'pro';
+  const licenseCode = localStorage.getItem('valid-license');
 
   useEffect(() => {
-    const logsKey = adminRole === 'demo' ? 'demo-attendance_logs' : 'attendance_logs';
-    const rawLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
-    setRecentLogs(rawLogs.slice(0, 5)); // Show latest 5
-
-    // Listen for storage changes if same window, but usually handled by reload in simple mocks
+    if (adminRole === 'demo') {
+      const rawLogs = JSON.parse(localStorage.getItem('demo-attendance_logs')) || [];
+      setRecentLogs(rawLogs.slice(0, 5));
+      setStats({ totalEmployees: 150, presentToday: 142, lateToday: 5, absentToday: 3 });
+      setIsLoading(false);
+    } else {
+      fetchRealData();
+    }
   }, []);
 
-  const handleSendAnnouncement = (e) => {
+  const fetchRealData = async () => {
+    setIsLoading(true);
+    try {
+      // 1. Get Total Employees
+      const { count: empCount } = await supabase
+        .from('employees')
+        .select('*', { count: 'exact', head: true })
+        .eq('license_code', licenseCode);
+
+      // 2. Get Today's Attendance
+      const today = new Date().toLocaleDateString('id-ID'); // e.g., 25/6/2026
+      const { data: attendanceData } = await supabase
+        .from('attendance')
+        .select(`
+          id, 
+          employee_id, 
+          date, 
+          check_in_time, 
+          status, 
+          employees (name)
+        `)
+        .eq('license_code', licenseCode)
+        .order('id', { ascending: false });
+
+      // Calculate stats based on today
+      const todaysLogs = attendanceData ? attendanceData.filter(log => log.date === today) : [];
+      
+      const present = todaysLogs.length;
+      const late = todaysLogs.filter(log => log.status === 'late').length;
+      const totalEmp = empCount || 0;
+      const absent = Math.max(0, totalEmp - present);
+
+      setStats({
+        totalEmployees: totalEmp,
+        presentToday: present,
+        lateToday: late,
+        absentToday: absent
+      });
+
+      // Format recent logs for the table
+      if (attendanceData) {
+        const formattedLogs = attendanceData.slice(0, 5).map(log => ({
+          id: log.id,
+          employeeName: log.employees ? log.employees.name : log.employee_id,
+          time: log.check_in_time,
+          type: 'check_in',
+          status: log.status
+        }));
+        setRecentLogs(formattedLogs);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleSendAnnouncement = async (e) => {
     e.preventDefault();
     if (!announcement.title || !announcement.content) return alert('Judul dan isi pengumuman harus diisi!');
     
@@ -27,7 +95,7 @@ const AdminDashboard = () => {
       date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
     };
 
-    const annKey = adminRole === 'demo' ? 'demo-hr-announcements' : 'hr-announcements';
+    const annKey = adminRole === 'demo' ? 'demo-hr-announcements' : `hr-announcements-${licenseCode}`;
     const existing = JSON.parse(localStorage.getItem(annKey) || '[]');
     const updated = [newAnnouncement, ...existing];
     localStorage.setItem(annKey, JSON.stringify(updated));
@@ -50,7 +118,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Total Karyawan</h4>
-            <p>150</p>
+            <p>{isLoading ? '...' : stats.totalEmployees}</p>
           </div>
         </div>
         
@@ -60,7 +128,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Hadir Hari Ini</h4>
-            <p>142</p>
+            <p>{isLoading ? '...' : stats.presentToday}</p>
           </div>
         </div>
 
@@ -70,7 +138,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Terlambat</h4>
-            <p>5</p>
+            <p>{isLoading ? '...' : stats.lateToday}</p>
           </div>
         </div>
 
@@ -80,7 +148,7 @@ const AdminDashboard = () => {
           </div>
           <div className="stat-details">
             <h4>Absen (Alpha)</h4>
-            <p>3</p>
+            <p>{isLoading ? '...' : stats.absentToday}</p>
           </div>
         </div>
       </div>
@@ -98,14 +166,20 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {recentLogs.length > 0 ? (
+            {isLoading ? (
+               <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td></tr>
+            ) : recentLogs.length > 0 ? (
               recentLogs.map((log) => (
                 <tr key={log.id}>
                   <td>{log.employeeName}</td>
                   <td>{log.time}</td>
                   <td style={{ textTransform: 'capitalize' }}>{log.type.replace('_', ' ')}</td>
-                  <td><span className="status-badge badge-success">{log.status}</span></td>
-                  <td>Valid</td>
+                  <td>
+                    <span className={`status-badge ${log.status === 'late' ? 'badge-danger' : 'badge-success'}`}>
+                      {log.status === 'late' ? 'Terlambat' : 'Tepat Waktu'}
+                    </span>
+                  </td>
+                  <td><span className="status-badge badge-success" style={{background: '#f1f5f9', color: '#64748b'}}>GPS Valid</span></td>
                 </tr>
               ))
             ) : (
