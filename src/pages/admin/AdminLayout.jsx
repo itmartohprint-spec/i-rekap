@@ -59,7 +59,8 @@ const AdminLayout = () => {
   
   const [profile, setProfile] = useState({
     logo: localStorage.getItem('company-logo') || '/maskot.png',
-    name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama')
+    name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama'),
+    address: localStorage.getItem(`office_address_${localStorage.getItem('valid-license')}`) || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21'
   });
   
   const handleRestrictedAccess = (e) => {
@@ -71,13 +72,26 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const handleProfileUpdate = () => {
-      setProfile({
+      setProfile(prev => ({
+        ...prev,
         logo: localStorage.getItem('company-logo') || '/maskot.png',
         name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama')
-      });
+      }));
     };
+    
+    const handleLocationUpdate = () => {
+      setProfile(prev => ({
+        ...prev,
+        address: localStorage.getItem(`office_address_${localStorage.getItem('valid-license')}`) || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21'
+      }));
+    };
+
     window.addEventListener('profileUpdated', handleProfileUpdate);
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+    window.addEventListener('locationSettingsUpdated', handleLocationUpdate);
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener('locationSettingsUpdated', handleLocationUpdate);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -177,7 +191,7 @@ const AdminLayout = () => {
         <header className="admin-header" style={{ justifyContent: 'space-between' }}>
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <span className="company-name-animated" style={{ display: 'block', fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>{profile.name}</span>
-            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Gedung i-rekap, Jl. Jend. Sudirman Kav. 21</span>
+            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{profile.address}</span>
           </div>
           <div className="admin-profile" onClick={(e) => {
             if (adminRole === 'demo') {

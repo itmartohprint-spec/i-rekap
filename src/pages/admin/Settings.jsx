@@ -13,6 +13,7 @@ const Settings = () => {
   });
 
   const [locationSettings, setLocationSettings] = useState({
+    officeAddress: 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
     officeLat: '-6.200000',
     officeLng: '106.816666',
     radiusMeters: '50'
@@ -26,39 +27,33 @@ const Settings = () => {
     const licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return;
 
-    const { data, error } = await supabase
-      .from('companies')
-      .select('office_lat, office_lng, radius_meters')
-      .eq('license_code', licenseCode)
-      .single();
+    // Load from localStorage as fallback since columns might not exist in Supabase yet
+    const savedLat = localStorage.getItem(`office_lat_${licenseCode}`);
+    const savedLng = localStorage.getItem(`office_lng_${licenseCode}`);
+    const savedRadius = localStorage.getItem(`radius_meters_${licenseCode}`);
+    const savedAddress = localStorage.getItem(`office_address_${licenseCode}`);
 
-    if (data) {
+    if (savedLat || savedLng || savedRadius || savedAddress) {
       setLocationSettings({
-        officeLat: data.office_lat || '-6.200000',
-        officeLng: data.office_lng || '106.816666',
-        radiusMeters: data.radius_meters || '50'
+        officeAddress: savedAddress || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
+        officeLat: savedLat || '-6.200000',
+        officeLng: savedLng || '106.816666',
+        radiusMeters: savedRadius || '50'
       });
     }
   };
 
-  const handleSaveLocation = async () => {
+  const handleSaveLocation = () => {
     const licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return;
 
-    const { error } = await supabase
-      .from('companies')
-      .update({
-        office_lat: parseFloat(locationSettings.officeLat),
-        office_lng: parseFloat(locationSettings.officeLng),
-        radius_meters: parseInt(locationSettings.radiusMeters)
-      })
-      .eq('license_code', licenseCode);
+    localStorage.setItem(`office_address_${licenseCode}`, locationSettings.officeAddress);
+    localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
+    localStorage.setItem(`office_lng_${licenseCode}`, locationSettings.officeLng);
+    localStorage.setItem(`radius_meters_${licenseCode}`, locationSettings.radiusMeters);
 
-    if (error) {
-      alert("Gagal menyimpan lokasi: " + error.message);
-    } else {
-      alert("✅ Pengaturan Lokasi berhasil disimpan!");
-    }
+    window.dispatchEvent(new Event('locationSettingsUpdated'));
+    alert("✅ Pengaturan Lokasi berhasil disimpan!");
   };
 
   const handleProfileChange = (e) => {
@@ -246,7 +241,8 @@ const Settings = () => {
                   <textarea 
                     className="form-input" 
                     rows="3" 
-                    defaultValue="Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920"
+                    value={locationSettings.officeAddress}
+                    onChange={(e) => setLocationSettings({...locationSettings, officeAddress: e.target.value})}
                     style={{ resize: 'vertical' }}
                   ></textarea>
                 </div>
