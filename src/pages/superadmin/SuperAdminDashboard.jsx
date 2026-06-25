@@ -19,6 +19,12 @@ const SuperAdminDashboard = () => {
   });
   const [isAddingTenant, setIsAddingTenant] = useState(false);
 
+  // Manage Tenant Modal State
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [isUpdatingTenant, setIsUpdatingTenant] = useState(false);
+  const navigate = require('react-router-dom').useNavigate();
+
   useEffect(() => {
     fetchCompanies();
   }, []);
@@ -86,6 +92,38 @@ const SuperAdminDashboard = () => {
     }
     
     setIsAddingTenant(false);
+  };
+
+  const handleUpdateTenant = async (e) => {
+    e.preventDefault();
+    setIsUpdatingTenant(true);
+
+    const { error } = await supabase.from('companies').update({
+      name: selectedTenant.name,
+      admin_name: selectedTenant.admin_name,
+      email: selectedTenant.email,
+      admin_password: selectedTenant.admin_password,
+      plan: selectedTenant.plan,
+      status: selectedTenant.status
+    }).eq('id', selectedTenant.id);
+
+    if (!error) {
+      alert('Data tenant berhasil diperbarui!');
+      setShowManageModal(false);
+      fetchCompanies();
+    } else {
+      alert('Gagal memperbarui: ' + error.message);
+    }
+    
+    setIsUpdatingTenant(false);
+  };
+
+  const handleGodMode = (company) => {
+    const licenseCode = company.license_code || `LIC-${company.id.toString().substring(0,6).toUpperCase()}`;
+    localStorage.setItem('admin-role', company.plan || 'pro');
+    localStorage.setItem('valid-license', licenseCode);
+    localStorage.setItem('company-name', company.name);
+    navigate('/admin/dashboard');
   };
 
   const totalCompanies = companies.length;
@@ -228,6 +266,7 @@ const SuperAdminDashboard = () => {
                           type="button"
                           className="btn-secondary" 
                           style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}
+                          onClick={() => { setSelectedTenant({...company}); setShowManageModal(true); }}
                         >
                           Kelola
                         </button>
@@ -299,6 +338,74 @@ const SuperAdminDashboard = () => {
                 <button type="button" className="btn-secondary" onClick={() => setShowAddTenantModal(false)} style={{ flex: 1 }}>Batal</button>
                 <button type="submit" className="btn-primary" disabled={isAddingTenant} style={{ flex: 1 }}>
                   {isAddingTenant ? 'Memproses...' : 'Buat Tenant Baru'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Kelola Tenant */}
+      {showManageModal && selectedTenant && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ color: '#0f172a', margin: 0 }}>Kelola Tenant: {selectedTenant.name}</h3>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ background: '#6366f1', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                onClick={() => handleGodMode(selectedTenant)}
+                title="Masuk sebagai HR Perusahaan ini tanpa password"
+              >
+                Login sbg HR (God Mode)
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdateTenant} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Nama Perusahaan</label>
+                <input type="text" className="form-input" required value={selectedTenant.name} onChange={(e) => setSelectedTenant({...selectedTenant, name: e.target.value})} />
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Nama Admin HR</label>
+                  <input type="text" className="form-input" required value={selectedTenant.admin_name} onChange={(e) => setSelectedTenant({...selectedTenant, admin_name: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Paket Langganan</label>
+                  <select className="form-input" value={selectedTenant.plan} onChange={(e) => setSelectedTenant({...selectedTenant, plan: e.target.value})}>
+                    <option value="standar">Standar (50 Org)</option>
+                    <option value="pro">Pro (200 Org)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Email / Username Login</label>
+                  <input type="email" className="form-input" required value={selectedTenant.email} onChange={(e) => setSelectedTenant({...selectedTenant, email: e.target.value})} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Password Admin HR</label>
+                  <input type="text" className="form-input" required minLength="6" value={selectedTenant.admin_password} onChange={(e) => setSelectedTenant({...selectedTenant, admin_password: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Status Lisensi</label>
+                <select className="form-input" value={selectedTenant.status} onChange={(e) => setSelectedTenant({...selectedTenant, status: e.target.value})}>
+                  <option value="active">Aktif / Lunas</option>
+                  <option value="suspended">Suspend / Diblokir</option>
+                  <option value="expired">Kedaluwarsa</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" className="btn-secondary" onClick={() => setShowManageModal(false)} style={{ flex: 1 }}>Tutup</button>
+                <button type="submit" className="btn-primary" disabled={isUpdatingTenant} style={{ flex: 1 }}>
+                  {isUpdatingTenant ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>
               </div>
             </form>
