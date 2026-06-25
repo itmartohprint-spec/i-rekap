@@ -84,15 +84,7 @@ const SuperAdminLayout = () => {
         <nav className="super-nav">
           <NavLink to="/super-admin/dashboard" className={({isActive}) => isActive ? "super-nav-item active" : "super-nav-item"}>
             <LayoutDashboard size={20} />
-            Dashboard Utama
-          </NavLink>
-          <NavLink to="/super-admin/companies" className={({isActive}) => isActive ? "super-nav-item active" : "super-nav-item"}>
-            <Building2 size={20} />
-            Daftar Tenant
-          </NavLink>
-          <NavLink to="/super-admin/licenses" className={({isActive}) => isActive ? "super-nav-item active" : "super-nav-item"}>
-            <CreditCard size={20} />
-            Manajemen Lisensi
+            Manajemen Pelanggan
           </NavLink>
         </nav>
 

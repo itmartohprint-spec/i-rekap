@@ -51,7 +51,7 @@ const SuperAdminDashboard = () => {
 
   const totalCompanies = companies.length;
   const activeLicenses = companies.filter(c => c.status === 'active').length;
-  const expiredLicenses = companies.filter(c => c.status === 'expired').length;
+  const expiredLicenses = companies.filter(c => c.status === 'expired' || c.status === 'suspended').length;
   const monthlyRevenue = companies.reduce((acc, curr) => {
     if (curr.status === 'active') {
       return acc + (curr.plan === 'standar' ? 499000 : 999000);
@@ -65,7 +65,7 @@ const SuperAdminDashboard = () => {
 
   return (
     <div>
-      <h2 style={{ marginBottom: '2rem' }}>Ringkasan SaaS i-rekap</h2>
+      <h2 style={{ marginBottom: '2rem' }}>Dashboard Manajemen Pelanggan</h2>
       
       <div className="dashboard-grid">
         <div className="glass-panel stat-card">
@@ -73,7 +73,7 @@ const SuperAdminDashboard = () => {
             <Building2 size={24} />
           </div>
           <div className="stat-details">
-            <h4>Total Perusahaan</h4>
+            <h4>Total Tenant</h4>
             <p>{totalCompanies}</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ const SuperAdminDashboard = () => {
             <Clock size={24} />
           </div>
           <div className="stat-details">
-            <h4>Lisensi Kedaluwarsa</h4>
+            <h4>Lisensi Nonaktif</h4>
             <p>{expiredLicenses}</p>
           </div>
         </div>
@@ -110,62 +110,97 @@ const SuperAdminDashboard = () => {
       </div>
 
       <div className="admin-table-container">
-        <h3 style={{ marginBottom: '1.5rem' }}>Pendaftaran Perusahaan Terbaru</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h3>Daftar Lengkap Tenant & Lisensi</h3>
+          <button className="btn-primary">Tambah Tenant Manual</button>
+        </div>
+        
         {isLoading ? <p style={{ padding: '2rem', textAlign: 'center' }}>Memuat data...</p> : (
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Nama Perusahaan</th>
-              <th>Admin HR</th>
-              <th>Paket Langganan</th>
+              <th>Perusahaan</th>
+              <th>Admin / Kontak</th>
+              <th>Kode Lisensi</th>
+              <th>Paket</th>
               <th>Status</th>
-              <th>Aksi</th>
+              <th>Aksi / Pembayaran</th>
             </tr>
           </thead>
           <tbody>
-            {companies.map((company) => (
-              <tr key={company.id}>
-                <td>{company.name}</td>
-                <td>{company.admin_name}</td>
-                <td style={{ textTransform: 'capitalize' }}>{company.plan}</td>
-                <td>
-                  {company.status === 'active' ? (
-                    <span className="status-badge badge-success">Aktif</span>
-                  ) : company.status === 'pending' ? (
-                    <span className="status-badge badge-warning">Menunggu Verifikasi</span>
-                  ) : (
-                    <span className="status-badge badge-danger">{company.status}</span>
-                  )}
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {company.payment_proof && (
-                      <button 
-                        type="button"
-                        className="btn-secondary" 
-                        style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px'}}
-                        onClick={() => { setSelectedProof(company.payment_proof); setShowProofModal(true); }}
-                      >
-                        <Image size={14} /> Bukti
-                      </button>
+            {companies.map((company) => {
+              const licenseCode = company.id ? `LIC-${company.id.toString().substring(0,6).toUpperCase()}` : '-';
+              
+              return (
+                <tr key={company.id}>
+                  <td>
+                    <strong>{company.name}</strong>
+                  </td>
+                  <td>
+                    <div>{company.admin_name}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{company.email}</div>
+                  </td>
+                  <td>
+                    <code style={{ background: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                      {licenseCode}
+                    </code>
+                  </td>
+                  <td>
+                    <div style={{ textTransform: 'capitalize' }}>{company.plan}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      {company.plan === 'standar' ? 'Maks 50 Orang' : 'Maks 200 Orang'}
+                    </div>
+                  </td>
+                  <td>
+                    {company.status === 'active' ? (
+                      <span className="status-badge badge-success">Aktif / Lunas</span>
+                    ) : company.status === 'pending' ? (
+                      <span className="status-badge badge-warning">Menunggu Validasi</span>
+                    ) : (
+                      <span className="status-badge badge-danger">{company.status}</span>
                     )}
-                    {company.status === 'pending' && (
-                      <button 
-                        type="button"
-                        className="btn-primary" 
-                        style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#10b981', border: 'none'}}
-                        onClick={() => approveCompany(company)}
-                      >
-                        Setujui
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {company.payment_proof && (
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px'}}
+                          onClick={() => { setSelectedProof(company.payment_proof); setShowProofModal(true); }}
+                        >
+                          <Image size={14} /> Bukti Transfer
+                        </button>
+                      )}
+                      
+                      {company.status === 'pending' && (
+                        <button 
+                          type="button"
+                          className="btn-primary" 
+                          style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#10b981', border: 'none'}}
+                          onClick={() => approveCompany(company)}
+                        >
+                          Setujui
+                        </button>
+                      )}
+
+                      {company.status === 'active' && (
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}
+                        >
+                          Kelola
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
             {companies.length === 0 && (
               <tr>
-                <td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data perusahaan terdaftar.</td>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada data perusahaan terdaftar.</td>
               </tr>
             )}
           </tbody>
@@ -176,7 +211,7 @@ const SuperAdminDashboard = () => {
       {showProofModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 style={{ marginBottom: '1rem' }}>Bukti Pembayaran</h3>
+            <h3 style={{ marginBottom: '1rem', color: '#0f172a' }}>Bukti Pembayaran</h3>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
               <img src={selectedProof} alt="Bukti" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain' }} />
             </div>

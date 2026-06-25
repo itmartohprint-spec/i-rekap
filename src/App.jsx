@@ -18,8 +18,6 @@ import RegisterDemo from './pages/RegisterDemo';
 import Checkout from './pages/Checkout';
 import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
-import CompanyList from './pages/superadmin/CompanyList';
-import LicenseManagement from './pages/superadmin/LicenseManagement';
 
 import TrackGPS from './pages/admin/TrackGPS';
 import LeaveManagement from './pages/admin/LeaveManagement';
@@ -71,8 +69,6 @@ function App() {
         <Route path="/super-admin" element={<SuperAdminLayout />}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="companies" element={<CompanyList />} />
-          <Route path="licenses" element={<LicenseManagement />} />
         </Route>
       </Routes>
     </Router>
