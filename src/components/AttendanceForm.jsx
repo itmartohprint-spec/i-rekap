@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera, MapPin, Wifi, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import './AttendanceForm.css';
 
 const AttendanceForm = ({ type, onClose }) => {
@@ -131,23 +132,35 @@ const AttendanceForm = ({ type, onClose }) => {
       }
 
       const now = new Date();
-      const formattedDate = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-      const formattedTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const formattedDate = now.toLocaleDateString('en-CA'); // YYYY-MM-DD format for database
+      const formattedTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // HH:MM:SS format
       
-      const logEntry = {
-        id: Date.now().toString(),
-        employeeId: 'EMP-001',
-        employeeName: 'Budi Santoso',
-        date: formattedDate,
-        time: formattedTime,
-        type: type,
-        status: 'Hadir',
-        location: { lat: -6.200000, lng: 106.816666 },
-        photoUrl: photoUrl // Simpan link Cloudinary atau base64
-      };
+      const licenseCode = localStorage.getItem('valid-license');
+      const employeeId = localStorage.getItem('user-id');
 
-      const existingLogs = JSON.parse(localStorage.getItem('attendance_logs')) || [];
-      localStorage.setItem('attendance_logs', JSON.stringify([logEntry, ...existingLogs]));
+      if (!licenseCode || !employeeId) {
+        alert("Sesi login tidak valid. Silakan login ulang.");
+        setIsUploading(false);
+        return;
+      }
+
+      const { error } = await supabase.from('attendance').insert([{
+        license_code: licenseCode,
+        employee_id: employeeId,
+        date: formattedDate,
+        time_in: (type === 'in' || type === 'overtime_in') ? formattedTime : null,
+        time_out: (type === 'out' || type === 'early' || type === 'overtime_out') ? formattedTime : null,
+        status: 'Hadir', // default status
+        type: type,
+        location_lat: -6.200000,
+        location_lng: 106.816666,
+        photo_url: photoUrl
+      }]);
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        throw new Error(error.message);
+      }
 
       alert(`Absen ${typeLabel[type]} Berhasil!`);
       onClose();

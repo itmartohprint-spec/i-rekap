@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Wallet, Banknote, Send } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const UserCashAdvance = () => {
   const [formData, setFormData] = useState({
@@ -18,14 +19,38 @@ const UserCashAdvance = () => {
     setFormData({ ...formData, amount: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (parseInt(formData.amount) < 50000) {
       alert('Minimal kasbon adalah Rp 50.000');
       return;
     }
-    alert(`Pengajuan kasbon sebesar ${formatRupiah(formData.amount)} berhasil dikirim! (Metode: ${formData.repaymentMethod})`);
-    setFormData({ amount: '', reason: '', repaymentMethod: 'Sekali' });
+
+    const licenseCode = localStorage.getItem('valid-license');
+    const employeeId = localStorage.getItem('user-id');
+
+    if (!licenseCode || !employeeId) {
+      alert("Sesi login tidak valid. Silakan login ulang.");
+      return;
+    }
+
+    const finalReason = `${formData.reason} (Metode: ${formData.repaymentMethod})`;
+
+    const { error } = await supabase.from('cash_advances').insert([{
+      license_code: licenseCode,
+      employee_id: employeeId,
+      amount: parseInt(formData.amount),
+      reason: finalReason,
+      status: 'pending'
+    }]);
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      alert("Terjadi kesalahan: " + error.message);
+    } else {
+      alert(`Pengajuan kasbon sebesar ${formatRupiah(formData.amount)} berhasil dikirim!`);
+      setFormData({ amount: '', reason: '', repaymentMethod: 'Sekali' });
+    }
   };
 
   return (

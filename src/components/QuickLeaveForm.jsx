@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Activity, X, Upload, Send, FileWarning, Stethoscope } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 import './QuickLeaveForm.css';
 
 const QuickLeaveForm = ({ onClose }) => {
@@ -31,24 +32,40 @@ const QuickLeaveForm = ({ onClose }) => {
     }
 
     const now = new Date();
-    const formattedDate = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const formattedDate = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
     
-    const requestEntry = {
-      id: Date.now().toString(),
-      employeeId: 'EMP-001',
-      employeeName: 'Budi Santoso',
-      date: formattedDate,
-      type: leaveType === 'izin' ? 'Izin' : 'Sakit',
-      reason: reason,
-      status: 'Menunggu',
-      attachment: attachment ? attachment.name : null
+    const licenseCode = localStorage.getItem('valid-license');
+    const employeeId = localStorage.getItem('user-id');
+
+    if (!licenseCode || !employeeId) {
+      alert("Sesi login tidak valid. Silakan login ulang.");
+      return;
+    }
+
+    const leaveTypeString = leaveType === 'izin' ? 'Izin' : 'Sakit';
+    const finalReason = `[${leaveTypeString}] ${reason}`;
+    
+    const submitToSupabase = async () => {
+      const { error } = await supabase.from('leave_requests').insert([{
+        license_code: licenseCode,
+        employee_id: employeeId,
+        start_date: formattedDate,
+        end_date: formattedDate,
+        reason: finalReason,
+        status: 'pending',
+        attachment_url: attachment ? attachment.name : null
+      }]);
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert("Terjadi kesalahan: " + error.message);
+      } else {
+        alert(`Pengajuan ${leaveTypeString} berhasil dikirim!`);
+        onClose();
+      }
     };
 
-    const existingRequests = JSON.parse(localStorage.getItem('leave_requests')) || [];
-    localStorage.setItem('leave_requests', JSON.stringify([requestEntry, ...existingRequests]));
-
-    alert(`Pengajuan ${leaveType === 'izin' ? 'Izin' : 'Sakit'} berhasil dikirim!`);
-    onClose();
+    submitToSupabase();
   };
 
   return (
