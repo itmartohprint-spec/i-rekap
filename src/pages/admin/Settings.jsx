@@ -19,6 +19,11 @@ const Settings = () => {
     radiusMeters: '50'
   });
 
+  const [networkSettings, setNetworkSettings] = useState({
+    ipAddresses: '192.168.1.100, 114.120.30.22',
+    requireIp: true
+  });
+
   useEffect(() => {
     fetchCompanySettings();
   }, []);
@@ -41,6 +46,15 @@ const Settings = () => {
         radiusMeters: savedRadius || '50'
       });
     }
+
+    const savedIpAddresses = localStorage.getItem(`network_ips_${licenseCode}`);
+    const savedRequireIp = localStorage.getItem(`network_require_${licenseCode}`);
+    if (savedIpAddresses !== null) {
+      setNetworkSettings({
+        ipAddresses: savedIpAddresses,
+        requireIp: savedRequireIp === 'true'
+      });
+    }
   };
 
   const handleSaveLocation = () => {
@@ -54,6 +68,14 @@ const Settings = () => {
 
     window.dispatchEvent(new Event('locationSettingsUpdated'));
     alert("✅ Pengaturan Lokasi berhasil disimpan!");
+  };
+
+  const handleSaveNetwork = () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return;
+    localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
+    localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
+    alert("✅ Pengaturan Jaringan berhasil disimpan!");
   };
 
   const handleProfileChange = (e) => {
@@ -309,14 +331,23 @@ const Settings = () => {
                   <label className="form-label">IP Address Publik Kantor</label>
                   <div className="input-with-icon">
                     <Wifi size={18} className="input-icon" />
-                    <input type="text" className="form-input" defaultValue="192.168.1.100, 114.120.30.22" />
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={networkSettings.ipAddresses} 
+                      onChange={(e) => setNetworkSettings({...networkSettings, ipAddresses: e.target.value})}
+                    />
                   </div>
                   <p className="helper-text">Pisahkan dengan koma jika Anda memiliki lebih dari satu koneksi internet publik.</p>
                 </div>
                 
                 <div className="toggle-switch-container" style={{ marginTop: '2rem' }}>
                   <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      checked={networkSettings.requireIp}
+                      onChange={(e) => setNetworkSettings({...networkSettings, requireIp: e.target.checked})}
+                    />
                     <span className="slider round"></span>
                   </label>
                   <div className="toggle-label">
@@ -327,7 +358,7 @@ const Settings = () => {
               </div>
 
               <div className="settings-footer">
-                <button className="btn-primary">Simpan Pengaturan Jaringan</button>
+                <button className="btn-primary" onClick={handleSaveNetwork}>Simpan Pengaturan Jaringan</button>
               </div>
             </div>
           )}
