@@ -8,9 +8,53 @@ const SuperAdminDashboard = () => {
   const [showProofModal, setShowProofModal] = useState(false);
   const [selectedProof, setSelectedProof] = useState(null);
 
+  // Super Admin Credentials State
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isUpdatingCreds, setIsUpdatingCreds] = useState(false);
+
   useEffect(() => {
     fetchCompanies();
+    fetchSuperAdminCreds();
   }, []);
+
+  const fetchSuperAdminCreds = async () => {
+    const { data } = await supabase.from('super_admins').select('*').limit(1).maybeSingle();
+    if (data) {
+      setAdminUsername(data.username);
+      setAdminPassword(data.password);
+    }
+  };
+
+  const handleUpdateCreds = async (e) => {
+    e.preventDefault();
+    setIsUpdatingCreds(true);
+    
+    // Check if row exists
+    const { data } = await supabase.from('super_admins').select('id').limit(1).maybeSingle();
+    
+    if (data) {
+      // Update existing
+      const { error } = await supabase.from('super_admins').update({
+        username: adminUsername,
+        password: adminPassword
+      }).eq('id', data.id);
+      
+      if (!error) alert("Kredensial Super Admin berhasil diperbarui!");
+      else alert("Gagal memperbarui: " + error.message);
+    } else {
+      // Insert new
+      const { error } = await supabase.from('super_admins').insert([{
+        username: adminUsername,
+        password: adminPassword
+      }]);
+      
+      if (!error) alert("Kredensial Super Admin berhasil dibuat!");
+      else alert("Gagal membuat: " + error.message);
+    }
+    
+    setIsUpdatingCreds(false);
+  };
 
   const fetchCompanies = async () => {
     setIsLoading(true);
@@ -171,6 +215,38 @@ const SuperAdminDashboard = () => {
           </tbody>
         </table>
         )}
+      </div>
+
+      {/* Pengaturan Kredensial Super Admin */}
+      <div className="admin-table-container" style={{ marginTop: '2rem' }}>
+        <h3 style={{ marginBottom: '1.5rem' }}>Pengaturan Akses Penyedia (Super Admin)</h3>
+        <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>Ganti Username dan Password login utama Anda di sini. Rahasiakan informasi ini.</p>
+        
+        <form onSubmit={handleUpdateCreds} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Username</label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={adminUsername}
+              onChange={(e) => setAdminUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Password Baru</label>
+            <input 
+              type="text" 
+              className="form-input" 
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn-primary" disabled={isUpdatingCreds}>
+            {isUpdatingCreds ? 'Menyimpan...' : 'Simpan Kredensial'}
+          </button>
+        </form>
       </div>
 
       {showProofModal && (

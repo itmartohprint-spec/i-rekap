@@ -26,7 +26,15 @@ const Login = () => {
       return;
     }
 
-    if (username === 'superadmin' || username === 'penyedia') {
+    // 0. Cek apakah ini login Super Admin / Penyedia
+    const { data: superAdminData } = await supabase
+      .from('super_admins')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .maybeSingle();
+
+    if (superAdminData) {
       navigate('/super-admin/dashboard');
       return;
     }
