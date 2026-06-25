@@ -191,15 +191,15 @@ const ShiftSchedule = () => {
                       <span>Masuk: <strong>{shift.startTime}</strong></span>
                       <span>Keluar: <strong>{shift.endTime}</strong></span>
                     </div>
-                    {shift.id !== 'default' && (
-                      <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '4px' }}>
-                        <button 
-                          onClick={() => handleStartEdit(shift)}
-                          style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}
-                          title="Edit Shift"
-                        >
-                          <Edit2 size={16} />
-                        </button>
+                    <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '4px' }}>
+                      <button 
+                        onClick={() => handleStartEdit(shift)}
+                        style={{ background: 'transparent', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '4px' }}
+                        title="Edit Shift"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      {shift.id !== 'default' && (
                         <button 
                           onClick={() => handleDeleteShift(shift.id)}
                           style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
@@ -207,8 +207,8 @@ const ShiftSchedule = () => {
                         >
                           <Trash2 size={16} />
                         </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </>
                 )}
               </div>
