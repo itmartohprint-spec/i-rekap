@@ -206,7 +206,7 @@ const SuperAdminDashboard = () => {
           </thead>
           <tbody>
             {companies.map((company) => {
-              const licenseCode = company.id ? `LIC-${company.id.toString().substring(0,6).toUpperCase()}` : '-';
+              const displayLicense = company.license_code || (company.id ? `LIC-${company.id.toString().substring(0,6).toUpperCase()}` : '-');
               
               return (
                 <tr key={company.id}>
@@ -219,7 +219,7 @@ const SuperAdminDashboard = () => {
                   </td>
                   <td>
                     <code style={{ background: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-                      {licenseCode}
+                      {displayLicense}
                     </code>
                   </td>
                   <td>
