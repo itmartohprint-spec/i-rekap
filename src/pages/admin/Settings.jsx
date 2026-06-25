@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, Wifi, Palette, Bell, Building, Globe, Check, Upload, Database, Download, RefreshCw, AlertTriangle } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('lokasi');
@@ -10,6 +11,55 @@ const Settings = () => {
     name: localStorage.getItem('company-name') || 'PT Maju Bersama',
     hrEmail: localStorage.getItem('company-hr-email') || 'hr@majubersama.com'
   });
+
+  const [locationSettings, setLocationSettings] = useState({
+    officeLat: '-6.200000',
+    officeLng: '106.816666',
+    radiusMeters: '50'
+  });
+
+  useEffect(() => {
+    fetchCompanySettings();
+  }, []);
+
+  const fetchCompanySettings = async () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return;
+
+    const { data, error } = await supabase
+      .from('companies')
+      .select('office_lat, office_lng, radius_meters')
+      .eq('license_code', licenseCode)
+      .single();
+
+    if (data) {
+      setLocationSettings({
+        officeLat: data.office_lat || '-6.200000',
+        officeLng: data.office_lng || '106.816666',
+        radiusMeters: data.radius_meters || '50'
+      });
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return;
+
+    const { error } = await supabase
+      .from('companies')
+      .update({
+        office_lat: parseFloat(locationSettings.officeLat),
+        office_lng: parseFloat(locationSettings.officeLng),
+        radius_meters: parseInt(locationSettings.radiusMeters)
+      })
+      .eq('license_code', licenseCode);
+
+    if (error) {
+      alert("Gagal menyimpan lokasi: " + error.message);
+    } else {
+      alert("✅ Pengaturan Lokasi berhasil disimpan!");
+    }
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -206,14 +256,24 @@ const Settings = () => {
                     <label className="form-label">Latitude Kantor</label>
                     <div className="input-with-icon">
                       <Globe size={18} className="input-icon" />
-                      <input type="text" className="form-input" defaultValue="-6.200000" />
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={locationSettings.officeLat}
+                        onChange={(e) => setLocationSettings({...locationSettings, officeLat: e.target.value})}
+                      />
                     </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Longitude Kantor</label>
                     <div className="input-with-icon">
                       <Globe size={18} className="input-icon" />
-                      <input type="text" className="form-input" defaultValue="106.816666" />
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        value={locationSettings.officeLng}
+                        onChange={(e) => setLocationSettings({...locationSettings, officeLng: e.target.value})}
+                      />
                     </div>
                   </div>
                 </div>
@@ -221,15 +281,21 @@ const Settings = () => {
                 <div className="form-group" style={{ marginTop: '1.5rem' }}>
                   <label className="form-label">Radius Toleransi Maksimal (Meter)</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <input type="range" min="10" max="500" defaultValue="50" className="range-slider" style={{ flex: 1 }} />
-                    <div className="range-value">50 m</div>
+                    <input 
+                      type="range" 
+                      min="10" max="500" 
+                      value={locationSettings.radiusMeters} 
+                      onChange={(e) => setLocationSettings({...locationSettings, radiusMeters: e.target.value})}
+                      className="range-slider" style={{ flex: 1 }} 
+                    />
+                    <div className="range-value">{locationSettings.radiusMeters} m</div>
                   </div>
                   <p className="helper-text">Karyawan tidak bisa absen jika berada di luar radius ini dari titik kordinat.</p>
                 </div>
               </div>
               
               <div className="settings-footer">
-                <button className="btn-primary">Simpan Pengaturan Lokasi</button>
+                <button className="btn-primary" onClick={handleSaveLocation}>Simpan Pengaturan Lokasi</button>
               </div>
             </div>
           )}

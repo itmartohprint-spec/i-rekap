@@ -18,16 +18,12 @@ const AttendanceForm = ({ type, onClose }) => {
   const [locationStatus, setLocationStatus] = useState('checking'); // checking, success, error
   const [ipStatus, setIpStatus] = useState('checking'); // checking, success, error
   const [isUploading, setIsUploading] = useState(false);
-  
-  // Dummy office coordinates for mock
-  const OFFICE_COORDS = { lat: -6.200000, lng: 106.816666 };
+  const [userLocation, setUserLocation] = useState(null);
+  const [distanceInfo, setDistanceInfo] = useState('');
   
   useEffect(() => {
-    // Start camera
     startCamera();
-    
-    // Check location
-    checkLocation();
+    fetchCompanySettings();
     
     // Mock IP Check
     setTimeout(() => {
@@ -38,6 +34,41 @@ const AttendanceForm = ({ type, onClose }) => {
       stopCamera();
     };
   }, []);
+
+  const fetchCompanySettings = async () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) {
+      setLocationStatus('error');
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('companies')
+      .select('office_lat, office_lng, radius_meters')
+      .eq('license_code', licenseCode)
+      .single();
+
+    if (data) {
+      checkLocation(data);
+    } else {
+      setLocationStatus('error');
+    }
+  };
+
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3; // Earth radius in meters
+    const p1 = lat1 * Math.PI / 180;
+    const p2 = lat2 * Math.PI / 180;
+    const dp = (lat2 - lat1) * Math.PI / 180;
+    const dl = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dp / 2) * Math.sin(dp / 2) +
+              Math.cos(p1) * Math.cos(p2) *
+              Math.sin(dl / 2) * Math.sin(dl / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // in meters
+  };
 
   const startCamera = async () => {
     try {
@@ -59,12 +90,36 @@ const AttendanceForm = ({ type, onClose }) => {
     }
   };
 
-  const checkLocation = () => {
+  const checkLocation = (settings) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // Mock success for now. In real app, calculate distance.
-          setLocationStatus('success');
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          setUserLocation({ lat: userLat, lng: userLng });
+          
+          if (!settings.office_lat || !settings.office_lng) {
+            // Bypass if company hasn't set coordinates
+            setLocationStatus('success');
+            return;
+          }
+
+          const distance = getDistance(
+            userLat, 
+            userLng, 
+            parseFloat(settings.office_lat), 
+            parseFloat(settings.office_lng)
+          );
+
+          const maxRadius = settings.radius_meters ? parseInt(settings.radius_meters) : 50;
+
+          if (distance <= maxRadius) {
+            setLocationStatus('success');
+            setDistanceInfo(`(${Math.round(distance)}m)`);
+          } else {
+            setLocationStatus('error');
+            setDistanceInfo(`(Jarak: ${Math.round(distance)}m, Maks: ${maxRadius}m)`);
+          }
         },
         (error) => {
           setLocationStatus('error');
@@ -152,8 +207,8 @@ const AttendanceForm = ({ type, onClose }) => {
         time_out: (type === 'out' || type === 'early' || type === 'overtime_out') ? formattedTime : null,
         status: 'Hadir', // default status
         type: type,
-        location_lat: -6.200000,
-        location_lng: 106.816666,
+        location_lat: userLocation ? userLocation.lat : null,
+        location_lng: userLocation ? userLocation.lng : null,
         photo_url: photoUrl
       }]);
 
@@ -196,7 +251,7 @@ const AttendanceForm = ({ type, onClose }) => {
       <div className="status-checks">
         <div className={`status-item ${locationStatus}`}>
           <MapPin size={18} />
-          <span>Lokasi: {locationStatus === 'checking' ? 'Mengecek...' : locationStatus === 'success' ? 'Dalam Area Kantor' : 'Di Luar Area Kantor'}</span>
+          <span>Lokasi: {locationStatus === 'checking' ? 'Mengecek GPS...' : locationStatus === 'success' ? `Dalam Area Kantor ${distanceInfo}` : `Di Luar Area ${distanceInfo}`}</span>
           {locationStatus === 'success' && <CheckCircle size={16} />}
           {locationStatus === 'error' && <XCircle size={16} />}
         </div>
