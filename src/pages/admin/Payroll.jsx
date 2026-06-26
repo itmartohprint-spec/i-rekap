@@ -222,8 +222,8 @@ const Payroll = () => {
                     <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.id}</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '4px 0', color: '#64748b' }}>Posisi / Jabatan</td>
-                    <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.position || 'Staff'}</td>
+                    <td style={{ padding: '4px 0', color: '#64748b' }}>Posisi / Bagian</td>
+                    <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.dept || 'Staff'}</td>
                   </tr>
                 </tbody>
               </table>
