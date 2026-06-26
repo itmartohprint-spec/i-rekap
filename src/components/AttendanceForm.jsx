@@ -235,7 +235,7 @@ const AttendanceForm = ({ type, onClose }) => {
       onClose();
     } catch (error) {
       console.error("Error submitting attendance:", error);
-      alert("Terjadi kesalahan sistem saat absen.");
+      alert("Terjadi kesalahan sistem saat absen: " + (error.message || error));
     } finally {
       setIsUploading(false);
     }

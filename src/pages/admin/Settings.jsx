@@ -522,6 +522,35 @@ const Settings = () => {
                   <label className="form-label">Email HRD</label>
                   <input type="email" className="form-input" name="hrEmail" value={companyProfile.hrEmail} onChange={handleProfileChange} />
                 </div>
+
+                <hr className="divider" style={{ margin: '2rem 0', borderTop: '1px solid #e2e8f0' }} />
+                
+                <div className="form-group">
+                  <label className="form-label">Link Instalasi Karyawan (Tanpa Perlu Ketik Lisensi)</label>
+                  <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem', lineHeight: '1.4' }}>
+                    Bagikan link ini ke grup WhatsApp karyawan. Karyawan yang membuka link ini bisa langsung Install Aplikasi (Add to Home Screen) tanpa harus memasukkan Kode Lisensi manual.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      readOnly 
+                      value={`${window.location.origin}/login?lic=${localStorage.getItem('valid-license') || ''}`} 
+                      style={{ background: '#f8fafc', color: '#0f172a', flex: 1 }}
+                    />
+                    <button 
+                      type="button"
+                      className="btn-primary" 
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/login?lic=${localStorage.getItem('valid-license') || ''}`);
+                        alert('Link berhasil disalin! Silakan paste dan bagikan ke grup WhatsApp karyawan.');
+                      }}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="settings-footer">
                 <button className="btn-primary" onClick={handleSaveProfile}>Simpan Profil</button>

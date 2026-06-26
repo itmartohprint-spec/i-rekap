@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fingerprint } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -9,6 +9,21 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [licenseCode, setLicenseCode] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Cek apakah ada parameter 'lic' di URL (Misal: i-rekap.com/login?lic=LIC-123)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLic = urlParams.get('lic');
+    
+    if (urlLic) {
+      setLicenseCode(urlLic);
+      localStorage.setItem('saved-license', urlLic);
+    } else {
+      // Jika tidak ada di URL, cek apakah sebelumnya pernah login di browser ini
+      const savedLic = localStorage.getItem('saved-license');
+      if (savedLic) setLicenseCode(savedLic);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -77,6 +92,7 @@ const Login = () => {
       localStorage.setItem('admin-role', companyData.plan || 'pro');
       localStorage.setItem('valid-license', licenseCode);
       localStorage.setItem('company-name', companyData.name);
+      localStorage.setItem('saved-license', licenseCode); // Simpan lisensi agar tidak perlu ketik ulang
       navigate('/admin/dashboard');
       return;
     }
@@ -102,6 +118,7 @@ const Login = () => {
       localStorage.setItem('user-password', employeeData.password);
       localStorage.setItem('user-dept', employeeData.dept);
       localStorage.setItem('valid-license', licenseCode);
+      localStorage.setItem('saved-license', licenseCode); // Simpan lisensi agar tidak perlu ketik ulang
       
       window.dispatchEvent(new Event('userProfileUpdated'));
       navigate('/user/dashboard');

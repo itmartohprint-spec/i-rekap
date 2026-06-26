@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { supabase } from '../../lib/supabaseClient';
 
 // Custom Map Markers to avoid Vite image path issues and look more modern
 const officeIcon = L.divIcon({
@@ -27,9 +28,7 @@ const TrackGPS = () => {
   const logsKey = adminRole === 'demo' ? 'demo-attendance_logs' : 'attendance_logs';
 
   useEffect(() => {
-    const rawLogs = JSON.parse(localStorage.getItem(logsKey)) || [];
-    setLogs(rawLogs.filter(log => log.location));
-    
+    fetchGPSLogs();
     const licenseCode = localStorage.getItem('valid-license');
     if (licenseCode) {
       const savedLat = localStorage.getItem(`office_lat_${licenseCode}`);
@@ -49,6 +48,40 @@ const TrackGPS = () => {
       setOfficeLocation([-6.200000, 106.816666]);
     }
   }, []);
+
+  const fetchGPSLogs = async () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (adminRole === 'demo') {
+      const rawLogs = JSON.parse(localStorage.getItem('demo-attendance_logs')) || [];
+      setLogs(rawLogs.filter(log => log.location));
+      return;
+    }
+    
+    if (!licenseCode) return;
+
+    const { data, error } = await supabase
+      .from('attendance')
+      .select(`
+        *,
+        employees (name)
+      `)
+      .eq('license_code', licenseCode)
+      .not('location_lat', 'is', null)
+      .not('location_lng', 'is', null);
+
+    if (data && !error) {
+      // Map supabase data to expected format for markers
+      const mappedLogs = data.map(d => ({
+        id: d.id,
+        location: { lat: parseFloat(d.location_lat), lng: parseFloat(d.location_lng) },
+        employeeName: d.employees?.name || d.employee_id,
+        type: d.type || 'in',
+        time: d.time_in || d.time_out || d.date,
+        status: d.status
+      }));
+      setLogs(mappedLogs);
+    }
+  };
 
   return (
     <div>
