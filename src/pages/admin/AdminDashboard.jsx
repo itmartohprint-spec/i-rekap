@@ -113,7 +113,21 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <h2 style={{ marginBottom: '2rem' }}>Dashboard Overview</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2 style={{ margin: 0 }}>Dashboard Overview</h2>
+        <button 
+          className="btn-primary" 
+          onClick={() => {
+            const licenseCode = localStorage.getItem('valid-license');
+            const url = `${window.location.origin}/#/monitor/${licenseCode}`;
+            navigator.clipboard.writeText(url);
+            alert(`Link berhasil disalin! Silakan paste ke WhatsApp Pimpinan Anda:\n\n${url}`);
+          }}
+          style={{ fontSize: '0.9rem', padding: '8px 15px', background: 'var(--success-color)' }}
+        >
+          Salin Link Live Monitor (Pimpinan)
+        </button>
+      </div>
       
       <div className="dashboard-grid">
         <div className="glass-panel stat-card">

@@ -18,6 +18,7 @@ import RegisterDemo from './pages/RegisterDemo';
 import Checkout from './pages/Checkout';
 import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+import LiveMonitor from './pages/LiveMonitor';
 
 import TrackGPS from './pages/admin/TrackGPS';
 import LeaveManagement from './pages/admin/LeaveManagement';
@@ -40,6 +41,9 @@ function App() {
         
         {/* Login */}
         <Route path="/login" element={<Login />} />
+        
+        {/* Live Monitor Khusus Pimpinan (Public) */}
+        <Route path="/monitor/:licenseCode" element={<LiveMonitor />} />
         
         {/* User Mobile Routes */}
         <Route path="/user" element={<UserLayout />}>
