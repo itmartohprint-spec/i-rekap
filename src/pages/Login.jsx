@@ -11,9 +11,19 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Cek apakah ada parameter 'lic' di URL (Misal: i-rekap.com/login?lic=LIC-123)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlLic = urlParams.get('lic');
+    // Cek parameter 'lic' dari URL (karena menggunakan HashRouter, parameternya ada setelah #)
+    // Contoh: i-rekap.com/#/login?lic=LIC-123
+    let urlLic = null;
+    if (window.location.hash.includes('?')) {
+      const queryParams = new URLSearchParams(window.location.hash.split('?')[1]);
+      urlLic = queryParams.get('lic');
+    }
+    
+    // Fallback ke window.location.search jika tidak pakai hash
+    if (!urlLic) {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlLic = urlParams.get('lic');
+    }
     
     if (urlLic) {
       setLicenseCode(urlLic);

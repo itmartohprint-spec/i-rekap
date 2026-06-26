@@ -642,14 +642,14 @@ const Settings = () => {
                       type="text" 
                       className="form-input" 
                       readOnly 
-                      value={`${window.location.origin}/login?lic=${localStorage.getItem('valid-license') || ''}`} 
+                      value={`${window.location.origin}/#/login?lic=${localStorage.getItem('valid-license') || ''}`} 
                       style={{ background: '#f8fafc', color: '#0f172a', flex: 1 }}
                     />
                     <button 
                       type="button"
                       className="btn-primary" 
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/login?lic=${localStorage.getItem('valid-license') || ''}`);
+                        navigator.clipboard.writeText(`${window.location.origin}/#/login?lic=${localStorage.getItem('valid-license') || ''}`);
                         alert('Link berhasil disalin! Silakan paste dan bagikan ke grup WhatsApp karyawan.');
                       }}
                       style={{ whiteSpace: 'nowrap' }}
