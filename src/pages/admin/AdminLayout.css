@@ -1008,3 +1008,9 @@ body.bg-metallic .admin-table tbody tr:hover td,
 body.bg-obsidian .admin-table tbody tr:hover td {
   background-color: rgba(255, 255, 255, 0.05);
 }
+
+@keyframes floatCharacter {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}

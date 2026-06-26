@@ -194,7 +194,17 @@ const AdminLayout = () => {
             <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{profile.address}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <img src="/gift.jpg" alt="Gift Character" style={{ height: '40px', objectFit: 'contain', borderRadius: '8px' }} />
+            <img 
+              src="/gift.jpg" 
+              alt="Gift Character" 
+              style={{ 
+                height: '60px', 
+                objectFit: 'contain', 
+                borderRadius: '8px', 
+                mixBlendMode: 'screen', 
+                animation: 'floatCharacter 3s ease-in-out infinite' 
+              }} 
+            />
             <button 
               onClick={() => window.location.reload()}
               style={{
