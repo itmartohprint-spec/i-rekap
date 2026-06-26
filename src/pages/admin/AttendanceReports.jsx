@@ -147,6 +147,13 @@ const AttendanceReports = () => {
     document.body.removeChild(link);
   };
 
+  const groupedLogs = {};
+  filteredLogs.forEach(log => {
+    const dept = (log.employees && log.employees.dept) ? log.employees.dept : 'Tanpa Divisi';
+    if (!groupedLogs[dept]) groupedLogs[dept] = [];
+    groupedLogs[dept].push(log);
+  });
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -216,28 +223,37 @@ const AttendanceReports = () => {
                 <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada laporan absen pada rentang tanggal ini</td>
               </tr>
             ) : (
-              filteredLogs.map(log => (
-                <tr key={log.id}>
-                  <td>{log.date}</td>
-                  <td>{log.employees ? log.employees.name : log.employee_id}</td>
-                  <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: log.type === 'in' ? '#dcfce7' : '#fee2e2', color: log.type === 'in' ? '#166534' : '#991b1b' }}>{log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type}</span></td>
-                  <td>{log.time_in || '-'}</td>
-                  <td>{log.time_out || '-'}</td>
-                  <td>
-                    {log.photo_url ? (
-                      <img 
-                        src={log.photo_url} 
-                        alt="Selfie" 
-                        onClick={() => setSelectedPhoto(log)}
-                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e2e8f0', transition: 'transform 0.2s' }} 
-                        onMouseOver={(e) => e.target.style.transform = 'scale(1.1)'}
-                        onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                      />
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                </tr>
+              Object.keys(groupedLogs).sort().map(div => (
+                <React.Fragment key={div}>
+                  <tr>
+                    <td colSpan="6" style={{ background: '#e2e8f0', fontWeight: 'bold', textAlign: 'center', padding: '8px', border: '1px solid #cbd5e1' }}>
+                      DIVISI: {div.toUpperCase()}
+                    </td>
+                  </tr>
+                  {groupedLogs[div].map(log => (
+                    <tr key={log.id}>
+                      <td>{log.date}</td>
+                      <td>{log.employees ? log.employees.name : log.employee_id}</td>
+                      <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: log.type === 'in' ? '#dcfce7' : '#fee2e2', color: log.type === 'in' ? '#166534' : '#991b1b' }}>{log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type}</span></td>
+                      <td>{log.time_in || '-'}</td>
+                      <td>{log.time_out || '-'}</td>
+                      <td>
+                        {log.photo_url ? (
+                          <img 
+                            src={log.photo_url} 
+                            alt="Selfie" 
+                            onClick={() => setSelectedPhoto(log)}
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e2e8f0', transition: 'transform 0.2s' }} 
+                            onMouseOver={(e) => e.target.style.transform = 'scale(1.1)'}
+                            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                          />
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))
             )}
           </tbody>
