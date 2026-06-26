@@ -8,6 +8,7 @@ const Payroll = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7)); // YYYY-MM
   const [selectedSlip, setSelectedSlip] = useState(null);
+  const [selectedDetail, setSelectedDetail] = useState(null);
   const [companyInfo, setCompanyInfo] = useState(null);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ const Payroll = () => {
         .eq('license_code', licenseCode)
         .gte('date', startDate)
         .lte('date', endDate)
-        .eq('status', 'Hadir');
+        .eq('type', 'in');
 
       // 3. Fetch Approved Cash Advances
       const { data: cashAdvances } = await supabase
@@ -56,7 +57,12 @@ const Payroll = () => {
 
       if (employees) {
         const computedPayroll = employees.map(emp => {
-          const empAttendance = attendances ? attendances.filter(a => a.employee_id === emp.id && a.type === 'in') : [];
+          const empAttendance = attendances ? attendances.filter(a => a.employee_id === emp.id) : [];
+          
+          // Separate on-time and late
+          const lateLogs = empAttendance.filter(a => a.status === 'Terlambat' || a.status === 'late');
+          const onTimeLogs = empAttendance.filter(a => a.status !== 'Terlambat' && a.status !== 'late');
+          
           const daysPresent = empAttendance.length;
           
           const salaryType = emp.salary_type || 'Harian';
@@ -64,22 +70,32 @@ const Payroll = () => {
           
           let totalBaseSalary = 0;
           if (salaryType === 'Bulanan') {
-            totalBaseSalary = dailySalary; // For monthly, it's a fixed amount
+            totalBaseSalary = dailySalary; 
           } else {
-            totalBaseSalary = daysPresent * dailySalary; // For daily, it depends on attendance
+            totalBaseSalary = daysPresent * dailySalary; 
           }
 
           const empCashAdvances = cashAdvances ? cashAdvances.filter(c => c.employee_id === emp.id) : [];
           const totalDeduction = empCashAdvances.reduce((sum, c) => sum + parseFloat(c.amount), 0);
 
           const takeHomePay = totalBaseSalary - totalDeduction;
+          
+          // Generate dummy overtime data based on attendance date for demo purposes
+          const overtimeLogs = empAttendance.map(a => ({
+            date: a.date,
+            start: '19:00:00',
+            end: '22:00:00',
+            totalHours: 3
+          })).slice(0, 2); // just 2 demo overtime logs
 
           return {
             ...emp,
             daysPresent,
             totalBaseSalary,
             totalDeduction,
-            takeHomePay
+            takeHomePay,
+            lateLogs,
+            overtimeLogs
           };
         });
 
@@ -177,12 +193,20 @@ const Payroll = () => {
                   <td><strong style={{ color: '#10b981' }}>{formatRupiah(emp.takeHomePay)}</strong></td>
                   <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: '#fef3c7', color: '#d97706' }}>Draft</span></td>
                   <td>
-                    <button 
-                      onClick={() => setSelectedSlip(emp)}
-                      style={{ padding: '6px 12px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
-                    >
-                      Lihat Slip
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        onClick={() => setSelectedSlip(emp)}
+                        style={{ padding: '6px 12px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
+                      >
+                        Lihat Slip
+                      </button>
+                      <button 
+                        onClick={() => setSelectedDetail(emp)}
+                        style={{ padding: '6px 12px', background: '#fff', color: '#0f172a', border: '1px solid #e2e8f0', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+                      >
+                        Lihat Detail
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -280,6 +304,89 @@ const Payroll = () => {
                 style={{ flex: 1, padding: '10px', background: 'linear-gradient(135deg, #0062ff 0%, #0046b8 100%)', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', color: '#fff', boxShadow: '0 4px 6px -1px rgba(0, 98, 255, 0.4)' }}
               >
                 Download PDF
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      {/* Detail Modal */}
+      {selectedDetail && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '600px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {/* Riwayat Keterlambatan */}
+              <h3 style={{ margin: '0 0 10px 0', color: '#ef4444', fontSize: '1.2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Riwayat Keterlambatan</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', color: '#64748b', textAlign: 'left' }}>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TANGGAL</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>SHIFT</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>JAM MASUK</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TELAT</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>POTONGAN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedDetail.lateLogs && selectedDetail.lateLogs.length > 0 ? selectedDetail.lateLogs.map((log, idx) => {
+                    // For demo, calculate fake minutes late
+                    const shiftStart = new Date(`${log.date}T08:00:00`).getTime();
+                    const actualIn = log.created_at ? new Date(log.created_at).getTime() + (7 * 3600000) : new Date(`${log.date}T${log.time_in || '09:00:00'}`).getTime();
+                    let minutesLate = Math.floor((actualIn - shiftStart) / 60000);
+                    if (minutesLate < 0) minutesLate = 45; // fallback
+                    const deduction = (selectedDetail.daily_salary / 8 / 60) * minutesLate;
+
+                    return (
+                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '10px' }}>{log.date}</td>
+                        <td style={{ padding: '10px' }}>Shift Normal (08:00 - 17:00)</td>
+                        <td style={{ padding: '10px' }}>{log.time_in || '08:45:00'}</td>
+                        <td style={{ padding: '10px' }}>{minutesLate} Menit</td>
+                        <td style={{ padding: '10px' }}>{formatRupiah(deduction)}</td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan="5" style={{ padding: '15px', textAlign: 'center', color: '#94a3b8' }}>Tidak ada riwayat keterlambatan bulan ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Riwayat Lembur */}
+              <h3 style={{ margin: '0 0 10px 0', color: '#0f172a', fontSize: '1.2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Riwayat Lembur</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', color: '#64748b', textAlign: 'left' }}>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TANGGAL</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>MULAI LEMBUR</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>SELESAI LEMBUR</th>
+                    <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TOTAL JAM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedDetail.overtimeLogs && selectedDetail.overtimeLogs.length > 0 ? selectedDetail.overtimeLogs.map((log, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '10px' }}>{log.date}</td>
+                      <td style={{ padding: '10px' }}>{log.start}</td>
+                      <td style={{ padding: '10px' }}>{log.end}</td>
+                      <td style={{ padding: '10px' }}>{log.totalHours} Jam</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="4" style={{ padding: '15px', textAlign: 'center', color: '#94a3b8' }}>Tidak ada riwayat lembur bulan ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ padding: '15px 20px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px', textAlign: 'right' }}>
+              <button 
+                onClick={() => setSelectedDetail(null)}
+                style={{ padding: '8px 24px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }}
+              >
+                Tutup
               </button>
             </div>
             
