@@ -29,6 +29,13 @@ import Payroll from './pages/admin/Payroll';
 
 function App() {
   React.useEffect(() => {
+    // Intercept old URL formats (without hash) and redirect them to HashRouter format
+    if (window.location.pathname === '/login') {
+      const search = window.location.search; // e.g. "?lic=..."
+      window.location.replace(`/#/login${search}`);
+      return;
+    }
+
     const primary = localStorage.getItem('theme-primary');
     const secondary = localStorage.getItem('theme-secondary');
     const font = localStorage.getItem('theme-font');
