@@ -75,76 +75,158 @@ const AttendanceReports = () => {
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
+    const companyName = localStorage.getItem('company-name') || 'PT. JASA SERVICE KOMPUTER MART';
+    const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
+
+    if (companyLogo.startsWith('data:image/')) {
+        doc.addImage(companyLogo, 'PNG', 14, 10, 25, 25);
+    }
     
-    // Title
-    doc.setFontSize(18);
-    doc.text("Laporan Absensi Karyawan", 14, 22);
+    doc.setFontSize(16);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('helvetica', 'bold');
+    doc.text(companyName.toUpperCase(), 45, 18);
     
-    // Subtitle (Date Range)
-    doc.setFontSize(11);
-    doc.setTextColor(100);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 65, 85);
+    doc.text("Daftar Log Absensi Harian", 45, 25);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(71, 85, 105);
     const dateText = (startDate || endDate) 
       ? `Periode: ${startDate || 'Awal'} s/d ${endDate || 'Akhir'}`
       : `Periode: Semua Data`;
-    doc.text(dateText, 14, 30);
+    doc.text(dateText, 45, 32);
+    const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
+    doc.text(divText + " | Jenis Absen: Semua Jenis Absen", 45, 37);
 
-    // Table
-    const tableColumn = ["Tanggal", "Nama Karyawan", "Tipe", "Jam Masuk", "Jam Pulang", "Status"];
-    const tableRows = [];
-
-    filteredLogs.forEach(log => {
-      const typeStr = log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type;
-      const logData = [
-        log.date,
-        log.employees ? log.employees.name : log.employee_id,
-        typeStr,
-        log.time_in || '-',
-        log.time_out || '-',
-        log.status || '-'
-      ];
-      tableRows.push(logData);
-    });
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(0.5);
+    doc.line(14, 42, 196, 42);
 
     autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 35,
+      html: '#list-table',
+      startY: 45,
       theme: 'grid',
-      styles: { fontSize: 9, cellPadding: 3 },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 }
+      styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      didParseCell: function(data) {
+        // Apply gray background to division rows
+        if (data.cell.colSpan > 1) {
+           data.cell.styles.fillColor = [226, 232, 240];
+           data.cell.styles.textColor = [15, 23, 42];
+           data.cell.styles.fontStyle = 'bold';
+           data.cell.styles.halign = 'center';
+        }
+      }
     });
 
-    doc.save(`Laporan_Absensi_${new Date().getTime()}.pdf`);
+    doc.save(`Laporan_Absensi_Harian_${new Date().getTime()}.pdf`);
   };
 
-  const handleExportCSV = () => {
+  const handleExportExcel = async () => {
     if (filteredLogs.length === 0) return;
     
-    const headers = ["Tanggal", "Nama Karyawan", "Tipe", "Jam Masuk", "Jam Pulang", "Status"];
+    const companyName = localStorage.getItem('company-name') || 'PT. JASA SERVICE KOMPUTER MART';
+    const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
+    const periodStr = (startDate || endDate) ? `Periode: ${startDate || 'Awal'} s/d ${endDate || 'Akhir'}` : `Periode: Semua Data`;
+    const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
     
-    const rows = filteredLogs.map(log => {
-      const typeStr = log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type;
-      return [
-        log.date,
-        log.employees ? log.employees.name : log.employee_id,
-        typeStr,
-        log.time_in || '-',
-        log.time_out || '-',
-        log.status || '-'
-      ].map(val => `"${val}"`).join(","); // Escape values with quotes to handle commas
-    });
+    // Cleanup display none and clone table
+    const tableEl = document.getElementById('list-table').cloneNode(true);
+    const images = tableEl.querySelectorAll('img');
+    images.forEach(img => img.remove()); // Remove selfies for cleaner excel
+    const tableHTML = tableEl.outerHTML;
     
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\\n"
-      + rows.join("\\n");
-      
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Data_Absensi_${new Date().getTime()}.csv`);
-    document.body.appendChild(link); // Required for FF
-    link.click();
-    document.body.removeChild(link);
+    let base64Data = "";
+    let mimeType = "image/png";
+    
+    try {
+      if (companyLogo.startsWith('data:')) {
+        const parts = companyLogo.split(',');
+        mimeType = parts[0].match(/:(.*?);/)[1];
+        base64Data = parts[1];
+      } else {
+        const response = await fetch(companyLogo);
+        const blob = await response.blob();
+        mimeType = blob.type;
+        base64Data = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+             const b64 = reader.result.split(',')[1];
+             resolve(b64);
+          };
+          reader.readAsDataURL(blob);
+        });
+      }
+    } catch (e) {
+      console.error("Failed to load logo", e);
+    }
+
+    const kopSurat = `
+      <table style="margin-bottom: 20px; font-family: Arial, sans-serif; border: none;">
+        <tr>
+          <td rowspan="4" style="width: 100px; text-align: center; vertical-align: middle; border: none;">
+            ${base64Data ? `<img src="cid:company-logo" width="80" height="80" style="max-width: 80px; max-height: 80px; object-fit: contain;" />` : ''}
+          </td>
+          <td colspan="5" style="border: none;"><h2>${companyName}</h2></td>
+        </tr>
+        <tr>
+          <td colspan="5" style="border: none;"><h4>Daftar Log Absensi Harian</h4></td>
+        </tr>
+        <tr>
+          <td colspan="5" style="border: none;"><p>${periodStr}</p></td>
+        </tr>
+        <tr>
+          <td colspan="5" style="border: none;"><p>${divText} | Jenis Absen: Semua Jenis Absen</p></td>
+        </tr>
+      </table>
+    `;
+
+    const htmlPart = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          #list-table { border-collapse: collapse; }
+          #list-table th, #list-table td { border: 1px solid black; }
+          td { mso-number-format:"\\@"; }
+        </style>
+      </head>
+      <body>
+        ${kopSurat}
+        ${tableHTML}
+      </body>
+      </html>
+    `;
+
+    const mhtml = `MIME-Version: 1.0
+Content-Type: multipart/related; boundary="----Excel_Export_Boundary"
+
+------Excel_Export_Boundary
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+${htmlPart}
+
+------Excel_Export_Boundary
+Content-Type: ${mimeType}
+Content-Transfer-Encoding: base64
+Content-Location: company-logo
+
+${base64Data}
+------Excel_Export_Boundary--`;
+    
+    const blob = new Blob([mhtml], { type: 'application/vnd.ms-excel' });
+    const downloadLink = document.createElement("a");
+    downloadLink.download = `Laporan_Absensi_Harian_${new Date().getTime()}.xls`;
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
   const groupedLogs = {};
@@ -195,14 +277,14 @@ const AttendanceReports = () => {
                 <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportCSV} disabled={filteredLogs.length === 0}>Export CSV (Excel)</button>
+                <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportExcel} disabled={filteredLogs.length === 0}>Export Excel</button>
                 <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
               </div>
             </div>
           </div>
 
           <div className="admin-table-container">
-        <table className="admin-table">
+        <table id="list-table" className="admin-table">
           <thead>
             <tr>
               <th>Tanggal</th>
