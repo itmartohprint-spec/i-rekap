@@ -56,8 +56,10 @@ const AdminDashboard = () => {
       // Calculate stats based on today
       const todaysLogs = attendanceData ? attendanceData.filter(log => log.date === today) : [];
       
-      const present = todaysLogs.length;
-      const late = todaysLogs.filter(log => log.status === 'late' || log.status === 'Terlambat').length;
+      const presentEmployees = new Set(todaysLogs.map(log => log.employee_id));
+      const present = presentEmployees.size;
+      const lateEmployees = new Set(todaysLogs.filter(log => log.status === 'late' || log.status === 'Terlambat').map(log => log.employee_id));
+      const late = lateEmployees.size;
       const totalEmp = empCount || 0;
       const absent = Math.max(0, totalEmp - present);
 
@@ -177,8 +179,8 @@ const AdminDashboard = () => {
                   <td>{log.time}</td>
                   <td style={{ textTransform: 'capitalize' }}>{log.type.replace('_', ' ')}</td>
                   <td>
-                    <span className={`status-badge ${log.status === 'late' ? 'badge-danger' : 'badge-success'}`}>
-                      {log.status === 'late' ? 'Terlambat' : 'Tepat Waktu'}
+                    <span className={`status-badge ${log.status === 'late' || log.status === 'Terlambat' ? 'badge-danger' : 'badge-success'}`}>
+                      {log.status === 'late' || log.status === 'Terlambat' ? 'Terlambat' : 'Tepat Waktu'}
                     </span>
                   </td>
                   <td><span className="status-badge badge-success" style={{background: '#f1f5f9', color: '#64748b'}}>GPS Valid</span></td>
