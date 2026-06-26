@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MapPin, Users, FileText, Calendar, Wallet, CalendarDays, DollarSign, Settings as SettingsIcon, LogOut, Fingerprint, ChevronLeft, ChevronRight, Upload, X } from 'lucide-react';
+import { LayoutDashboard, MapPin, Users, FileText, Calendar, Wallet, CalendarDays, DollarSign, Settings as SettingsIcon, LogOut, Fingerprint, ChevronLeft, ChevronRight, Upload, X, RefreshCcw } from 'lucide-react';
 import './AdminLayout.css';
 
 const MagicLogo = ({ src, className, style }) => {
@@ -193,20 +193,43 @@ const AdminLayout = () => {
             <span className="company-name-animated" style={{ display: 'block', fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>{profile.name}</span>
             <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{profile.address}</span>
           </div>
-          <div className="admin-profile" onClick={(e) => {
-            if (adminRole === 'demo') {
-              handleRestrictedAccess(e);
-            } else {
-              setShowAdminModal(true);
-            }
-          }} style={{ cursor: adminRole === 'demo' ? 'not-allowed' : 'pointer' }}>
-            <span>HR Manager {adminRole === 'demo' && '🔒'}</span>
-            <div className="avatar">
-              {adminPhoto ? (
-                <img src={adminPhoto} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                "HR"
-              )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button 
+              onClick={() => window.location.reload()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                color: 'var(--text-primary)',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '999px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              }}
+            >
+              <RefreshCcw size={14} />
+              Refresh
+            </button>
+            <div className="admin-profile" onClick={(e) => {
+              if (adminRole === 'demo') {
+                handleRestrictedAccess(e);
+              } else {
+                setShowAdminModal(true);
+              }
+            }} style={{ cursor: adminRole === 'demo' ? 'not-allowed' : 'pointer' }}>
+              <span>HR Manager {adminRole === 'demo' && '🔒'}</span>
+              <div className="avatar">
+                {adminPhoto ? (
+                  <img src={adminPhoto} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  "HR"
+                )}
+              </div>
             </div>
           </div>
         </header>
