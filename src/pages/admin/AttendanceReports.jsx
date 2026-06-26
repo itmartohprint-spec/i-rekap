@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import AttendanceMatrix from '../../components/AttendanceMatrix';
 import AttendanceWeeklyMatrix from '../../components/AttendanceWeeklyMatrix';
+import EditAttendanceModal from '../../components/EditAttendanceModal';
 
 const AttendanceReports = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -19,6 +20,23 @@ const AttendanceReports = () => {
   // Date filters
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [editDate, setEditDate] = useState('');
+
+  const handleEditClick = (employee, date) => {
+    setEditEmployee(employee);
+    setEditDate(date);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchLogs();
+    // Dispatch event to force re-fetch in matrices
+    window.dispatchEvent(new Event('refresh-matrix'));
+  };
 
   useEffect(() => {
     fetchLogs();
@@ -298,22 +316,23 @@ ${base64Data}
               <th>Jam Masuk</th>
               <th>Jam Pulang</th>
               <th>Selfie</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
+                <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
               </tr>
             ) : filteredLogs.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada laporan absen pada rentang tanggal ini</td>
+                <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada laporan absen pada rentang tanggal ini</td>
               </tr>
             ) : (
               Object.keys(groupedLogs).sort().map(div => (
                 <React.Fragment key={div}>
                   <tr>
-                    <td colSpan="6" style={{ background: '#e2e8f0', fontWeight: 'bold', textAlign: 'center', padding: '8px', border: '1px solid #cbd5e1' }}>
+                    <td colSpan="7" style={{ background: '#e2e8f0', fontWeight: 'bold', textAlign: 'center', padding: '8px', border: '1px solid #cbd5e1' }}>
                       DIVISI: {div.toUpperCase()}
                     </td>
                   </tr>
@@ -337,6 +356,14 @@ ${base64Data}
                         ) : (
                           '-'
                         )}
+                      </td>
+                      <td>
+                        <button 
+                          onClick={() => handleEditClick(log.employees ? { id: log.employee_id, name: log.employees.name } : { id: log.employee_id, name: log.employee_id }, log.date)}
+                          style={{ padding: '0.25rem 0.75rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -399,7 +426,12 @@ ${base64Data}
             </button>
           </div>
           
-          <AttendanceMatrix month={matrixMonth} year={matrixYear} licenseCode={localStorage.getItem('valid-license')} />
+          <AttendanceMatrix 
+            month={matrixMonth} 
+            year={matrixYear} 
+            licenseCode={localStorage.getItem('valid-license')} 
+            onEditClick={handleEditClick} 
+          />
         </>
       )}
 
@@ -429,12 +461,25 @@ ${base64Data}
               <p style={{ color: '#64748b' }}>Silakan pilih tanggal Mulai dan Sampai terlebih dahulu.</p>
             </div>
           ) : (
-            <AttendanceWeeklyMatrix startDate={startDate} endDate={endDate} licenseCode={localStorage.getItem('valid-license')} />
+            <AttendanceWeeklyMatrix 
+              startDate={startDate} 
+              endDate={endDate} 
+              licenseCode={localStorage.getItem('valid-license')} 
+              onEditClick={handleEditClick}
+            />
           )}
         </>
       )}
       </>
       )}
+
+      <EditAttendanceModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        employee={editEmployee}
+        date={editDate}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };

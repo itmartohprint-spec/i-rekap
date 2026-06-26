@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const AttendanceWeeklyMatrix = ({ startDate, endDate, licenseCode }) => {
+const AttendanceWeeklyMatrix = ({ startDate, endDate, licenseCode, onEditClick }) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,6 +27,9 @@ const AttendanceWeeklyMatrix = ({ startDate, endDate, licenseCode }) => {
   
   useEffect(() => {
     fetchData();
+    const handleRefresh = () => fetchData();
+    window.addEventListener('refresh-matrix', handleRefresh);
+    return () => window.removeEventListener('refresh-matrix', handleRefresh);
   }, [startDate, endDate, licenseCode]);
 
   useEffect(() => {
@@ -319,7 +322,16 @@ ${base64Data}
                     const isLeave = ['S', 'I', 'C'].includes(cell.timeIn);
                     
                     return (
-                      <td key={dateStr} style={{...tdStyle, background: isWeekend ? '#fee2e2' : 'transparent', padding: '2px', msoNumberFormat: '"\\@"'}}>
+                      <td 
+                        key={dateStr} 
+                        style={{...tdStyle, background: isWeekend ? '#fee2e2' : 'transparent', padding: '2px', msoNumberFormat: '"\\@"', cursor: onEditClick && !isLeave ? 'pointer' : 'default'}}
+                        onClick={() => {
+                          if (onEditClick && !isLeave) {
+                            onEditClick(emp, dateStr);
+                          }
+                        }}
+                        title={!isLeave ? "Klik untuk edit" : ""}
+                      >
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '0.75rem' }}>
                           {isLeave ? (
                             <span style={{ fontWeight: 'bold', color: '#b91c1c' }}>{cell.timeIn}</span>
