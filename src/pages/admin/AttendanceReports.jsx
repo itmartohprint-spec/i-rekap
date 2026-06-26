@@ -62,7 +62,10 @@ const AttendanceReports = () => {
     if (selectedDivision && log.employees && log.employees.dept !== selectedDivision) {
       return false;
     }
-    if (!startDate && !endDate) return true;
+    if (viewMode === 'list') {
+      if (!startDate) return true;
+      return log.date === startDate;
+    }
     
     const logDate = new Date(log.date);
     const sDate = startDate ? new Date(startDate) : null;
@@ -96,9 +99,9 @@ const AttendanceReports = () => {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(71, 85, 105);
-    const dateText = (startDate || endDate) 
-      ? `Periode: ${startDate || 'Awal'} s/d ${endDate || 'Akhir'}`
-      : `Periode: Semua Data`;
+    const dateText = startDate 
+      ? `Tanggal: ${startDate}` 
+      : 'Periode: Semua Waktu';
     doc.text(dateText, 45, 32);
     const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
     doc.text(divText + " | Jenis Absen: Semua Jenis Absen", 45, 37);
@@ -132,7 +135,7 @@ const AttendanceReports = () => {
     
     const companyName = localStorage.getItem('company-name') || 'PT. JASA SERVICE KOMPUTER MART';
     const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
-    const periodStr = (startDate || endDate) ? `Periode: ${startDate || 'Awal'} s/d ${endDate || 'Akhir'}` : `Periode: Semua Data`;
+    const periodStr = startDate ? `Tanggal: ${startDate}` : 'Periode: Semua Waktu';
     const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
     
     // Cleanup display none and clone table
@@ -276,12 +279,8 @@ ${base64Data}
                 </select>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
+                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Tanggal:</span>
                 <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
-                <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportExcel} disabled={filteredLogs.length === 0}>Export Excel</button>
