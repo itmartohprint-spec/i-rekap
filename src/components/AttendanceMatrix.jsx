@@ -22,7 +22,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
     const handleExport = () => {
       if (!data) return;
       
-      const tableHTML = document.getElementById('matrix-table').outerHTML;
+      const tableHTML = document.getElementById('matrix-table').outerHTML.replace(/display:\s*none/g, '');
       
       const kopSurat = `
         <table style="margin-bottom: 20px; font-family: Arial, sans-serif;">
@@ -62,6 +62,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
           <style>
             table { border-collapse: collapse; }
             th, td { border: 1px solid black; }
+            td { mso-number-format:"\@"; }
           </style>
         </head>
         <body>
@@ -260,7 +261,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
                     const isLeave = ['S', 'I', 'C'].includes(cell.timeIn);
                     
                     return (
-                      <td key={d} style={{...tdStyle, background: isWeekend ? '#fee2e2' : 'transparent', padding: '2px'}}>
+                      <td key={d} style={{...tdStyle, background: isWeekend ? '#fee2e2' : 'transparent', padding: '2px', msoNumberFormat: '"\\@"'}}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: '0.75rem' }}>
                           {isLeave ? (
                             <span style={{ fontWeight: 'bold', color: '#b91c1c' }}>{cell.timeIn}</span>
@@ -269,6 +270,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
                               <span style={{ borderBottom: '1px solid #e2e8f0', width: '100%', paddingBottom: '2px', marginBottom: '2px', color: cell.timeIn !== '-' ? '#15803d' : '#94a3b8' }}>
                                 {cell.timeIn}
                               </span>
+                              <br style={{ msoDataPlacement: 'same-cell', display: 'none' }} className="excel-newline" />
                               <span style={{ color: cell.timeOut !== '-' ? '#b91c1c' : '#94a3b8' }}>
                                 {cell.timeOut}
                               </span>
