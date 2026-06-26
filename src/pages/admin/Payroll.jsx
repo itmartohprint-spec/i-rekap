@@ -84,9 +84,16 @@ const Payroll = () => {
           const deductionAmountFlat = deductionAmountStr ? parseFloat(deductionAmountStr) : 0;
 
           let lateDeductionTotal = 0;
-          
+          // Load shifts for accurate lateness calculation
+          const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
+          const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
+          const shiftId = savedEmpShifts[emp.id] || 'default';
+          const shift = savedMasterShifts.find(s => s.id === shiftId);
+          const expectedStart = (shift && shift.startTime) ? shift.startTime : '08:00';
+          const expectedStartSec = `${expectedStart}:00`;
+
           const processedLateLogs = lateLogs.map(log => {
-            const shiftStart = new Date(`${log.date}T08:00:00`).getTime();
+            const shiftStart = new Date(`${log.date}T${expectedStartSec}`).getTime();
             const actualIn = log.created_at ? new Date(log.created_at).getTime() + (7 * 3600000) : new Date(`${log.date}T${log.time_in || '09:00:00'}`).getTime();
             let minutesLate = Math.floor((actualIn - shiftStart) / 60000);
             if (minutesLate < 0) minutesLate = 0;
@@ -390,7 +397,15 @@ const Payroll = () => {
                     return (
                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '10px' }}>{log.date}</td>
-                        <td style={{ padding: '10px' }}>Shift Normal (08:00 - 17:00)</td>
+                        <td style={{ padding: '10px' }}>
+                          {(() => {
+                            const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
+                            const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
+                            const shiftId = savedEmpShifts[selectedDetail.id] || 'default';
+                            const shift = savedMasterShifts.find(s => s.id === shiftId);
+                            return shift ? `${shift.name} (${shift.startTime} - ${shift.endTime})` : 'Shift Normal (08:00 - 17:00)';
+                          })()}
+                        </td>
                         <td style={{ padding: '10px' }}>{log.time_in || '08:45:00'}</td>
                         <td style={{ padding: '10px' }}>{log.minutesLate || 0} Menit</td>
                         <td style={{ padding: '10px' }}>{formatRupiah(log.deduction || 0)}</td>
