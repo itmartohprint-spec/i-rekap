@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabaseClient';
 const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => {
   const [timeIn, setTimeIn] = useState('');
   const [timeOut, setTimeOut] = useState('');
+  const [overtimeIn, setOvertimeIn] = useState('');
+  const [overtimeOut, setOvertimeOut] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [logs, setLogs] = useState([]);
 
@@ -25,11 +27,15 @@ const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => 
       console.error('Error fetching data:', error);
     } else if (data) {
       setLogs(data);
-      const inLog = data.find(l => l.type === 'in' || l.type === 'overtime_in');
-      const outLog = data.find(l => l.type === 'out' || l.type === 'early' || l.type === 'overtime_out');
+      const normalInLog = data.find(l => l.type === 'in');
+      const normalOutLog = data.find(l => l.type === 'out' || l.type === 'early');
+      const overtimeInLog = data.find(l => l.type === 'overtime_in');
+      const overtimeOutLog = data.find(l => l.type === 'overtime_out');
       
-      setTimeIn(inLog && inLog.time_in ? inLog.time_in.substring(0, 5) : '');
-      setTimeOut(outLog && outLog.time_out ? outLog.time_out.substring(0, 5) : '');
+      setTimeIn(normalInLog && normalInLog.time_in ? normalInLog.time_in.substring(0, 5) : '');
+      setTimeOut(normalOutLog && normalOutLog.time_out ? normalOutLog.time_out.substring(0, 5) : '');
+      setOvertimeIn(overtimeInLog && overtimeInLog.time_in ? overtimeInLog.time_in.substring(0, 5) : '');
+      setOvertimeOut(overtimeOutLog && overtimeOutLog.time_out ? overtimeOutLog.time_out.substring(0, 5) : '');
     }
     setIsLoading(false);
   };
@@ -38,14 +44,16 @@ const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => 
     setIsLoading(true);
     const licenseCode = localStorage.getItem('valid-license');
     
-    const inLog = logs.find(l => l.type === 'in' || l.type === 'overtime_in');
-    const outLog = logs.find(l => l.type === 'out' || l.type === 'early' || l.type === 'overtime_out');
+    const normalInLog = logs.find(l => l.type === 'in');
+    const normalOutLog = logs.find(l => l.type === 'out' || l.type === 'early');
+    const overtimeInLog = logs.find(l => l.type === 'overtime_in');
+    const overtimeOutLog = logs.find(l => l.type === 'overtime_out');
 
     try {
-      // Handle Time In
+      // Handle Normal Time In
       if (timeIn) {
-        if (inLog) {
-          await supabase.from('attendance').update({ time_in: `${timeIn}:00` }).eq('id', inLog.id);
+        if (normalInLog) {
+          await supabase.from('attendance').update({ time_in: `${timeIn}:00` }).eq('id', normalInLog.id);
         } else {
           await supabase.from('attendance').insert({
             employee_id: employee.id,
@@ -55,15 +63,14 @@ const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => 
             license_code: licenseCode
           });
         }
-      } else if (inLog && !timeIn) {
-         // Delete if emptied
-         await supabase.from('attendance').delete().eq('id', inLog.id);
+      } else if (normalInLog && !timeIn) {
+         await supabase.from('attendance').delete().eq('id', normalInLog.id);
       }
 
-      // Handle Time Out
+      // Handle Normal Time Out
       if (timeOut) {
-        if (outLog) {
-          await supabase.from('attendance').update({ time_out: `${timeOut}:00` }).eq('id', outLog.id);
+        if (normalOutLog) {
+          await supabase.from('attendance').update({ time_out: `${timeOut}:00` }).eq('id', normalOutLog.id);
         } else {
           await supabase.from('attendance').insert({
             employee_id: employee.id,
@@ -73,9 +80,42 @@ const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => 
             license_code: licenseCode
           });
         }
-      } else if (outLog && !timeOut) {
-         // Delete if emptied
-         await supabase.from('attendance').delete().eq('id', outLog.id);
+      } else if (normalOutLog && !timeOut) {
+         await supabase.from('attendance').delete().eq('id', normalOutLog.id);
+      }
+
+      // Handle Overtime In
+      if (overtimeIn) {
+        if (overtimeInLog) {
+          await supabase.from('attendance').update({ time_in: `${overtimeIn}:00` }).eq('id', overtimeInLog.id);
+        } else {
+          await supabase.from('attendance').insert({
+            employee_id: employee.id,
+            date: date,
+            time_in: `${overtimeIn}:00`,
+            type: 'overtime_in',
+            license_code: licenseCode
+          });
+        }
+      } else if (overtimeInLog && !overtimeIn) {
+         await supabase.from('attendance').delete().eq('id', overtimeInLog.id);
+      }
+
+      // Handle Overtime Out
+      if (overtimeOut) {
+        if (overtimeOutLog) {
+          await supabase.from('attendance').update({ time_out: `${overtimeOut}:00` }).eq('id', overtimeOutLog.id);
+        } else {
+          await supabase.from('attendance').insert({
+            employee_id: employee.id,
+            date: date,
+            time_out: `${overtimeOut}:00`,
+            type: 'overtime_out',
+            license_code: licenseCode
+          });
+        }
+      } else if (overtimeOutLog && !overtimeOut) {
+         await supabase.from('attendance').delete().eq('id', overtimeOutLog.id);
       }
 
       onSuccess();
@@ -100,26 +140,50 @@ const EditAttendanceModal = ({ isOpen, onClose, employee, date, onSuccess }) => 
           <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#64748b' }}>Tanggal: <strong>{date}</strong></p>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#334155' }}>Jam Masuk</label>
-          <input 
-            type="time" 
-            className="form-input" 
-            style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }} 
-            value={timeIn}
-            onChange={(e) => setTimeIn(e.target.value)}
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#15803d' }}>Nrml: Jam Masuk</label>
+            <input 
+              type="time" 
+              className="form-input" 
+              style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }} 
+              value={timeIn}
+              onChange={(e) => setTimeIn(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#b91c1c' }}>Nrml: Jam Pulang</label>
+            <input 
+              type="time" 
+              className="form-input" 
+              style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }} 
+              value={timeOut}
+              onChange={(e) => setTimeOut(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#334155' }}>Jam Pulang</label>
-          <input 
-            type="time" 
-            className="form-input" 
-            style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }} 
-            value={timeOut}
-            onChange={(e) => setTimeOut(e.target.value)}
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#15803d' }}>Lmbr: Jam Masuk</label>
+            <input 
+              type="time" 
+              className="form-input" 
+              style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }} 
+              value={overtimeIn}
+              onChange={(e) => setOvertimeIn(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', color: '#b91c1c' }}>Lmbr: Jam Pulang</label>
+            <input 
+              type="time" 
+              className="form-input" 
+              style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }} 
+              value={overtimeOut}
+              onChange={(e) => setOvertimeOut(e.target.value)}
+            />
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>

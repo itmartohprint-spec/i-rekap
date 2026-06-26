@@ -207,14 +207,16 @@ ${base64Data}
         
         // Find attendance
         const logs = attendance.filter(a => a.employee_id === emp.id && a.date === dateStr);
-        let timeIn = '-';
-        let timeOut = '-';
         
-        const inLog = logs.find(l => l.type === 'in' || l.type === 'overtime_in');
-        const outLog = logs.find(l => l.type === 'out' || l.type === 'early' || l.type === 'overtime_out');
+        const normalInLog = logs.find(l => l.type === 'in');
+        const normalOutLog = logs.find(l => l.type === 'out' || l.type === 'early');
+        const overtimeInLog = logs.find(l => l.type === 'overtime_in');
+        const overtimeOutLog = logs.find(l => l.type === 'overtime_out');
         
-        if (inLog) timeIn = inLog.time_in ? inLog.time_in.substring(0, 5) : '-';
-        if (outLog) timeOut = outLog.time_out ? outLog.time_out.substring(0, 5) : '-';
+        let timeIn = normalInLog && normalInLog.time_in ? normalInLog.time_in.substring(0, 5) : '-';
+        let timeOut = normalOutLog && normalOutLog.time_out ? normalOutLog.time_out.substring(0, 5) : '-';
+        let overtimeIn = overtimeInLog && overtimeInLog.time_in ? overtimeInLog.time_in.substring(0, 5) : '-';
+        let overtimeOut = overtimeOutLog && overtimeOutLog.time_out ? overtimeOutLog.time_out.substring(0, 5) : '-';
         
         // Find leaves
         let leaveStatus = null;
@@ -226,18 +228,21 @@ ${base64Data}
           else leaveStatus = 'I';
         }
 
-        if (inLog || outLog) {
+        if (normalInLog || normalOutLog || overtimeInLog || overtimeOutLog) {
           totalMasuk++;
-          // Calculate hours
-          if (inLog && inLog.time_in && outLog && outLog.time_out) {
-             const start = new Date(`1970-01-01T${inLog.time_in}`);
-             const end = new Date(`1970-01-01T${outLog.time_out}`);
+          // Calculate normal hours
+          if (normalInLog && normalInLog.time_in && normalOutLog && normalOutLog.time_out) {
+             const start = new Date(`1970-01-01T${normalInLog.time_in}`);
+             const end = new Date(`1970-01-01T${normalOutLog.time_out}`);
              let diff = (end - start) / (1000 * 60 * 60);
              if (diff > 0) totalJamKerja += diff;
-             
-             if (inLog.type === 'overtime_in' || outLog.type === 'overtime_out') {
-                 totalLembur += diff > 8 ? diff - 8 : 0; // rough calculation
-             }
+          }
+          // Calculate overtime hours
+          if (overtimeInLog && overtimeInLog.time_in && overtimeOutLog && overtimeOutLog.time_out) {
+             const start = new Date(`1970-01-01T${overtimeInLog.time_in}`);
+             const end = new Date(`1970-01-01T${overtimeOutLog.time_out}`);
+             let diff = (end - start) / (1000 * 60 * 60);
+             if (diff > 0) totalLembur += diff;
           }
         } else if (leaveStatus === 'S') totalSakit++;
         else if (leaveStatus === 'C') totalCuti++;
@@ -246,6 +251,8 @@ ${base64Data}
         daily[dateStr] = {
           timeIn: leaveStatus ? leaveStatus : timeIn,
           timeOut: leaveStatus ? leaveStatus : timeOut,
+          overtimeIn: leaveStatus ? '-' : overtimeIn,
+          overtimeOut: leaveStatus ? '-' : overtimeOut,
           isWeekend: new Date(dateStr).getDay() === 0 // Sunday
         };
       });
@@ -337,13 +344,23 @@ ${base64Data}
                             <span style={{ fontWeight: 'bold', color: '#b91c1c' }}>{cell.timeIn}</span>
                           ) : (
                             <>
-                              <span style={{ borderBottom: '1px solid #e2e8f0', width: '100%', paddingBottom: '2px', marginBottom: '2px', color: cell.timeIn !== '-' ? '#15803d' : '#94a3b8' }}>
-                                {cell.timeIn}
-                              </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', width: '100%', borderBottom: '1px solid #e2e8f0', paddingBottom: '2px', marginBottom: '2px' }}>
+                                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Nrml</span>
+                                <div>
+                                  <span style={{ color: cell.timeIn !== '-' ? '#15803d' : '#94a3b8' }}>{cell.timeIn}</span>
+                                  <span style={{ color: '#94a3b8', margin: '0 2px' }}>-</span>
+                                  <span style={{ color: cell.timeOut !== '-' ? '#b91c1c' : '#94a3b8' }}>{cell.timeOut}</span>
+                                </div>
+                              </div>
                               <br style={{ msoDataPlacement: 'same-cell', display: 'none' }} className="excel-newline" />
-                              <span style={{ color: cell.timeOut !== '-' ? '#b91c1c' : '#94a3b8' }}>
-                                {cell.timeOut}
-                              </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                                <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Lmbr</span>
+                                <div>
+                                  <span style={{ color: cell.overtimeIn !== '-' ? '#15803d' : '#94a3b8' }}>{cell.overtimeIn}</span>
+                                  <span style={{ color: '#94a3b8', margin: '0 2px' }}>-</span>
+                                  <span style={{ color: cell.overtimeOut !== '-' ? '#b91c1c' : '#94a3b8' }}>{cell.overtimeOut}</span>
+                                </div>
+                              </div>
                             </>
                           )}
                         </div>
