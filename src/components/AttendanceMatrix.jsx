@@ -133,8 +133,26 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
   if (isLoading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Memuat data matriks...</div>;
   if (!data) return null;
 
+  const companyName = localStorage.getItem('company-name') || 'PT Maju Bersama';
+  const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
+  const lastDay = new Date(year, month, 0).getDate();
+  const periodStr = `Periode: ${year}-${String(month).padStart(2, '0')}-01 s/d ${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+
   return (
     <div style={{ overflowX: 'auto', background: '#fff', padding: '1rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      {/* KOP SURAT */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '2px solid #1e293b' }}>
+        <div style={{ width: '80px', height: '80px', flexShrink: 0, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <img src={companyLogo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        </div>
+        <div>
+          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: '#0f172a', textTransform: 'uppercase' }}>{companyName}</h2>
+          <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem', color: '#334155' }}>Rekap Absensi Bulanan</h4>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569' }}>{periodStr}</p>
+          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#475569' }}>Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen</p>
+        </div>
+      </div>
+
       <table id="matrix-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '1500px' }}>
         <thead>
           <tr>
