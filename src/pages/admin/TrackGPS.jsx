@@ -7,8 +7,9 @@ import { supabase } from '../../lib/supabaseClient';
 // Function to create custom dynamic marker
 const createCustomMarker = (log) => {
   const photo = log.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(log.employeeName) + '&background=0D8ABC&color=fff';
-  const borderColor = log.status === 'Hadir' ? '#10b981' : '#ef4444';
-  const animation = log.status === 'Hadir' ? '' : 'animation: pulse 2s infinite;';
+  const isLate = log.status === 'Terlambat' || log.status === 'late';
+  const borderColor = isLate ? '#f59e0b' : '#10b981';
+  const animation = isLate ? 'animation: pulse-late 2s infinite;' : '';
   
   return L.divIcon({
     html: `
@@ -110,6 +111,11 @@ const TrackGPS = () => {
             70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
           }
+          @keyframes pulse-late {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+          }
         `}
       </style>
       <h2 style={{ marginBottom: '2rem' }}>Lacak GPS Karyawan Live</h2>
@@ -171,8 +177,8 @@ const TrackGPS = () => {
                 <td>{log.location.lat}, {log.location.lng}</td>
                 <td>~5 meter</td>
                 <td>
-                  <span className={`status-badge badge-${log.status === 'Hadir' ? 'success' : 'danger'}`}>
-                    {log.status === 'Hadir' ? 'Dalam Area' : 'Luar Area'}
+                  <span className="status-badge badge-success">
+                    Dalam Area
                   </span>
                 </td>
               </tr>
