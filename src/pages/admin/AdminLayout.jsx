@@ -194,6 +194,7 @@ const AdminLayout = () => {
             <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{profile.address}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <img src="/maskot.png" alt="Maskot" style={{ height: '40px', objectFit: 'contain' }} />
             <button 
               onClick={() => window.location.reload()}
               style={{
