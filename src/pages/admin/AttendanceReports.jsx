@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const AttendanceReports = () => {
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  
+  // Date filters
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     fetchLogs();
@@ -36,13 +42,76 @@ const AttendanceReports = () => {
     setIsLoading(false);
   };
 
+  const filteredLogs = logs.filter(log => {
+    if (!startDate && !endDate) return true;
+    const logDate = new Date(log.date);
+    const sDate = startDate ? new Date(startDate) : null;
+    const eDate = endDate ? new Date(endDate) : null;
+    
+    if (sDate && eDate) return logDate >= sDate && logDate <= eDate;
+    if (sDate) return logDate >= sDate;
+    if (eDate) return logDate <= eDate;
+    return true;
+  });
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text("Laporan Absensi Karyawan", 14, 22);
+    
+    // Subtitle (Date Range)
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    const dateText = (startDate || endDate) 
+      ? `Periode: ${startDate || 'Awal'} s/d ${endDate || 'Akhir'}`
+      : `Periode: Semua Data`;
+    doc.text(dateText, 14, 30);
+
+    // Table
+    const tableColumn = ["Tanggal", "Nama Karyawan", "Tipe", "Jam Masuk", "Jam Pulang", "Status"];
+    const tableRows = [];
+
+    filteredLogs.forEach(log => {
+      const typeStr = log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type;
+      const logData = [
+        log.date,
+        log.employees ? log.employees.name : log.employee_id,
+        typeStr,
+        log.time_in || '-',
+        log.time_out || '-',
+        log.status || '-'
+      ];
+      tableRows.push(logData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 35,
+      theme: 'grid',
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 }
+    });
+
+    doc.save(`Laporan_Absensi_${new Date().getTime()}.pdf`);
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2>Laporan Absensi</h2>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <input type="date" className="form-input" style={{ width: 'auto' }} />
-          <button className="btn-primary">Export PDF</button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
+            <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
+            <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+          </div>
+          <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
         </div>
       </div>
 
@@ -63,12 +132,12 @@ const AttendanceReports = () => {
               <tr>
                 <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Memuat data...</td>
               </tr>
-            ) : logs.length === 0 ? (
+            ) : filteredLogs.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada laporan absen</td>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada laporan absen pada rentang tanggal ini</td>
               </tr>
             ) : (
-              logs.map(log => (
+              filteredLogs.map(log => (
                 <tr key={log.id}>
                   <td>{log.date}</td>
                   <td>{log.employees ? log.employees.name : log.employee_id}</td>
