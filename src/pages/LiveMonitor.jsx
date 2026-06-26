@@ -102,11 +102,11 @@ const LiveMonitor = () => {
   };
 
   return (
-    <div style={{ background: 'var(--bg-color)', minHeight: '100vh', color: 'var(--text-primary)', padding: '20px', fontFamily: 'var(--font-family)' }}>
+    <div style={{ background: '#0f172a', minHeight: '100vh', color: '#f8fafc', padding: '20px', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px', textAlign: 'center' }}>
         <div style={{ 
-          background: 'var(--primary-color)', 
+          background: '#10b981', 
           color: 'white', 
           padding: '10px 20px', 
           borderRadius: '30px',
@@ -114,17 +114,18 @@ const LiveMonitor = () => {
           marginBottom: '15px',
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '8px',
+          boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)'
         }}>
           <TrendingUp size={18} />
           Live Monitor
         </div>
-        <h1 style={{ fontSize: '1.8rem', margin: '0 0 5px 0' }}>{companyName}</h1>
-        <p style={{ margin: 0, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <h1 style={{ fontSize: '1.8rem', margin: '0 0 5px 0', color: '#ffffff' }}>{companyName}</h1>
+        <p style={{ margin: 0, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px' }}>
           <Calendar size={14} /> 
           {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
-        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginTop: '10px', color: 'var(--primary-color)' }}>
+        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginTop: '10px', color: '#38bdf8' }}>
           {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </div>
       </div>
@@ -132,37 +133,37 @@ const LiveMonitor = () => {
       {/* Grid Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px', marginBottom: '30px' }}>
         
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--primary-color)', marginBottom: '10px' }}><Users size={30} style={{ margin: '0 auto' }}/></div>
-          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Karyawan</h4>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{isLoading ? '-' : stats.totalEmployees}</div>
+        <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
+          <div style={{ color: '#38bdf8', marginBottom: '10px' }}><Users size={30} style={{ margin: '0 auto' }}/></div>
+          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: '#94a3b8' }}>Total Karyawan</h4>
+          <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ffffff' }}>{isLoading ? '-' : stats.totalEmployees}</div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--success-color)', marginBottom: '10px' }}><CheckCircle size={30} style={{ margin: '0 auto' }}/></div>
-          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hadir (Hari Ini)</h4>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{isLoading ? '-' : stats.presentToday}</div>
+        <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
+          <div style={{ color: '#10b981', marginBottom: '10px' }}><CheckCircle size={30} style={{ margin: '0 auto' }}/></div>
+          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: '#94a3b8' }}>Hadir (Hari Ini)</h4>
+          <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ffffff' }}>{isLoading ? '-' : stats.presentToday}</div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--warning-color)', marginBottom: '10px' }}><Clock size={30} style={{ margin: '0 auto' }}/></div>
-          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Terlambat</h4>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{isLoading ? '-' : stats.lateToday}</div>
+        <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
+          <div style={{ color: '#f59e0b', marginBottom: '10px' }}><Clock size={30} style={{ margin: '0 auto' }}/></div>
+          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: '#94a3b8' }}>Terlambat</h4>
+          <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ffffff' }}>{isLoading ? '-' : stats.lateToday}</div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
-          <div style={{ color: 'var(--danger-color)', marginBottom: '10px' }}><XCircle size={30} style={{ margin: '0 auto' }}/></div>
-          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Absen (Alpha)</h4>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{isLoading ? '-' : stats.absentToday}</div>
+        <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '20px', borderRadius: '15px', textAlign: 'center' }}>
+          <div style={{ color: '#ef4444', marginBottom: '10px' }}><XCircle size={30} style={{ margin: '0 auto' }}/></div>
+          <h4 style={{ margin: '0 0 5px 0', fontSize: '0.8rem', color: '#94a3b8' }}>Absen (Alpha)</h4>
+          <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#ffffff' }}>{isLoading ? '-' : stats.absentToday}</div>
         </div>
 
       </div>
 
       {/* Recent Logs List */}
-      <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'var(--text-primary)' }}>Presensi Masuk Terbaru</h3>
-      <div className="glass-panel" style={{ padding: '15px', borderRadius: '15px' }}>
+      <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#f8fafc' }}>Presensi Masuk Terbaru</h3>
+      <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '15px', borderRadius: '15px' }}>
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>Memuat data realtime...</div>
+          <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Memuat data realtime...</div>
         ) : recentLogs.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {recentLogs.map(log => (
@@ -171,11 +172,11 @@ const LiveMonitor = () => {
                 justifyContent: 'space-between', 
                 alignItems: 'center', 
                 padding: '12px',
-                borderBottom: '1px solid var(--glass-border)'
+                borderBottom: '1px solid #334155'
               }}>
                 <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{log.employeeName}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hari ini, {log.time}</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#ffffff' }}>{log.employeeName}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Hari ini, {log.time}</div>
                 </div>
                 <div>
                   <span style={{
@@ -183,8 +184,8 @@ const LiveMonitor = () => {
                     padding: '4px 10px',
                     borderRadius: '20px',
                     fontWeight: 'bold',
-                    background: log.status === 'Terlambat' || log.status === 'late' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)',
-                    color: log.status === 'Terlambat' || log.status === 'late' ? 'var(--warning-color)' : 'var(--success-color)'
+                    background: log.status === 'Terlambat' || log.status === 'late' ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)',
+                    color: log.status === 'Terlambat' || log.status === 'late' ? '#fbbf24' : '#34d399'
                   }}>
                     {log.status === 'Terlambat' || log.status === 'late' ? 'Terlambat' : 'Tepat Waktu'}
                   </span>
@@ -193,13 +194,13 @@ const LiveMonitor = () => {
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>
+          <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>
             Belum ada karyawan yang absen hari ini.
           </div>
         )}
       </div>
       
-      <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+      <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.8rem', color: '#64748b' }}>
         <p>Data diperbarui secara otomatis secara real-time.</p>
         <p>© 2026 i-rekap System</p>
       </div>
