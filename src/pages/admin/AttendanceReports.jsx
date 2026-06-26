@@ -58,14 +58,14 @@ const AttendanceReports = () => {
   };
 
   const filteredLogs = logs.filter(log => {
-    if (!startDate && !endDate) return true;
-    const logDate = new Date(log.date);
-    const sDate = startDate ? new Date(startDate) : null;
-    const eDate = endDate ? new Date(endDate) : null;
-    
     if (selectedDivision && log.employees && log.employees.dept !== selectedDivision) {
       return false;
     }
+    if (!startDate && !endDate) return true;
+    
+    const logDate = new Date(log.date);
+    const sDate = startDate ? new Date(startDate) : null;
+    const eDate = endDate ? new Date(endDate) : null;
     
     if (sDate && eDate) return logDate >= sDate && logDate <= eDate;
     if (sDate) return logDate >= sDate;
