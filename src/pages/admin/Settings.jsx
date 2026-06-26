@@ -58,8 +58,15 @@ const Settings = () => {
   };
 
   const handleSaveLocation = () => {
-    const licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) return;
+    let licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) {
+      if (localStorage.getItem('admin-role') === 'demo') {
+        licenseCode = 'DEMO-123';
+      } else {
+        alert("Gagal: Sesi tidak valid (Kode Lisensi tidak ditemukan)!");
+        return;
+      }
+    }
 
     localStorage.setItem(`office_address_${licenseCode}`, locationSettings.officeAddress);
     localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
