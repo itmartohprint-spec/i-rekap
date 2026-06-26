@@ -250,16 +250,16 @@ ${base64Data}
             Daftar Log Harian
           </button>
           <button 
-            onClick={() => setViewMode('matrix')}
-            style={{ padding: '0.5rem 1rem', background: viewMode === 'matrix' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'matrix' ? 'bold' : 'normal', boxShadow: viewMode === 'matrix' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'matrix' ? '#0f172a' : '#64748b' }}
-          >
-            Rekap Matriks (Bulanan)
-          </button>
-          <button 
             onClick={() => setViewMode('matrix-weekly')}
             style={{ padding: '0.5rem 1rem', background: viewMode === 'matrix-weekly' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'matrix-weekly' ? 'bold' : 'normal', boxShadow: viewMode === 'matrix-weekly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'matrix-weekly' ? '#0f172a' : '#64748b' }}
           >
             Rekap Matriks (Rentang Waktu)
+          </button>
+          <button 
+            onClick={() => setViewMode('matrix')}
+            style={{ padding: '0.5rem 1rem', background: viewMode === 'matrix' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'matrix' ? 'bold' : 'normal', boxShadow: viewMode === 'matrix' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'matrix' ? '#0f172a' : '#64748b' }}
+          >
+            Rekap Matriks (Bulanan)
           </button>
         </div>
       </div>
