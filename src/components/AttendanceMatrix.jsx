@@ -9,9 +9,77 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
   const daysInMonth = new Date(year, month, 0).getDate();
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   
+  const companyName = localStorage.getItem('company-name') || 'PT Maju Bersama';
+  const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
+  const lastDay = new Date(year, month, 0).getDate();
+  const periodStr = `Periode: ${year}-${String(month).padStart(2, '0')}-01 s/d ${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+  
   useEffect(() => {
     fetchData();
   }, [month, year, licenseCode]);
+
+  useEffect(() => {
+    const handleExport = () => {
+      if (!data) return;
+      
+      let csv = [];
+      // 1. KOP SURAT
+      csv.push(`"${companyName}"`);
+      csv.push(`"Rekap Absensi Bulanan"`);
+      csv.push(`"${periodStr}"`);
+      csv.push(`"Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen"`);
+      csv.push(`""`); // Empty line
+      
+      // 2. HEADER
+      let headerRow1 = ['"No"', '"Nama Karyawan"'];
+      for (let i = 1; i <= daysInMonth; i++) {
+        if (i === 1) headerRow1.push(`"Tanggal (${year}-${String(month).padStart(2, '0')})"`);
+        else headerRow1.push(`""`);
+      }
+      headerRow1.push('"Rekapitulasi Total"');
+      for (let i = 0; i < 6; i++) headerRow1.push(`""`);
+      csv.push(headerRow1.join(","));
+
+      let headerRow2 = ['""', '""'];
+      for (let i = 1; i <= daysInMonth; i++) {
+        headerRow2.push(`"${String(i).padStart(2, '0')}"`);
+      }
+      headerRow2.push('"Masuk"', '"Izin"', '"Sakit"', '"Cuti"', '"Alpa"', '"Jam Kerja"', '"Lembur"');
+      csv.push(headerRow2.join(","));
+      
+      // 3. BODY
+      Object.keys(data).sort().forEach(div => {
+        let divRow = [`"DIVISI: ${div.toUpperCase()}"`];
+        for (let i = 0; i < daysInMonth + 8; i++) divRow.push(`""`);
+        csv.push(divRow.join(","));
+        
+        data[div].forEach((emp, empIdx) => {
+          let empRow = [`"${empIdx + 1}"`, `"${emp.name}"`];
+          daysArray.forEach(d => {
+            const cell = emp.daily[d];
+            if (['S', 'I', 'C'].includes(cell.timeIn)) {
+              empRow.push(`"${cell.timeIn}"`);
+            } else {
+              empRow.push(`"${cell.timeIn} - ${cell.timeOut}"`);
+            }
+          });
+          empRow.push(`"${emp.totalMasuk}"`, `"${emp.totalIzin}"`, `"${emp.totalSakit}"`, `"${emp.totalCuti}"`, `"${emp.totalAlpa}"`, `"${emp.totalJamKerja}j"`, `"${emp.totalLembur}j"`);
+          csv.push(empRow.join(","));
+        });
+      });
+
+      const csvFile = new Blob([csv.join("\\n")], {type: "text/csv;charset=utf-8;"});
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `Rekap_Absensi_${year}_${month}.csv`;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    };
+
+    window.addEventListener('export-matrix-csv', handleExport);
+    return () => window.removeEventListener('export-matrix-csv', handleExport);
+  }, [data, month, year, companyName, periodStr]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -132,11 +200,6 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
 
   if (isLoading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Memuat data matriks...</div>;
   if (!data) return null;
-
-  const companyName = localStorage.getItem('company-name') || 'PT Maju Bersama';
-  const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
-  const lastDay = new Date(year, month, 0).getDate();
-  const periodStr = `Periode: ${year}-${String(month).padStart(2, '0')}-01 s/d ${year}-${String(month).padStart(2, '0')}-${lastDay}`;
 
   return (
     <div style={{ overflowX: 'auto', background: '#fff', padding: '1rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>

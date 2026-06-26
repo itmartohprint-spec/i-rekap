@@ -268,25 +268,7 @@ const AttendanceReports = () => {
               className="btn-primary" 
               style={{ background: '#10b981', marginLeft: 'auto' }}
               onClick={() => {
-                // Export Logic for Matrix is handled in AttendanceMatrix component, or we can just trigger it here.
-                // We'll let the user use the export button inside the AttendanceMatrix component later if needed.
-                const table = document.getElementById('matrix-table');
-                if (!table) return;
-                
-                let csv = [];
-                for (let i = 0; i < table.rows.length; i++) {
-                    let row = [], cols = table.rows[i].querySelectorAll("td, th");
-                    for (let j = 0; j < cols.length; j++) 
-                        row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-                    csv.push(row.join(","));
-                }
-                const csvFile = new Blob([csv.join("\\n")], {type: "text/csv"});
-                const downloadLink = document.createElement("a");
-                downloadLink.download = `Rekap_Absensi_${matrixYear}_${matrixMonth}.csv`;
-                downloadLink.href = window.URL.createObjectURL(csvFile);
-                downloadLink.style.display = "none";
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
+                window.dispatchEvent(new Event('export-matrix-csv'));
               }}
             >
               Export Matrix ke CSV
