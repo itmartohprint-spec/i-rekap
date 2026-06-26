@@ -22,12 +22,12 @@ body.bg-midnight, body.bg-ocean, body.bg-cyber, body.bg-luxury, body.bg-metallic
   --text-secondary: #e2e8f0 !important;
 }
 
-body.bg-midnight h1, body.bg-midnight h2, body.bg-midnight h3, body.bg-midnight h4, body.bg-midnight p, body.bg-midnight span, body.bg-midnight label,
-body.bg-ocean h1, body.bg-ocean h2, body.bg-ocean h3, body.bg-ocean h4, body.bg-ocean p, body.bg-ocean span, body.bg-ocean label,
-body.bg-cyber h1, body.bg-cyber h2, body.bg-cyber h3, body.bg-cyber h4, body.bg-cyber p, body.bg-cyber span, body.bg-cyber label,
-body.bg-luxury h1, body.bg-luxury h2, body.bg-luxury h3, body.bg-luxury h4, body.bg-luxury p, body.bg-luxury span, body.bg-luxury label,
-body.bg-metallic h1, body.bg-metallic h2, body.bg-metallic h3, body.bg-metallic h4, body.bg-metallic p, body.bg-metallic span, body.bg-metallic label,
-body.bg-obsidian h1, body.bg-obsidian h2, body.bg-obsidian h3, body.bg-obsidian h4, body.bg-obsidian p, body.bg-obsidian span, body.bg-obsidian label {
+body.bg-midnight h1, body.bg-midnight h2, body.bg-midnight h3, body.bg-midnight h4,
+body.bg-ocean h1, body.bg-ocean h2, body.bg-ocean h3, body.bg-ocean h4,
+body.bg-cyber h1, body.bg-cyber h2, body.bg-cyber h3, body.bg-cyber h4,
+body.bg-luxury h1, body.bg-luxury h2, body.bg-luxury h3, body.bg-luxury h4,
+body.bg-metallic h1, body.bg-metallic h2, body.bg-metallic h3, body.bg-metallic h4,
+body.bg-obsidian h1, body.bg-obsidian h2, body.bg-obsidian h3, body.bg-obsidian h4 {
   color: var(--text-primary);
 }
 
@@ -162,7 +162,7 @@ body.bg-neo .glass-panel, body.bg-neo .admin-sidebar, body.bg-neo .admin-table-c
   border: none;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
 }
-body.bg-neo h1, body.bg-neo h2, body.bg-neo h3, body.bg-neo h4, body.bg-neo p, body.bg-neo label, body.bg-neo span:not(.status-badge) {
+body.bg-neo h1, body.bg-neo h2, body.bg-neo h3, body.bg-neo h4 {
   color: var(--text-primary);
 }
 body.bg-neo .admin-header span {
