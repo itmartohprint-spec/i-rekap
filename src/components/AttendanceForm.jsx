@@ -213,13 +213,35 @@ const AttendanceForm = ({ type, onClose }) => {
         return;
       }
 
+      // Hitung keterlambatan untuk absen masuk normal
+      let attendanceStatus = 'Hadir';
+      if (type === 'in') {
+        const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
+        const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
+        const shiftId = savedEmpShifts[employeeId] || 'default';
+        const shift = savedMasterShifts.find(s => s.id === shiftId);
+        const tolerance = parseInt(localStorage.getItem(`lateness_tolerance_${licenseCode}`) || '15', 10);
+        
+        if (shift && shift.startTime) {
+          const [shiftHour, shiftMin] = shift.startTime.split(':').map(Number);
+          const shiftTimeInMinutes = (shiftHour * 60) + shiftMin;
+          const currentHour = now.getHours();
+          const currentMin = now.getMinutes();
+          const currentTimeInMinutes = (currentHour * 60) + currentMin;
+
+          if (currentTimeInMinutes > shiftTimeInMinutes + tolerance) {
+            attendanceStatus = 'Terlambat';
+          }
+        }
+      }
+
       const { error } = await supabase.from('attendance').insert([{
         license_code: licenseCode,
         employee_id: employeeId,
         date: formattedDate,
         time_in: (type === 'in' || type === 'overtime_in') ? formattedTime : null,
         time_out: (type === 'out' || type === 'early' || type === 'overtime_out') ? formattedTime : null,
-        status: 'Hadir', // default status
+        status: attendanceStatus,
         type: type,
         location_lat: userLocation ? userLocation.lat : null,
         location_lng: userLocation ? userLocation.lng : null,

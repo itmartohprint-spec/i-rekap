@@ -340,9 +340,9 @@ ${base64Data}
                     <tr key={log.id}>
                       <td>{log.date}</td>
                       <td>{log.employees ? log.employees.name : log.employee_id}</td>
-                      <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: log.type === 'in' ? '#dcfce7' : '#fee2e2', color: log.type === 'in' ? '#166534' : '#991b1b' }}>{log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type}</span></td>
-                      <td>{log.time_in || '-'}</td>
-                      <td>{log.time_out || '-'}</td>
+                      <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: (log.type === 'in' || log.type === 'overtime_in') ? '#dcfce7' : '#fee2e2', color: (log.type === 'in' || log.type === 'overtime_in') ? '#166534' : '#991b1b' }}>{log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type === 'overtime_in' ? 'Lembur Masuk' : log.type === 'overtime_out' ? 'Lembur Pulang' : log.type}</span></td>
+                      <td>{log.time_in ? log.time_in.substring(0,5) : '-'}</td>
+                      <td>{log.time_out ? log.time_out.substring(0,5) : '-'}</td>
                       <td>
                         {log.photo_url ? (
                           <img 

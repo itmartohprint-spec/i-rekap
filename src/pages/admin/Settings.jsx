@@ -16,7 +16,8 @@ const Settings = () => {
     officeAddress: 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
     officeLat: '-6.200000',
     officeLng: '106.816666',
-    radiusMeters: '50'
+    radiusMeters: '50',
+    latenessTolerance: '15'
   });
 
   const [networkSettings, setNetworkSettings] = useState({
@@ -37,13 +38,15 @@ const Settings = () => {
     const savedLng = localStorage.getItem(`office_lng_${licenseCode}`);
     const savedRadius = localStorage.getItem(`radius_meters_${licenseCode}`);
     const savedAddress = localStorage.getItem(`office_address_${licenseCode}`);
+    const savedTolerance = localStorage.getItem(`lateness_tolerance_${licenseCode}`);
 
-    if (savedLat || savedLng || savedRadius || savedAddress) {
+    if (savedLat || savedLng || savedRadius || savedAddress || savedTolerance) {
       setLocationSettings({
         officeAddress: savedAddress || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
         officeLat: savedLat || '-6.200000',
         officeLng: savedLng || '106.816666',
-        radiusMeters: savedRadius || '50'
+        radiusMeters: savedRadius || '50',
+        latenessTolerance: savedTolerance || '15'
       });
     }
 
@@ -72,6 +75,7 @@ const Settings = () => {
     localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
     localStorage.setItem(`office_lng_${licenseCode}`, locationSettings.officeLng);
     localStorage.setItem(`radius_meters_${licenseCode}`, locationSettings.radiusMeters);
+    localStorage.setItem(`lateness_tolerance_${licenseCode}`, locationSettings.latenessTolerance);
 
     window.dispatchEvent(new Event('locationSettingsUpdated'));
     alert("✅ Pengaturan Lokasi berhasil disimpan!");
@@ -216,7 +220,7 @@ const Settings = () => {
               onClick={() => setActiveTab('lokasi')}
             >
               <div className="icon-box"><MapPin size={18} /></div>
-              <span>Lokasi & GPS</span>
+              <span>Lokasi & Aturan Absen</span>
             </button>
             <button 
               className={`settings-nav-item ${activeTab === 'jaringan' ? 'active' : ''}`}
@@ -263,8 +267,8 @@ const Settings = () => {
           {activeTab === 'lokasi' && (
             <div className="settings-card glass-panel fade-in">
               <div className="settings-header">
-                <h3>Pengaturan Lokasi Absensi</h3>
-                <p>Tentukan titik kordinat kantor pusat untuk membatasi radius absensi karyawan.</p>
+                <h3>Pengaturan Lokasi & Aturan Absensi</h3>
+                <p>Tentukan titik kordinat kantor pusat untuk membatasi radius absensi karyawan serta atur toleransi keterlambatan.</p>
               </div>
               
               <div className="settings-body">
@@ -319,6 +323,20 @@ const Settings = () => {
                     <div className="range-value">{locationSettings.radiusMeters} m</div>
                   </div>
                   <p className="helper-text">Karyawan tidak bisa absen jika berada di luar radius ini dari titik kordinat.</p>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                  <label className="form-label">Toleransi Keterlambatan (Menit)</label>
+                  <div className="input-with-icon">
+                    <Globe size={18} className="input-icon" style={{ opacity: 0 }} />
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      value={locationSettings.latenessTolerance}
+                      onChange={(e) => setLocationSettings({...locationSettings, latenessTolerance: e.target.value})}
+                    />
+                  </div>
+                  <p className="helper-text">Batas waktu (dalam menit) setelah jam masuk shift sebelum dianggap terlambat.</p>
                 </div>
               </div>
               
