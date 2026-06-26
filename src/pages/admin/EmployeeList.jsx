@@ -10,7 +10,7 @@ const EmployeeList = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     id: '', name: '', nik: '', birthDate: '', religion: '', dept: '', position: '',
-    address: '', whatsapp: '', password: '', dailySalary: '', overtimeRate: '',
+    address: '', whatsapp: '', password: '', dailySalary: '', salaryType: 'Harian', overtimeRate: '',
     leaveQuota: '12', status: 'Aktif Bekerja', isMock: false
   });
   const [budiPhoto, setBudiPhoto] = useState('');
@@ -54,6 +54,7 @@ const EmployeeList = () => {
         whatsapp: emp.whatsapp,
         password: emp.password,
         dailySalary: emp.daily_salary,
+        salaryType: emp.salary_type || 'Harian',
         overtimeRate: emp.overtime_rate,
         leaveQuota: emp.leave_quota,
         status: emp.status,
@@ -96,7 +97,7 @@ const EmployeeList = () => {
     setEditMode(false);
     setFormData({ 
       id: `EMP-00${employees.length + 1}`, name: '', nik: '', birthDate: '', religion: '', dept: '', position: '',
-      address: '', whatsapp: '', password: '', dailySalary: '', overtimeRate: '',
+      address: '', whatsapp: '', password: '', dailySalary: '', salaryType: 'Harian', overtimeRate: '',
       leaveQuota: '12', status: 'Aktif Bekerja', isMock: false
     });
     setShowModal(true);
@@ -157,6 +158,7 @@ const EmployeeList = () => {
       whatsapp: formData.whatsapp,
       password: formData.password,
       daily_salary: formData.dailySalary ? parseFloat(formData.dailySalary) : null,
+      salary_type: formData.salaryType || 'Harian',
       overtime_rate: formData.overtimeRate ? parseFloat(formData.overtimeRate) : null,
       leave_quota: formData.leaveQuota ? parseInt(formData.leaveQuota) : 12,
       status: formData.status,
@@ -303,7 +305,16 @@ const EmployeeList = () => {
                     <input type="text" className="form-input" value={formData.password || ''} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Minimal 6 karakter" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Gaji Harian (Rp)</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Sistem Penggajian</label>
+                    <select className="form-input" value={formData.salaryType} onChange={e => setFormData({...formData, salaryType: e.target.value})}>
+                      <option value="Harian">Sistem Harian (Sesuai Kehadiran)</option>
+                      <option value="Bulanan">Sistem Bulanan (Gaji Tetap)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>
+                      {formData.salaryType === 'Bulanan' ? 'Gaji Bulanan Tetap (Rp)' : 'Gaji Pokok Harian (Rp)'}
+                    </label>
                     <input type="number" className="form-input" value={formData.dailySalary || ''} onChange={e => setFormData({...formData, dailySalary: e.target.value})} placeholder="Contoh: 150000" />
                   </div>
                   <div>

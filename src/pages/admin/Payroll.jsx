@@ -62,8 +62,15 @@ const Payroll = () => {
           const empAttendance = attendances ? attendances.filter(a => a.employee_id === emp.id && a.type === 'in') : [];
           const daysPresent = empAttendance.length;
           
+          const salaryType = emp.salary_type || 'Harian';
           const dailySalary = emp.daily_salary ? parseFloat(emp.daily_salary) : 0;
-          const totalBaseSalary = daysPresent * dailySalary;
+          
+          let totalBaseSalary = 0;
+          if (salaryType === 'Bulanan') {
+            totalBaseSalary = dailySalary; // For monthly, it's a fixed amount
+          } else {
+            totalBaseSalary = daysPresent * dailySalary; // For daily, it depends on attendance
+          }
 
           const empCashAdvances = cashAdvances ? cashAdvances.filter(c => c.employee_id === emp.id) : [];
           const totalDeduction = empCashAdvances.reduce((sum, c) => sum + parseFloat(c.amount), 0);
@@ -228,7 +235,12 @@ const Payroll = () => {
               <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
                 <h4 style={{ margin: '0 0 10px 0', color: '#0f172a', borderBottom: '1px solid #cbd5e1', paddingBottom: '5px' }}>PENERIMAAN</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
-                  <span>Gaji Pokok ({selectedSlip.daysPresent} Hari x {formatRupiah(selectedSlip.daily_salary)})</span>
+                  <span>
+                    {selectedSlip.salary_type === 'Bulanan' 
+                      ? `Gaji Pokok (Bulanan Tetap)` 
+                      : `Gaji Pokok (${selectedSlip.daysPresent} Hari x ${formatRupiah(selectedSlip.daily_salary)})`
+                    }
+                  </span>
                   <span style={{ fontWeight: 'bold' }}>{formatRupiah(selectedSlip.totalBaseSalary)}</span>
                 </div>
                 
