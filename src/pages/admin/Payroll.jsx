@@ -23,13 +23,22 @@ const Payroll = () => {
     }
 
     try {
-      // Fetch Company Info
+      // 1. Ambil Company Info dari Local Storage (karena disetting via Settings.jsx)
+      const savedLogo = localStorage.getItem('company-logo') || '/maskot.png';
+      const savedName = localStorage.getItem('company-name') || 'PT Maju Bersama';
+      
+      // Tetap coba ambil dari database sebagai prioritas pertama jika ada
       const { data: companyData } = await supabase
         .from('companies')
         .select('*')
         .eq('license_code', licenseCode)
         .single();
-      if (companyData) setCompanyInfo(companyData);
+        
+      if (companyData) {
+        setCompanyInfo(companyData);
+      } else {
+        setCompanyInfo({ company_name: savedName, logo_url: savedLogo });
+      }
 
       // 1. Fetch Employees
       const { data: employees } = await supabase
