@@ -200,8 +200,7 @@ const EmployeeList = () => {
               <th>ID</th>
               <th>Foto</th>
               <th>Nama Karyawan</th>
-              <th>Departemen</th>
-              <th>Posisi</th>
+              <th>Divisi</th>
               <th>Password</th>
               <th>Status</th>
               <th>Aksi</th>
@@ -222,7 +221,6 @@ const EmployeeList = () => {
                 </td>
                 <td>{emp.name}</td>
                 <td>{emp.dept}</td>
-                <td>{emp.position}</td>
                 <td style={{ fontFamily: 'monospace', color: emp.isMock && budiPassword !== '*****' ? '#0f172a' : '#94a3b8' }}>
                   {emp.isMock ? budiPassword : '*****'}
                 </td>
