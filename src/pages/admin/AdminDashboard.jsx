@@ -37,14 +37,16 @@ const AdminDashboard = () => {
         .eq('license_code', licenseCode);
 
       // 2. Get Today's Attendance
-      const today = new Date().toLocaleDateString('id-ID'); // e.g., 25/6/2026
+      const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format to match database
       const { data: attendanceData } = await supabase
         .from('attendance')
         .select(`
           id, 
           employee_id, 
           date, 
-          check_in_time, 
+          time_in,
+          time_out,
+          type,
           status, 
           employees (name)
         `)
@@ -55,7 +57,7 @@ const AdminDashboard = () => {
       const todaysLogs = attendanceData ? attendanceData.filter(log => log.date === today) : [];
       
       const present = todaysLogs.length;
-      const late = todaysLogs.filter(log => log.status === 'late').length;
+      const late = todaysLogs.filter(log => log.status === 'late' || log.status === 'Terlambat').length;
       const totalEmp = empCount || 0;
       const absent = Math.max(0, totalEmp - present);
 
@@ -71,8 +73,8 @@ const AdminDashboard = () => {
         const formattedLogs = attendanceData.slice(0, 5).map(log => ({
           id: log.id,
           employeeName: log.employees ? log.employees.name : log.employee_id,
-          time: log.check_in_time,
-          type: 'check_in',
+          time: log.time_in || log.time_out || '-',
+          type: log.type || 'Hadir',
           status: log.status
         }));
         setRecentLogs(formattedLogs);
