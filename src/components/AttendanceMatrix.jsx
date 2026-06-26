@@ -24,19 +24,26 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
       
       const tableHTML = document.getElementById('matrix-table').outerHTML.replace(/display:\s*none/g, '');
       
+      const absoluteLogo = companyLogo.startsWith('http') || companyLogo.startsWith('data:') 
+        ? companyLogo 
+        : window.location.origin + companyLogo;
+
       const kopSurat = `
-        <table style="margin-bottom: 20px; font-family: Arial, sans-serif;">
+        <table style="margin-bottom: 20px; font-family: Arial, sans-serif; border: none;">
           <tr>
-            <td colspan="4"><h2>${companyName}</h2></td>
+            <td rowspan="4" style="width: 100px; text-align: center; vertical-align: middle; border: none;">
+              <img src="${absoluteLogo}" width="80" height="80" style="max-width: 80px; max-height: 80px; object-fit: contain;" />
+            </td>
+            <td colspan="10" style="border: none;"><h2>${companyName}</h2></td>
           </tr>
           <tr>
-            <td colspan="4"><h4>Rekap Absensi Bulanan</h4></td>
+            <td colspan="10" style="border: none;"><h4>Rekap Absensi Bulanan</h4></td>
           </tr>
           <tr>
-            <td colspan="4"><p>${periodStr}</p></td>
+            <td colspan="10" style="border: none;"><p>${periodStr}</p></td>
           </tr>
           <tr>
-            <td colspan="4"><p>Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen</p></td>
+            <td colspan="10" style="border: none;"><p>Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen</p></td>
           </tr>
         </table>
       `;
@@ -60,8 +67,8 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
           </xml>
           <![endif]-->
           <style>
-            table { border-collapse: collapse; }
-            th, td { border: 1px solid black; }
+            #matrix-table { border-collapse: collapse; }
+            #matrix-table th, #matrix-table td { border: 1px solid black; }
             td { mso-number-format:"\@"; }
           </style>
         </head>
