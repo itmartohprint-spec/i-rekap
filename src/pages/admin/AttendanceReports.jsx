@@ -10,6 +10,8 @@ const AttendanceReports = () => {
   const [matrixYear, setMatrixYear] = useState(new Date().getFullYear());
   
   const [logs, setLogs] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   
@@ -19,7 +21,15 @@ const AttendanceReports = () => {
 
   useEffect(() => {
     fetchLogs();
+    fetchDivisions();
   }, []);
+
+  const fetchDivisions = async () => {
+    const { data, error } = await supabase.from('divisions').select('*').order('name');
+    if (data && !error) {
+      setDivisions(data.map(d => d.name));
+    }
+  };
 
   const fetchLogs = async () => {
     setIsLoading(true);
@@ -33,7 +43,7 @@ const AttendanceReports = () => {
       .from('attendance')
       .select(`
         *,
-        employees (name)
+        employees (name, dept)
       `)
       .eq('license_code', licenseCode)
       .order('date', { ascending: false })
@@ -52,6 +62,10 @@ const AttendanceReports = () => {
     const logDate = new Date(log.date);
     const sDate = startDate ? new Date(startDate) : null;
     const eDate = endDate ? new Date(endDate) : null;
+    
+    if (selectedDivision && log.employees && log.employees.dept !== selectedDivision) {
+      return false;
+    }
     
     if (sDate && eDate) return logDate >= sDate && logDate <= eDate;
     if (sDate) return logDate >= sDate;
@@ -158,6 +172,13 @@ const AttendanceReports = () => {
         <>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Divisi:</span>
+                <select className="form-input" style={{ width: 'auto' }} value={selectedDivision} onChange={e => setSelectedDivision(e.target.value)}>
+                  <option value="">Semua Divisi</option>
+                  {divisions.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
                 <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
