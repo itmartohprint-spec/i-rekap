@@ -19,20 +19,41 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
   }, [month, year, licenseCode]);
 
   useEffect(() => {
-    const handleExport = () => {
+    const handleExport = async () => {
       if (!data) return;
       
       const tableHTML = document.getElementById('matrix-table').outerHTML.replace(/display:\s*none/g, '');
       
-      const absoluteLogo = companyLogo.startsWith('http') || companyLogo.startsWith('data:') 
-        ? companyLogo 
-        : window.location.origin + companyLogo;
+      let base64Data = "";
+      let mimeType = "image/png";
+      
+      try {
+        if (companyLogo.startsWith('data:')) {
+          const parts = companyLogo.split(',');
+          mimeType = parts[0].match(/:(.*?);/)[1];
+          base64Data = parts[1];
+        } else {
+          const response = await fetch(companyLogo);
+          const blob = await response.blob();
+          mimeType = blob.type;
+          base64Data = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+               const b64 = reader.result.split(',')[1];
+               resolve(b64);
+            };
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load logo for export", e);
+      }
 
       const kopSurat = `
         <table style="margin-bottom: 20px; font-family: Arial, sans-serif; border: none;">
           <tr>
             <td rowspan="4" style="width: 100px; text-align: center; vertical-align: middle; border: none;">
-              <img src="${absoluteLogo}" width="80" height="80" style="max-width: 80px; max-height: 80px; object-fit: contain;" />
+              ${base64Data ? `<img src="cid:company-logo" width="80" height="80" style="max-width: 80px; max-height: 80px; object-fit: contain;" />` : ''}
             </td>
             <td colspan="10" style="border: none;"><h2>${companyName}</h2></td>
           </tr>
@@ -48,7 +69,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
         </table>
       `;
 
-      const template = `
+      const htmlPart = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
         <head>
           <meta charset="UTF-8">
@@ -69,7 +90,7 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
           <style>
             #matrix-table { border-collapse: collapse; }
             #matrix-table th, #matrix-table td { border: 1px solid black; }
-            td { mso-number-format:"\@"; }
+            td { mso-number-format:"\\@"; }
           </style>
         </head>
         <body>
@@ -78,8 +99,25 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
         </body>
         </html>
       `;
+
+      const mhtml = `MIME-Version: 1.0
+Content-Type: multipart/related; boundary="----Excel_Export_Boundary"
+
+------Excel_Export_Boundary
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+${htmlPart}
+
+------Excel_Export_Boundary
+Content-Type: ${mimeType}
+Content-Transfer-Encoding: base64
+Content-Location: company-logo
+
+${base64Data}
+------Excel_Export_Boundary--`;
       
-      const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+      const blob = new Blob([mhtml], { type: 'application/vnd.ms-excel' });
       const downloadLink = document.createElement("a");
       downloadLink.download = `Rekap_Absensi_Matrix_${year}_${month}.xls`;
       downloadLink.href = window.URL.createObjectURL(blob);
