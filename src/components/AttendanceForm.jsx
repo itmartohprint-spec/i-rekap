@@ -43,20 +43,6 @@ const AttendanceForm = ({ type, onClose }) => {
       return;
     }
 
-    // Try loading from localStorage since location columns might not exist in Supabase yet
-    const savedLat = localStorage.getItem(`office_lat_${licenseCode}`);
-    const savedLng = localStorage.getItem(`office_lng_${licenseCode}`);
-    const savedRadius = localStorage.getItem(`radius_meters_${licenseCode}`);
-
-    if (savedLat || savedLng || savedRadius) {
-      checkLocation({
-        office_lat: savedLat,
-        office_lng: savedLng,
-        radius_meters: savedRadius
-      });
-      return;
-    }
-
     const { data, error } = await supabase
       .from('companies')
       .select('office_lat, office_lng, radius_meters')

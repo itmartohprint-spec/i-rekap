@@ -28,6 +28,21 @@ import ShiftSchedule from './pages/admin/ShiftSchedule';
 import Payroll from './pages/admin/Payroll';
 
 function App() {
+  React.useEffect(() => {
+    const primary = localStorage.getItem('theme-primary');
+    const secondary = localStorage.getItem('theme-secondary');
+    const font = localStorage.getItem('theme-font');
+    const bg = localStorage.getItem('theme-bg');
+    
+    if (primary) document.documentElement.style.setProperty('--primary-color', primary);
+    if (secondary) document.documentElement.style.setProperty('--secondary-color', secondary);
+    if (font) document.documentElement.style.setProperty('--font-family', font);
+    if (bg) {
+      document.body.className = '';
+      document.body.classList.add(bg);
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>

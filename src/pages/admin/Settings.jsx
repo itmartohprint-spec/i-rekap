@@ -38,83 +38,112 @@ const Settings = () => {
     const licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return;
 
-    // Load from localStorage as fallback since columns might not exist in Supabase yet
-    const savedLat = localStorage.getItem(`office_lat_${licenseCode}`);
-    const savedLng = localStorage.getItem(`office_lng_${licenseCode}`);
-    const savedRadius = localStorage.getItem(`radius_meters_${licenseCode}`);
-    const savedAddress = localStorage.getItem(`office_address_${licenseCode}`);
-    const savedTolerance = localStorage.getItem(`lateness_tolerance_${licenseCode}`);
+    // Ambil data global dari Supabase
+    const { data: comp } = await supabase.from('companies').select('*').eq('license_code', licenseCode).single();
+    if (comp) {
+      setCompanyProfile({
+        logo: comp.logo_url || localStorage.getItem('company-logo') || '/maskot.png',
+        name: comp.name || localStorage.getItem('company-name') || 'PT Maju Bersama',
+        hrEmail: comp.hr_email || localStorage.getItem('company-hr-email') || 'hr@majubersama.com'
+      });
 
-    if (savedLat || savedLng || savedRadius || savedAddress || savedTolerance) {
       setLocationSettings({
-        officeAddress: savedAddress || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
-        officeLat: savedLat || '-6.200000',
-        officeLng: savedLng || '106.816666',
-        radiusMeters: savedRadius || '50',
-        latenessTolerance: savedTolerance || '15'
+        officeAddress: comp.office_address || localStorage.getItem(`office_address_${licenseCode}`) || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21, Jakarta Selatan 12920',
+        officeLat: comp.office_lat || localStorage.getItem(`office_lat_${licenseCode}`) || '-6.200000',
+        officeLng: comp.office_lng || localStorage.getItem(`office_lng_${licenseCode}`) || '106.816666',
+        radiusMeters: comp.radius_meters || localStorage.getItem(`radius_meters_${licenseCode}`) || '50',
+        latenessTolerance: comp.lateness_tolerance || localStorage.getItem(`lateness_tolerance_${licenseCode}`) || '15'
       });
-    }
 
-    const savedIpAddresses = localStorage.getItem(`network_ips_${licenseCode}`);
-    const savedRequireIp = localStorage.getItem(`network_require_${licenseCode}`);
-    if (savedIpAddresses !== null) {
       setNetworkSettings({
-        ipAddresses: savedIpAddresses,
-        requireIp: savedRequireIp === 'true'
+        ipAddresses: comp.network_ips || localStorage.getItem(`network_ips_${licenseCode}`) || '192.168.1.100',
+        requireIp: comp.require_ip !== null ? comp.require_ip : (localStorage.getItem(`network_require_${licenseCode}`) === 'true')
       });
-    }
 
-    const savedLateType = localStorage.getItem(`payroll_late_type_${licenseCode}`);
-    const savedLateAmount = localStorage.getItem(`payroll_late_amount_${licenseCode}`);
-    if (savedLateType) {
       setPayrollSettings({
-        lateDeductionType: savedLateType,
-        lateDeductionAmount: savedLateAmount || '0'
+        lateDeductionType: comp.late_deduction_type || localStorage.getItem(`payroll_late_type_${licenseCode}`) || 'proportional',
+        lateDeductionAmount: comp.late_deduction_amount || localStorage.getItem(`payroll_late_amount_${licenseCode}`) || '0'
       });
+
+      // Terapkan tema dari Supabase jika ada
+      if (comp.theme_primary) {
+        document.documentElement.style.setProperty('--primary-color', comp.theme_primary);
+        document.documentElement.style.setProperty('--secondary-color', comp.theme_secondary);
+      }
+      if (comp.theme_font) document.documentElement.style.setProperty('--font-family', comp.theme_font);
+      if (comp.theme_bg) {
+        document.body.className = ''; 
+        document.body.classList.add(comp.theme_bg);
+      }
     }
   };
 
-  const handleSaveLocation = () => {
-    let licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) {
-      if (localStorage.getItem('admin-role') === 'demo') {
-        licenseCode = 'DEMO-123';
-      } else {
-        alert("Gagal: Sesi tidak valid (Kode Lisensi tidak ditemukan)!");
-        return;
-      }
+  const updateSupabase = async (payload) => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode || licenseCode.startsWith('DEMO')) return true; // skip untuk demo
+    const { error } = await supabase.from('companies').update(payload).eq('license_code', licenseCode);
+    if (error) {
+      console.error(error);
+      alert('Gagal sinkronisasi ke cloud: ' + error.message);
+      return false;
     }
+    return true;
+  };
 
+  const handleSaveLocation = async () => {
+    let licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return alert("Sesi tidak valid!");
+
+    // Simpan di LocalStorage (sebagai cache)
     localStorage.setItem(`office_address_${licenseCode}`, locationSettings.officeAddress);
     localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
     localStorage.setItem(`office_lng_${licenseCode}`, locationSettings.officeLng);
     localStorage.setItem(`radius_meters_${licenseCode}`, locationSettings.radiusMeters);
     localStorage.setItem(`lateness_tolerance_${licenseCode}`, locationSettings.latenessTolerance);
 
-    window.dispatchEvent(new Event('locationSettingsUpdated'));
-    alert("✅ Pengaturan Lokasi berhasil disimpan!");
+    // Simpan ke Supabase
+    const success = await updateSupabase({
+      office_address: locationSettings.officeAddress,
+      office_lat: locationSettings.officeLat,
+      office_lng: locationSettings.officeLng,
+      radius_meters: locationSettings.radiusMeters,
+      lateness_tolerance: locationSettings.latenessTolerance
+    });
+
+    if (success) {
+      window.dispatchEvent(new Event('locationSettingsUpdated'));
+      alert("✅ Pengaturan Lokasi berhasil disimpan dan disinkronkan ke seluruh perangkat!");
+    }
   };
 
-  const handleSaveNetwork = () => {
-    const licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) {
-      alert("Gagal: Kode lisensi tidak ditemukan!");
-      return;
-    }
+  const handleSaveNetwork = async () => {
+    let licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return alert("Sesi tidak valid!");
+    
     localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
     localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
-    alert("✅ Pengaturan Jaringan berhasil disimpan!");
+    
+    const success = await updateSupabase({
+      network_ips: networkSettings.ipAddresses,
+      require_ip: networkSettings.requireIp
+    });
+
+    if (success) alert("✅ Pengaturan Jaringan berhasil disinkronkan!");
   };
 
-  const handleSavePayroll = () => {
-    const licenseCode = localStorage.getItem('valid-license');
-    if (!licenseCode) {
-      alert("Gagal: Kode lisensi tidak ditemukan!");
-      return;
-    }
+  const handleSavePayroll = async () => {
+    let licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) return alert("Sesi tidak valid!");
+
     localStorage.setItem(`payroll_late_type_${licenseCode}`, payrollSettings.lateDeductionType);
     localStorage.setItem(`payroll_late_amount_${licenseCode}`, payrollSettings.lateDeductionAmount);
-    alert("✅ Pengaturan Penggajian berhasil disimpan!");
+    
+    const success = await updateSupabase({
+      late_deduction_type: payrollSettings.lateDeductionType,
+      late_deduction_amount: payrollSettings.lateDeductionAmount
+    });
+
+    if (success) alert("✅ Pengaturan Penggajian berhasil disinkronkan!");
   };
 
   const handleProfileChange = (e) => {
@@ -125,24 +154,28 @@ const Settings = () => {
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran file terlalu besar! Maksimal 2MB.");
-        return;
-      }
+      if (file.size > 2 * 1024 * 1024) return alert("Maksimal 2MB.");
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setCompanyProfile(prev => ({ ...prev, logo: reader.result }));
-      };
+      reader.onloadend = () => setCompanyProfile(prev => ({ ...prev, logo: reader.result }));
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     localStorage.setItem('company-logo', companyProfile.logo);
     localStorage.setItem('company-name', companyProfile.name);
     localStorage.setItem('company-hr-email', companyProfile.hrEmail);
-    window.dispatchEvent(new Event('profileUpdated'));
-    alert("✅ Profil perusahaan berhasil disimpan!");
+    
+    const success = await updateSupabase({
+      logo_url: companyProfile.logo,
+      name: companyProfile.name,
+      hr_email: companyProfile.hrEmail
+    });
+
+    if (success) {
+      window.dispatchEvent(new Event('profileUpdated'));
+      alert("✅ Profil perusahaan berhasil disinkronkan!");
+    }
   };
 
   const handleBackupData = () => {
@@ -173,14 +206,38 @@ const Settings = () => {
     
     if (window.confirm("Peringatan: Mengembalikan data (Restore) akan menimpa semua data yang ada saat ini. Anda yakin ingin melanjutkan?")) {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         try {
           const data = JSON.parse(event.target.result);
           localStorage.clear();
           Object.keys(data).forEach(key => {
             localStorage.setItem(key, data[key]);
           });
-          alert("✅ Data berhasil dipulihkan! Aplikasi akan dimuat ulang untuk menerapkan perubahan.");
+
+          // Upload restored settings to Supabase
+          const licenseCode = localStorage.getItem('valid-license');
+          if (licenseCode && !licenseCode.startsWith('DEMO')) {
+            await supabase.from('companies').update({
+              logo_url: data['company-logo'] || null,
+              name: data['company-name'] || null,
+              hr_email: data['company-hr-email'] || null,
+              office_address: data[`office_address_${licenseCode}`] || null,
+              office_lat: data[`office_lat_${licenseCode}`] || null,
+              office_lng: data[`office_lng_${licenseCode}`] || null,
+              radius_meters: data[`radius_meters_${licenseCode}`] || null,
+              lateness_tolerance: data[`lateness_tolerance_${licenseCode}`] || null,
+              network_ips: data[`network_ips_${licenseCode}`] || null,
+              require_ip: data[`network_require_${licenseCode}`] === 'true',
+              late_deduction_type: data[`payroll_late_type_${licenseCode}`] || null,
+              late_deduction_amount: data[`payroll_late_amount_${licenseCode}`] || null,
+              theme_primary: data['theme-primary'] || null,
+              theme_secondary: data['theme-secondary'] || null,
+              theme_font: data['theme-font'] || null,
+              theme_bg: data['theme-bg'] || null
+            }).eq('license_code', licenseCode);
+          }
+
+          alert("✅ Data berhasil dipulihkan dan disinkronkan ke Cloud! Aplikasi akan dimuat ulang.");
           window.location.reload();
         } catch (error) {
           alert("Format file tidak valid atau rusak!");
@@ -188,19 +245,16 @@ const Settings = () => {
       };
       reader.readAsText(file);
     }
-    // reset input
     e.target.value = '';
   };
 
   const handleResetData = () => {
-    if (window.confirm("⚠️ PERINGATAN FATAL: Anda akan menghapus SEMUA data karyawan, absensi, kasbon, dan pengaturan. Tindakan ini TIDAK DAPAT DIBATALKAN. Anda sangat yakin?")) {
+    if (window.confirm("⚠️ PERINGATAN FATAL: Anda akan menghapus SEMUA data lokal. Lanjutkan?")) {
       const confirmText = window.prompt("Ketik 'HAPUS' untuk mengonfirmasi:");
       if (confirmText === 'HAPUS') {
         localStorage.clear();
-        alert("Semua data telah direset ke pengaturan awal pabrik.");
+        alert("Semua data lokal telah dihapus.");
         window.location.href = '/login';
-      } else {
-        alert("Reset dibatalkan.");
       }
     }
   };
@@ -218,15 +272,22 @@ const Settings = () => {
   };
 
   const changeBackground = (bgClass) => {
-    document.body.className = ''; // reset
-    if (bgClass) {
-      document.body.classList.add(bgClass);
-    }
+    document.body.className = ''; 
+    if (bgClass) document.body.classList.add(bgClass);
     localStorage.setItem('theme-bg', bgClass || '');
   };
 
-  const handleSaveTheme = () => {
-    alert("✅ Perubahan personalisasi UI/UX berhasil disimpan dan akan berlaku permanen pada perangkat ini!");
+  const handleSaveTheme = async () => {
+    const success = await updateSupabase({
+      theme_primary: localStorage.getItem('theme-primary'),
+      theme_secondary: localStorage.getItem('theme-secondary'),
+      theme_font: localStorage.getItem('theme-font'),
+      theme_bg: localStorage.getItem('theme-bg')
+    });
+
+    if (success) {
+      alert("✅ Personalisasi UI/UX berhasil disimpan dan disinkronkan ke seluruh perangkat!");
+    }
   };
 
   return (

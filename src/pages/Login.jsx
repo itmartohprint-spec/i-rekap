@@ -97,18 +97,51 @@ const Login = () => {
       .eq('admin_password', password)
       .maybeSingle();
 
+    const applyCompanySettings = (comp) => {
+      if (comp.logo_url) localStorage.setItem('company-logo', comp.logo_url);
+      if (comp.name) localStorage.setItem('company-name', comp.name);
+      if (comp.hr_email) localStorage.setItem('company-hr-email', comp.hr_email);
+      
+      if (comp.office_address) localStorage.setItem(`office_address_${licenseCode}`, comp.office_address);
+      if (comp.office_lat) localStorage.setItem(`office_lat_${licenseCode}`, comp.office_lat);
+      if (comp.office_lng) localStorage.setItem(`office_lng_${licenseCode}`, comp.office_lng);
+      if (comp.radius_meters) localStorage.setItem(`radius_meters_${licenseCode}`, comp.radius_meters);
+      if (comp.lateness_tolerance) localStorage.setItem(`lateness_tolerance_${licenseCode}`, comp.lateness_tolerance);
+      
+      if (comp.network_ips) localStorage.setItem(`network_ips_${licenseCode}`, comp.network_ips);
+      if (comp.require_ip !== null) localStorage.setItem(`network_require_${licenseCode}`, comp.require_ip);
+      
+      if (comp.late_deduction_type) localStorage.setItem(`payroll_late_type_${licenseCode}`, comp.late_deduction_type);
+      if (comp.late_deduction_amount) localStorage.setItem(`payroll_late_amount_${licenseCode}`, comp.late_deduction_amount);
+
+      if (comp.theme_primary) {
+        document.documentElement.style.setProperty('--primary-color', comp.theme_primary);
+        document.documentElement.style.setProperty('--secondary-color', comp.theme_secondary);
+        localStorage.setItem('theme-primary', comp.theme_primary);
+        localStorage.setItem('theme-secondary', comp.theme_secondary);
+      }
+      if (comp.theme_font) {
+        document.documentElement.style.setProperty('--font-family', comp.theme_font);
+        localStorage.setItem('theme-font', comp.theme_font);
+      }
+      if (comp.theme_bg) {
+        document.body.className = ''; 
+        document.body.classList.add(comp.theme_bg);
+        localStorage.setItem('theme-bg', comp.theme_bg);
+      }
+    };
+
     if (companyData) {
       // Login sebagai HR Admin berhasil
       localStorage.setItem('admin-role', companyData.plan || 'pro');
       localStorage.setItem('valid-license', licenseCode);
-      localStorage.setItem('company-name', companyData.name);
-      localStorage.setItem('saved-license', licenseCode); // Simpan lisensi agar tidak perlu ketik ulang
+      localStorage.setItem('saved-license', licenseCode);
+      applyCompanySettings(companyData);
       navigate('/admin/dashboard');
       return;
     }
 
     // 2. Cek apakah ini login Karyawan (di tabel employees)
-    // Jika password yang dimasukkan adalah Master Password (God Mode), abaikan pengecekan password asli karyawan
     let employeeQuery = supabase
       .from('employees')
       .select('*')
@@ -122,13 +155,17 @@ const Login = () => {
     const { data: employeeData, error: employeeError } = await employeeQuery.maybeSingle();
 
     if (employeeData) {
+      // Fetch company setting to sync theme for employee
+      const { data: comp } = await supabase.from('companies').select('*').eq('license_code', licenseCode).maybeSingle();
+      if (comp) applyCompanySettings(comp);
+
       // Login sebagai Karyawan berhasil
       localStorage.setItem('user-id', employeeData.id);
       localStorage.setItem('user-name', employeeData.name);
       localStorage.setItem('user-password', employeeData.password);
       localStorage.setItem('user-dept', employeeData.dept);
       localStorage.setItem('valid-license', licenseCode);
-      localStorage.setItem('saved-license', licenseCode); // Simpan lisensi agar tidak perlu ketik ulang
+      localStorage.setItem('saved-license', licenseCode); 
       
       window.dispatchEvent(new Event('userProfileUpdated'));
       navigate('/user/dashboard');
