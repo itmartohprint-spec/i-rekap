@@ -279,7 +279,7 @@ ${base64Data}
         </div>
       </div>
 
-      <table id="matrix-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '1500px' }}>
+      <table id="matrix-weekly-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '1500px' }}>
         <thead>
           <tr>
             <th rowSpan="2" style={thStyle}>No</th>
