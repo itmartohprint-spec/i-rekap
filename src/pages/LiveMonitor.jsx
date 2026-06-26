@@ -440,101 +440,115 @@ const LiveMonitor = () => {
   );
 
   return (
-    <div style={{ background: '#0f172a', minHeight: '100vh', color: '#f8fafc', fontFamily: 'Inter, sans-serif', paddingBottom: '80px' }}>
-      
-      {/* Header (Applies to all tabs) */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px', textAlign: 'center', padding: '20px 20px 0 20px' }}>
-        <div style={{ 
-          background: '#10b981', 
-          color: 'white', 
-          padding: '8px 16px', 
-          borderRadius: '30px',
-          fontWeight: 'bold',
-          marginBottom: '10px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-          fontSize: '0.8rem'
-        }}>
-          <TrendingUp size={16} />
-          {companyName}
-        </div>
-        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#38bdf8' }}>
-          {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-        </div>
-        <p style={{ margin: 0, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', marginTop: '5px' }}>
-          <Calendar size={12} /> 
-          {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-        </p>
-      </div>
-
-      {/* Main Content Area */}
-      <div style={{ padding: '0 20px' }}>
-        {activeTab === 'dashboard' && renderDashboard()}
-        {activeTab === 'logs' && renderLogs()}
-        {activeTab === 'gps' && renderGPS()}
-        {activeTab === 'leave' && renderLeave()}
-      </div>
-      
-      <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.7rem', color: '#64748b' }}>
-        <p>Data diperbarui secara otomatis.</p>
-      </div>
-
-      {/* Bottom Navigation Bar */}
+    <div style={{ background: '#020617', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
       <div style={{ 
-        position: 'fixed', 
-        bottom: 0, 
-        left: 0, 
-        right: 0, 
-        background: '#1e293b', 
-        borderTop: '1px solid #334155',
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '12px 10px',
-        zIndex: 1000,
-        boxShadow: '0 -4px 10px rgba(0,0,0,0.2)'
+        background: '#0f172a', 
+        minHeight: '100vh', 
+        width: '100%', 
+        maxWidth: '500px', 
+        position: 'relative',
+        color: '#f8fafc', 
+        fontFamily: 'Inter, sans-serif', 
+        paddingBottom: '80px',
+        boxShadow: '0 0 50px rgba(0,0,0,0.5)'
       }}>
         
-        <div 
-          onClick={() => setActiveTab('dashboard')} 
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'dashboard' ? '#38bdf8' : '#94a3b8' }}
-        >
-          <TrendingUp size={22} />
-          <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal' }}>Dashboard</span>
+        {/* Header (Applies to all tabs) */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px', textAlign: 'center', padding: '20px 20px 0 20px' }}>
+          <div style={{ 
+            background: '#10b981', 
+            color: 'white', 
+            padding: '8px 16px', 
+            borderRadius: '30px',
+            fontWeight: 'bold',
+            marginBottom: '10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+            fontSize: '0.8rem'
+          }}>
+            <TrendingUp size={16} />
+            {companyName}
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#38bdf8' }}>
+            {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          </div>
+          <p style={{ margin: 0, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', marginTop: '5px' }}>
+            <Calendar size={12} /> 
+            {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
         </div>
 
-        <div 
-          onClick={() => setActiveTab('logs')} 
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'logs' ? '#38bdf8' : '#94a3b8' }}
-        >
-          <ClipboardList size={22} />
-          <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>Log Absen</span>
+        {/* Main Content Area */}
+        <div style={{ padding: '0 20px' }}>
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'logs' && renderLogs()}
+          {activeTab === 'gps' && renderGPS()}
+          {activeTab === 'leave' && renderLeave()}
+        </div>
+        
+        <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.7rem', color: '#64748b' }}>
+          <p>Data diperbarui secara otomatis.</p>
         </div>
 
-        <div 
-          onClick={() => setActiveTab('gps')} 
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'gps' ? '#38bdf8' : '#94a3b8' }}
-        >
-          <MapIcon size={22} />
-          <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'gps' ? 'bold' : 'normal' }}>Peta GPS</span>
-        </div>
+        {/* Bottom Navigation Bar */}
+        <div style={{ 
+          position: 'absolute', 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          background: '#1e293b', 
+          borderTop: '1px solid #334155',
+          borderBottomLeftRadius: window.innerWidth > 500 ? '15px' : '0',
+          borderBottomRightRadius: window.innerWidth > 500 ? '15px' : '0',
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '12px 10px',
+          zIndex: 1000,
+          boxShadow: '0 -4px 10px rgba(0,0,0,0.2)'
+        }}>
+          
+          <div 
+            onClick={() => setActiveTab('dashboard')} 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'dashboard' ? '#38bdf8' : '#94a3b8' }}
+          >
+            <TrendingUp size={22} />
+            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal' }}>Dashboard</span>
+          </div>
 
-        <div 
-          onClick={() => setActiveTab('leave')} 
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', position: 'relative', color: activeTab === 'leave' ? '#38bdf8' : '#94a3b8' }}
-        >
-          <FileText size={22} />
-          <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'leave' ? 'bold' : 'normal' }}>Pengajuan</span>
-          {leaveRequests.length > 0 && (
-            <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '0.6rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>
-              {leaveRequests.length}
-            </span>
-          )}
+          <div 
+            onClick={() => setActiveTab('logs')} 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'logs' ? '#38bdf8' : '#94a3b8' }}
+          >
+            <ClipboardList size={22} />
+            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>Log Absen</span>
+          </div>
+
+          <div 
+            onClick={() => setActiveTab('gps')} 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'gps' ? '#38bdf8' : '#94a3b8' }}
+          >
+            <MapIcon size={22} />
+            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'gps' ? 'bold' : 'normal' }}>Peta GPS</span>
+          </div>
+
+          <div 
+            onClick={() => setActiveTab('leave')} 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', position: 'relative', color: activeTab === 'leave' ? '#38bdf8' : '#94a3b8' }}
+          >
+            <FileText size={22} />
+            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'leave' ? 'bold' : 'normal' }}>Pengajuan</span>
+            {leaveRequests.length > 0 && (
+              <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '0.6rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>
+                {leaveRequests.length}
+              </span>
+            )}
+          </div>
+
         </div>
 
       </div>
-
     </div>
   );
 };
