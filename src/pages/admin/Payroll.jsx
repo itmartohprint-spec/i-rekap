@@ -112,11 +112,12 @@ const Payroll = () => {
       const canvas = await html2canvas(slipElement, { scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       
-      const pdf = new jsPDF('p', 'mm', 'a5'); // A5 size for payslip
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdf = new jsPDF('p', 'mm', 'a4'); // Use A4 to prevent cut-off
+      const margin = 15; // 15mm margin
+      const pdfWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight);
       pdf.save(`Slip_Gaji_${selectedSlip.name}_${selectedMonth}.pdf`);
     } catch (error) {
       console.error("Error generating PDF", error);
