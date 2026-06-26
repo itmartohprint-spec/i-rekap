@@ -254,7 +254,7 @@ const Payroll = () => {
               </table>
 
               {/* Earnings & Deductions */}
-              <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
+              <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px', color: '#334155' }}>
                 <h4 style={{ margin: '0 0 10px 0', color: '#0f172a', borderBottom: '1px solid #cbd5e1', paddingBottom: '5px' }}>PENERIMAAN</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
                   <span>
@@ -317,7 +317,7 @@ const Payroll = () => {
             <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
               {/* Riwayat Keterlambatan */}
               <h3 style={{ margin: '0 0 10px 0', color: '#ef4444', fontSize: '1.2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Riwayat Keterlambatan</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px', fontSize: '0.9rem', color: '#334155' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', color: '#64748b', textAlign: 'left' }}>
                     <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TANGGAL</th>
@@ -355,7 +355,7 @@ const Payroll = () => {
 
               {/* Riwayat Lembur */}
               <h3 style={{ margin: '0 0 10px 0', color: '#0f172a', fontSize: '1.2rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Riwayat Lembur</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', color: '#334155' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc', color: '#64748b', textAlign: 'left' }}>
                     <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>TANGGAL</th>
