@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const AttendanceReports = () => {
   const [logs, setLogs] = useState([]);
@@ -86,7 +86,7 @@ const AttendanceReports = () => {
       tableRows.push(logData);
     });
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 35,
@@ -96,6 +96,36 @@ const AttendanceReports = () => {
     });
 
     doc.save(`Laporan_Absensi_${new Date().getTime()}.pdf`);
+  };
+
+  const handleExportCSV = () => {
+    if (filteredLogs.length === 0) return;
+    
+    const headers = ["Tanggal", "Nama Karyawan", "Tipe", "Jam Masuk", "Jam Pulang", "Status"];
+    
+    const rows = filteredLogs.map(log => {
+      const typeStr = log.type === 'in' ? 'Masuk' : log.type === 'out' ? 'Pulang' : log.type === 'early' ? 'Pulang Cepat' : log.type;
+      return [
+        log.date,
+        log.employees ? log.employees.name : log.employee_id,
+        typeStr,
+        log.time_in || '-',
+        log.time_out || '-',
+        log.status || '-'
+      ].map(val => `"${val}"`).join(","); // Escape values with quotes to handle commas
+    });
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\\n"
+      + rows.join("\\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Data_Absensi_${new Date().getTime()}.csv`);
+    document.body.appendChild(link); // Required for FF
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -111,7 +141,11 @@ const AttendanceReports = () => {
             <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
             <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
           </div>
-          <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportCSV} disabled={filteredLogs.length === 0}>Export CSV (Excel)</button>
+            <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
+          </div>
         </div>
       </div>
 
