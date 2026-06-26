@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import AttendanceMatrix from '../../components/AttendanceMatrix';
 
 const AttendanceReports = () => {
+  const [viewMode, setViewMode] = useState('list');
+  const [matrixMonth, setMatrixMonth] = useState(new Date().getMonth() + 1);
+  const [matrixYear, setMatrixYear] = useState(new Date().getFullYear());
+  
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -130,25 +135,45 @@ const AttendanceReports = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h2>Laporan Absensi</h2>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
-            <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
-            <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportCSV} disabled={filteredLogs.length === 0}>Export CSV (Excel)</button>
-            <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
-          </div>
+        
+        <div style={{ display: 'flex', background: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+          <button 
+            onClick={() => setViewMode('list')}
+            style={{ padding: '0.5rem 1rem', background: viewMode === 'list' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'list' ? 'bold' : 'normal', boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'list' ? '#0f172a' : '#64748b' }}
+          >
+            Daftar Log Harian
+          </button>
+          <button 
+            onClick={() => setViewMode('matrix')}
+            style={{ padding: '0.5rem 1rem', background: viewMode === 'matrix' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'matrix' ? 'bold' : 'normal', boxShadow: viewMode === 'matrix' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'matrix' ? '#0f172a' : '#64748b' }}
+          >
+            Rekap Matriks (Bulanan)
+          </button>
         </div>
       </div>
 
-      <div className="admin-table-container">
+      {viewMode === 'list' ? (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
+                <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
+                <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportCSV} disabled={filteredLogs.length === 0}>Export CSV (Excel)</button>
+                <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-table-container">
         <table className="admin-table">
           <thead>
             <tr>
@@ -222,6 +247,54 @@ const AttendanceReports = () => {
             </div>
           </div>
         </div>
+      )}
+      </>
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', gap: '1rem', alignItems: 'center', background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>Pilih Bulan:</span>
+              <select className="form-input" style={{ width: 'auto', minWidth: '120px' }} value={matrixMonth} onChange={e => setMatrixMonth(parseInt(e.target.value))}>
+                {Array.from({length: 12}, (_, i) => i + 1).map(m => (
+                  <option key={m} value={m}>{new Date(2000, m - 1, 1).toLocaleString('id-ID', { month: 'long' })}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>Tahun:</span>
+              <input type="number" className="form-input" style={{ width: '80px' }} value={matrixYear} onChange={e => setMatrixYear(parseInt(e.target.value))} />
+            </div>
+            <button 
+              className="btn-primary" 
+              style={{ background: '#10b981', marginLeft: 'auto' }}
+              onClick={() => {
+                // Export Logic for Matrix is handled in AttendanceMatrix component, or we can just trigger it here.
+                // We'll let the user use the export button inside the AttendanceMatrix component later if needed.
+                const table = document.getElementById('matrix-table');
+                if (!table) return;
+                
+                let csv = [];
+                for (let i = 0; i < table.rows.length; i++) {
+                    let row = [], cols = table.rows[i].querySelectorAll("td, th");
+                    for (let j = 0; j < cols.length; j++) 
+                        row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+                    csv.push(row.join(","));
+                }
+                const csvFile = new Blob([csv.join("\\n")], {type: "text/csv"});
+                const downloadLink = document.createElement("a");
+                downloadLink.download = `Rekap_Absensi_${matrixYear}_${matrixMonth}.csv`;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+              }}
+            >
+              Export Matrix ke CSV
+            </button>
+          </div>
+          
+          <AttendanceMatrix month={matrixMonth} year={matrixYear} licenseCode={localStorage.getItem('valid-license')} />
+        </>
       )}
     </div>
   );
