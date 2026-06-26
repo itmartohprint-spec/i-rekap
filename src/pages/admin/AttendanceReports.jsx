@@ -141,7 +141,6 @@ const AttendanceReports = () => {
             <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
             <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
           </div>
-          </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportCSV} disabled={filteredLogs.length === 0}>Export CSV (Excel)</button>
             <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
