@@ -283,7 +283,6 @@ ${base64Data}
                 <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportExcel} disabled={filteredLogs.length === 0}>Export Excel</button>
                 <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
               </div>
             </div>
