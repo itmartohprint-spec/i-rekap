@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, MapPin, Users, FileText, Calendar, Wallet, CalendarDays, DollarSign, Settings as SettingsIcon, LogOut, Fingerprint, ChevronLeft, ChevronRight, Upload, X, RefreshCcw } from 'lucide-react';
+import { LayoutDashboard, MapPin, Users, FileText, Calendar, Wallet, CalendarDays, DollarSign, Settings as SettingsIcon, LogOut, Fingerprint, ChevronLeft, ChevronRight, Upload, X, RefreshCcw, Camera } from 'lucide-react';
 import './AdminLayout.css';
 
 const MagicLogo = ({ src, className, style }) => {
