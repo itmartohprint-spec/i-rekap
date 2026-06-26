@@ -246,8 +246,9 @@ const EmployeeList = () => {
             
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                {/* Column 1 */}
+                {/* Kolom 1: Informasi Pribadi & Kontak */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <h4 style={{ margin: 0, paddingBottom: '0.5rem', borderBottom: '2px solid #e2e8f0', color: '#0f172a', fontSize: '1.1rem' }}>Informasi Pribadi & Kontak</h4>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>ID Karyawan (Untuk Login)</label>
                     <input type="text" className="form-input" required value={formData.id} onChange={e => setFormData({...formData, id: e.target.value})} placeholder="Contoh: EMP-004" />
@@ -277,6 +278,19 @@ const EmployeeList = () => {
                     </select>
                   </div>
                   <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>No. WhatsApp</label>
+                    <input type="text" className="form-input" value={formData.whatsapp || ''} onChange={e => setFormData({...formData, whatsapp: e.target.value})} placeholder="Contoh: 081234567890" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Alamat Lengkap</label>
+                    <textarea className="form-input" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Alamat domisili saat ini" style={{ minHeight: '80px', resize: 'vertical' }}></textarea>
+                  </div>
+                </div>
+
+                {/* Kolom 2: Pekerjaan & Gaji */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  <h4 style={{ margin: 0, paddingBottom: '0.5rem', borderBottom: '2px solid #e2e8f0', color: '#0f172a', fontSize: '1.1rem' }}>Pekerjaan & Penggajian</h4>
+                  <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                       <label style={{ fontWeight: 600, color: '#334155' }}>Divisi / Bagian</label>
                       <button type="button" onClick={handleAddDivision} style={{ background: 'transparent', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem', padding: '0.1rem 0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#0062ff', fontWeight: 600 }}>+ Tambah Divisi</button>
@@ -288,17 +302,12 @@ const EmployeeList = () => {
                       ))}
                     </select>
                   </div>
-                </div>
-
-                {/* Column 2 */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Alamat Lengkap</label>
-                    <textarea className="form-input" value={formData.address || ''} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Alamat domisili saat ini" style={{ minHeight: '80px', resize: 'vertical' }}></textarea>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>No. WhatsApp</label>
-                    <input type="text" className="form-input" value={formData.whatsapp || ''} onChange={e => setFormData({...formData, whatsapp: e.target.value})} placeholder="Contoh: 081234567890" />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Status Karyawan</label>
+                    <select className="form-input" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                      <option value="Aktif Bekerja">Aktif Bekerja</option>
+                      <option value="Non-Aktif">Non-Aktif</option>
+                    </select>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Password Akun (Untuk Login)</label>
@@ -324,13 +333,6 @@ const EmployeeList = () => {
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Jatah Cuti Tahunan (Hari)</label>
                     <input type="number" className="form-input" value={formData.leaveQuota || '12'} onChange={e => setFormData({...formData, leaveQuota: e.target.value})} />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Status Karyawan</label>
-                    <select className="form-input" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                      <option value="Aktif Bekerja">Aktif Bekerja</option>
-                      <option value="Non-Aktif">Non-Aktif</option>
-                    </select>
                   </div>
                 </div>
               </div>
