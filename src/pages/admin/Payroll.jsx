@@ -45,8 +45,7 @@ const Payroll = () => {
         .select('*')
         .eq('license_code', licenseCode)
         .gte('date', startDate)
-        .lte('date', endDate)
-        .eq('type', 'in');
+        .lte('date', endDate);
 
       // 3. Fetch Approved Cash Advances
       const { data: cashAdvances } = await supabase
@@ -59,11 +58,12 @@ const Payroll = () => {
         const computedPayroll = employees.map(emp => {
           const empAttendance = attendances ? attendances.filter(a => a.employee_id === emp.id) : [];
           
-          // Separate on-time and late
-          const lateLogs = empAttendance.filter(a => a.status === 'Terlambat' || a.status === 'late');
-          const onTimeLogs = empAttendance.filter(a => a.status !== 'Terlambat' && a.status !== 'late');
+          // Separate on-time and late (only for check-in)
+          const inLogs = empAttendance.filter(a => a.type === 'in');
+          const lateLogs = inLogs.filter(a => a.status === 'Terlambat' || a.status === 'late');
+          const onTimeLogs = inLogs.filter(a => a.status !== 'Terlambat' && a.status !== 'late');
           
-          const daysPresent = empAttendance.length;
+          const daysPresent = inLogs.length;
           
           const salaryType = emp.salary_type || 'Harian';
           const dailySalary = emp.daily_salary ? parseFloat(emp.daily_salary) : 0;
@@ -80,13 +80,31 @@ const Payroll = () => {
 
           const takeHomePay = totalBaseSalary - totalDeduction;
           
-          // Generate dummy overtime data based on attendance date for demo purposes
-          const overtimeLogs = empAttendance.map(a => ({
-            date: a.date,
-            start: '19:00:00',
-            end: '22:00:00',
-            totalHours: 3
-          })).slice(0, 2); // just 2 demo overtime logs
+          // Process Real Overtime Data
+          const overtimeInLogs = empAttendance.filter(a => a.type === 'overtime_in');
+          const overtimeOutLogs = empAttendance.filter(a => a.type === 'overtime_out');
+          
+          const overtimeLogs = overtimeInLogs.map(inLog => {
+            const outLog = overtimeOutLogs.find(o => o.date === inLog.date);
+            const start = inLog.time_in;
+            const end = outLog ? (outLog.time_out || outLog.time_in) : '-'; // some cases time_out might be used or time_in
+            
+            let totalHours = 0;
+            if (outLog && start && end !== '-') {
+               const startD = new Date(`${inLog.date}T${start}`);
+               const endD = new Date(`${outLog.date}T${end}`);
+               let diff = (endD - startD) / 3600000;
+               if (diff < 0) diff += 24; // Cross midnight
+               totalHours = Math.floor(diff);
+            }
+            
+            return {
+              date: inLog.date,
+              start: start,
+              end: end,
+              totalHours: totalHours
+            };
+          });
 
           return {
             ...emp,
