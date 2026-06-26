@@ -4,20 +4,24 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../../lib/supabaseClient';
 
-// Custom Map Markers to avoid Vite image path issues and look more modern
-const officeIcon = L.divIcon({
-  html: `<div style="background-color: #10b981; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
-  className: '',
-  iconSize: [26, 26],
-  iconAnchor: [13, 13]
-});
-
-const dangerIcon = L.divIcon({
-  html: `<div style="background-color: #ef4444; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>`,
-  className: '',
-  iconSize: [26, 26],
-  iconAnchor: [13, 13]
-});
+// Function to create custom dynamic marker
+const createCustomMarker = (log) => {
+  const photo = log.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(log.employeeName) + '&background=0D8ABC&color=fff';
+  const borderColor = log.status === 'Hadir' ? '#10b981' : '#ef4444';
+  const animation = log.status === 'Hadir' ? '' : 'animation: pulse 2s infinite;';
+  
+  return L.divIcon({
+    html: `
+      <div style="display: flex; flex-direction: column; align-items: center; width: 60px; transform: translate(-15px, -15px);">
+        <div style="background-image: url('${photo}'); background-size: cover; background-position: center; background-color: #fff; width: 40px; height: 40px; border-radius: 50%; border: 3px solid ${borderColor}; box-shadow: 0 0 10px rgba(0,0,0,0.3); ${animation}"></div>
+        <div style="background: rgba(255,255,255,0.9); border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; margin-top: 4px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.2); text-align: center;">${log.employeeName}</div>
+      </div>
+    `,
+    className: '',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+};
 
 const TrackGPS = () => {
   const [officeLocation, setOfficeLocation] = useState(null);
@@ -59,6 +63,7 @@ const TrackGPS = () => {
     
     if (!licenseCode) return;
 
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
     const { data, error } = await supabase
       .from('attendance')
       .select(`
@@ -66,15 +71,25 @@ const TrackGPS = () => {
         employees (name)
       `)
       .eq('license_code', licenseCode)
+      .eq('date', today)
       .not('location_lat', 'is', null)
-      .not('location_lng', 'is', null);
+      .not('location_lng', 'is', null)
+      .order('created_at', { ascending: false });
 
     if (data && !error) {
+      const uniqueEmployees = new Set();
+      const filteredData = data.filter(d => {
+        if (uniqueEmployees.has(d.employee_id)) return false;
+        uniqueEmployees.add(d.employee_id);
+        return true;
+      });
+
       // Map supabase data to expected format for markers
-      const mappedLogs = data.map(d => ({
+      const mappedLogs = filteredData.map(d => ({
         id: d.id,
         location: { lat: parseFloat(d.location_lat), lng: parseFloat(d.location_lng) },
         employeeName: d.employees?.name || d.employee_id,
+        photo_url: d.photo_url,
         type: d.type || 'in',
         time: d.time_in || d.time_out || d.date,
         status: d.status
@@ -123,7 +138,7 @@ const TrackGPS = () => {
             <Marker 
               key={log.id || index} 
               position={[log.location.lat, log.location.lng]} 
-              icon={log.status === 'Hadir' ? officeIcon : dangerIcon}
+              icon={createCustomMarker(log)}
             >
               <Popup>
                 <strong>{log.employeeName}</strong><br/>
