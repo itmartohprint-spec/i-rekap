@@ -8,6 +8,7 @@ const Payroll = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7)); // YYYY-MM
   const [selectedSlip, setSelectedSlip] = useState(null);
+  const [companyInfo, setCompanyInfo] = useState(null);
 
   useEffect(() => {
     generatePayroll();
@@ -22,6 +23,14 @@ const Payroll = () => {
     }
 
     try {
+      // Fetch Company Info
+      const { data: companyData } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('license_code', licenseCode)
+        .single();
+      if (companyData) setCompanyInfo(companyData);
+
       // 1. Fetch Employees
       const { data: employees } = await supabase
         .from('employees')
@@ -185,6 +194,14 @@ const Payroll = () => {
             <div id="payslip-print-area" style={{ padding: '40px', background: '#fff' }}>
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '2px dashed #cbd5e1', paddingBottom: '20px', marginBottom: '20px' }}>
+                {companyInfo && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '15px' }}>
+                    {companyInfo.logo_url && (
+                      <img src={companyInfo.logo_url} alt="Logo" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
+                    )}
+                    <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.2rem', fontWeight: '800' }}>{companyInfo.company_name}</h3>
+                  </div>
+                )}
                 <h2 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '1.5rem' }}>SLIP GAJI KARYAWAN</h2>
                 <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Periode: {new Date(selectedMonth + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
               </div>
