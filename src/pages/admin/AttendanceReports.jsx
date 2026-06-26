@@ -308,7 +308,7 @@ const AttendanceReports = () => {
                 window.dispatchEvent(new Event('export-matrix-csv'));
               }}
             >
-              Export Matrix ke CSV
+              Export Matrix ke Excel
             </button>
           </div>
           

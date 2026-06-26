@@ -22,59 +22,63 @@ const AttendanceMatrix = ({ month, year, licenseCode }) => {
     const handleExport = () => {
       if (!data) return;
       
-      let csv = [];
-      // 1. KOP SURAT
-      csv.push(`"${companyName}"`);
-      csv.push(`"Rekap Absensi Bulanan"`);
-      csv.push(`"${periodStr}"`);
-      csv.push(`"Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen"`);
-      csv.push(`""`); // Empty line
+      const tableHTML = document.getElementById('matrix-table').outerHTML;
       
-      // 2. HEADER
-      let headerRow1 = ['"No"', '"Nama Karyawan"'];
-      for (let i = 1; i <= daysInMonth; i++) {
-        if (i === 1) headerRow1.push(`"Tanggal (${year}-${String(month).padStart(2, '0')})"`);
-        else headerRow1.push(`""`);
-      }
-      headerRow1.push('"Rekapitulasi Total"');
-      for (let i = 0; i < 6; i++) headerRow1.push(`""`);
-      csv.push(headerRow1.join(","));
+      const kopSurat = `
+        <table style="margin-bottom: 20px; font-family: Arial, sans-serif;">
+          <tr>
+            <td colspan="4"><h2>${companyName}</h2></td>
+          </tr>
+          <tr>
+            <td colspan="4"><h4>Rekap Absensi Bulanan</h4></td>
+          </tr>
+          <tr>
+            <td colspan="4"><p>${periodStr}</p></td>
+          </tr>
+          <tr>
+            <td colspan="4"><p>Divisi: Semua Divisi | Jenis Absen: Semua Jenis Absen</p></td>
+          </tr>
+        </table>
+      `;
 
-      let headerRow2 = ['""', '""'];
-      for (let i = 1; i <= daysInMonth; i++) {
-        headerRow2.push(`"${String(i).padStart(2, '0')}"`);
-      }
-      headerRow2.push('"Masuk"', '"Izin"', '"Sakit"', '"Cuti"', '"Alpa"', '"Jam Kerja"', '"Lembur"');
-      csv.push(headerRow2.join(","));
+      const template = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="UTF-8">
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>Rekap Matrix</x:Name>
+                  <x:WorksheetOptions>
+                    <x:DisplayGridlines/>
+                  </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+          <style>
+            table { border-collapse: collapse; }
+            th, td { border: 1px solid black; }
+          </style>
+        </head>
+        <body>
+          ${kopSurat}
+          ${tableHTML}
+        </body>
+        </html>
+      `;
       
-      // 3. BODY
-      Object.keys(data).sort().forEach(div => {
-        let divRow = [`"DIVISI: ${div.toUpperCase()}"`];
-        for (let i = 0; i < daysInMonth + 8; i++) divRow.push(`""`);
-        csv.push(divRow.join(","));
-        
-        data[div].forEach((emp, empIdx) => {
-          let empRow = [`"${empIdx + 1}"`, `"${emp.name}"`];
-          daysArray.forEach(d => {
-            const cell = emp.daily[d];
-            if (['S', 'I', 'C'].includes(cell.timeIn)) {
-              empRow.push(`"${cell.timeIn}"`);
-            } else {
-              empRow.push(`"${cell.timeIn} - ${cell.timeOut}"`);
-            }
-          });
-          empRow.push(`"${emp.totalMasuk}"`, `"${emp.totalIzin}"`, `"${emp.totalSakit}"`, `"${emp.totalCuti}"`, `"${emp.totalAlpa}"`, `"${emp.totalJamKerja}j"`, `"${emp.totalLembur}j"`);
-          csv.push(empRow.join(","));
-        });
-      });
-
-      const csvFile = new Blob([csv.join("\\n")], {type: "text/csv;charset=utf-8;"});
+      const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
       const downloadLink = document.createElement("a");
-      downloadLink.download = `Rekap_Absensi_${year}_${month}.csv`;
-      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.download = `Rekap_Absensi_Matrix_${year}_${month}.xls`;
+      downloadLink.href = window.URL.createObjectURL(blob);
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
+      document.body.removeChild(downloadLink);
     };
 
     window.addEventListener('export-matrix-csv', handleExport);
