@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import AttendanceMatrix from '../../components/AttendanceMatrix';
+import AttendanceWeeklyMatrix from '../../components/AttendanceWeeklyMatrix';
 
 const AttendanceReports = () => {
   const [viewMode, setViewMode] = useState('list');
@@ -254,6 +255,12 @@ ${base64Data}
           >
             Rekap Matriks (Bulanan)
           </button>
+          <button 
+            onClick={() => setViewMode('matrix-weekly')}
+            style={{ padding: '0.5rem 1rem', background: viewMode === 'matrix-weekly' ? '#fff' : 'transparent', border: 'none', borderRadius: '6px', fontWeight: viewMode === 'matrix-weekly' ? 'bold' : 'normal', boxShadow: viewMode === 'matrix-weekly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer', color: viewMode === 'matrix-weekly' ? '#0f172a' : '#64748b' }}
+          >
+            Rekap Matriks (Rentang Waktu)
+          </button>
         </div>
       </div>
 
@@ -370,25 +377,25 @@ ${base64Data}
       </>
       ) : (
         <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', gap: '1rem', alignItems: 'center', background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>Pilih Bulan:</span>
-              <select className="form-input" style={{ width: 'auto', minWidth: '120px' }} value={matrixMonth} onChange={e => setMatrixMonth(parseInt(e.target.value))}>
-                {Array.from({length: 12}, (_, i) => i + 1).map(m => (
-                  <option key={m} value={m}>{new Date(2000, m - 1, 1).toLocaleString('id-ID', { month: 'long' })}</option>
-                ))}
-              </select>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>Tahun:</span>
-              <input type="number" className="form-input" style={{ width: '80px' }} value={matrixYear} onChange={e => setMatrixYear(parseInt(e.target.value))} />
-            </div>
+      {viewMode === 'matrix' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem', gap: '1rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Bulan:</span>
+            <select className="form-input" style={{ width: 'auto' }} value={matrixMonth} onChange={e => setMatrixMonth(Number(e.target.value))}>
+              {Array.from({length: 12}, (_, i) => i + 1).map(m => (
+                <option key={m} value={m}>{new Date(2000, m - 1).toLocaleString('id-ID', { month: 'long' })}</option>
+              ))}
+            </select>
+            <select className="form-input" style={{ width: 'auto' }} value={matrixYear} onChange={e => setMatrixYear(Number(e.target.value))}>
+              {[...Array(5)].map((_, i) => {
+                const y = new Date().getFullYear() - i;
+                return <option key={y} value={y}>{y}</option>;
+              })}
+            </select>
             <button 
               className="btn-primary" 
               style={{ background: '#10b981', marginLeft: 'auto' }}
-              onClick={() => {
-                window.dispatchEvent(new Event('export-matrix-csv'));
-              }}
+              onClick={() => window.dispatchEvent(new Event('export-matrix-csv'))}
             >
               Export Matrix ke Excel
             </button>
@@ -396,6 +403,39 @@ ${base64Data}
           
           <AttendanceMatrix month={matrixMonth} year={matrixYear} licenseCode={localStorage.getItem('valid-license')} />
         </>
+      )}
+
+      {viewMode === 'matrix-weekly' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Mulai:</span>
+              <input type="date" className="form-input" style={{ width: 'auto' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Sampai:</span>
+              <input type="date" className="form-input" style={{ width: 'auto' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+            </div>
+            <button 
+              className="btn-primary" 
+              style={{ background: '#10b981', marginLeft: 'auto' }}
+              onClick={() => window.dispatchEvent(new Event('export-weekly-matrix'))}
+              disabled={!startDate || !endDate}
+            >
+              Export Matrix ke Excel
+            </button>
+          </div>
+          
+          {(!startDate || !endDate) ? (
+            <div style={{ padding: '3rem', textAlign: 'center', background: '#fff', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+              <p style={{ color: '#64748b' }}>Silakan pilih tanggal Mulai dan Sampai terlebih dahulu.</p>
+            </div>
+          ) : (
+            <AttendanceWeeklyMatrix startDate={startDate} endDate={endDate} licenseCode={localStorage.getItem('valid-license')} />
+          )}
+        </>
+      )}
+      </>
       )}
     </div>
   );
