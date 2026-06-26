@@ -62,32 +62,6 @@ const AdminLayout = () => {
     name: adminRole === 'demo' ? (localStorage.getItem('demo-company-name') || 'Akun Demo') : (localStorage.getItem('company-name') || 'PT Maju Bersama'),
     address: localStorage.getItem(`office_address_${localStorage.getItem('valid-license')}`) || 'Gedung i-rekap, Jl. Jend. Sudirman Kav. 21'
   });
-  const [giftSrc, setGiftSrc] = useState('/gift.jpg');
-
-  useEffect(() => {
-    // Process gift image to remove black background
-    const img = new window.Image();
-    img.src = '/gift.jpg';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        // If pixel is very dark (black background)
-        if (data[i] < 30 && data[i+1] < 30 && data[i+2] < 30) {
-          // Soft blending for edges
-          const maxVal = Math.max(data[i], data[i+1], data[i+2]);
-          data[i+3] = maxVal > 0 ? (maxVal / 30) * 255 : 0; 
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-      setGiftSrc(canvas.toDataURL());
-    };
-  }, []);
   
   const handleRestrictedAccess = (e) => {
     if (adminRole === 'demo') {
@@ -221,7 +195,7 @@ const AdminLayout = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <img 
-              src={giftSrc} 
+              src="/gift.png" 
               alt="Gift Character" 
               style={{ 
                 height: '60px', 
