@@ -76,8 +76,40 @@ const Payroll = () => {
           }
 
           const empCashAdvances = cashAdvances ? cashAdvances.filter(c => c.employee_id === emp.id) : [];
-          const totalDeduction = empCashAdvances.reduce((sum, c) => sum + parseFloat(c.amount), 0);
+          const cashAdvanceDeduction = empCashAdvances.reduce((sum, c) => sum + parseFloat(c.amount), 0);
 
+          // Calculate Lateness Deduction based on Settings
+          const deductionType = localStorage.getItem(`payroll_late_type_${licenseCode}`) || 'proportional';
+          const deductionAmountStr = localStorage.getItem(`payroll_late_amount_${licenseCode}`);
+          const deductionAmountFlat = deductionAmountStr ? parseFloat(deductionAmountStr) : 0;
+
+          let lateDeductionTotal = 0;
+          
+          const processedLateLogs = lateLogs.map(log => {
+            const shiftStart = new Date(`${log.date}T08:00:00`).getTime();
+            const actualIn = log.created_at ? new Date(log.created_at).getTime() + (7 * 3600000) : new Date(`${log.date}T${log.time_in || '09:00:00'}`).getTime();
+            let minutesLate = Math.floor((actualIn - shiftStart) / 60000);
+            if (minutesLate < 0) minutesLate = 0;
+            
+            let deduction = 0;
+            if (deductionType === 'proportional') {
+              deduction = (dailySalary / 8 / 60) * minutesLate;
+            } else if (deductionType === 'flat_minute') {
+              deduction = deductionAmountFlat * minutesLate;
+            } else if (deductionType === 'flat_incident') {
+              deduction = deductionAmountFlat;
+            }
+            
+            lateDeductionTotal += deduction;
+            
+            return {
+              ...log,
+              minutesLate,
+              deduction
+            };
+          });
+
+          const totalDeduction = cashAdvanceDeduction + lateDeductionTotal;
           const takeHomePay = totalBaseSalary - totalDeduction;
           
           // Process Real Overtime Data
@@ -111,8 +143,10 @@ const Payroll = () => {
             daysPresent,
             totalBaseSalary,
             totalDeduction,
+            cashAdvanceDeduction,
+            lateDeductionTotal,
             takeHomePay,
-            lateLogs,
+            lateLogs: processedLateLogs,
             overtimeLogs
           };
         });
@@ -287,7 +321,11 @@ const Payroll = () => {
                 <h4 style={{ margin: '15px 0 10px 0', color: '#0f172a', borderBottom: '1px solid #cbd5e1', paddingBottom: '5px' }}>POTONGAN</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
                   <span>Pinjaman / Kasbon</span>
-                  <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{selectedSlip.totalDeduction > 0 ? '-' + formatRupiah(selectedSlip.totalDeduction) : 'Rp 0'}</span>
+                  <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{selectedSlip.cashAdvanceDeduction > 0 ? '-' + formatRupiah(selectedSlip.cashAdvanceDeduction) : 'Rp 0'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
+                  <span>Keterlambatan ({selectedSlip.lateLogs ? selectedSlip.lateLogs.reduce((sum, log) => sum + (log.minutesLate || 0), 0) : 0} Menit)</span>
+                  <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{selectedSlip.lateDeductionTotal > 0 ? '-' + formatRupiah(selectedSlip.lateDeductionTotal) : 'Rp 0'}</span>
                 </div>
               </div>
 
@@ -349,20 +387,13 @@ const Payroll = () => {
                 </thead>
                 <tbody>
                   {selectedDetail.lateLogs && selectedDetail.lateLogs.length > 0 ? selectedDetail.lateLogs.map((log, idx) => {
-                    // For demo, calculate fake minutes late
-                    const shiftStart = new Date(`${log.date}T08:00:00`).getTime();
-                    const actualIn = log.created_at ? new Date(log.created_at).getTime() + (7 * 3600000) : new Date(`${log.date}T${log.time_in || '09:00:00'}`).getTime();
-                    let minutesLate = Math.floor((actualIn - shiftStart) / 60000);
-                    if (minutesLate < 0) minutesLate = 45; // fallback
-                    const deduction = (selectedDetail.daily_salary / 8 / 60) * minutesLate;
-
                     return (
                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '10px' }}>{log.date}</td>
                         <td style={{ padding: '10px' }}>Shift Normal (08:00 - 17:00)</td>
                         <td style={{ padding: '10px' }}>{log.time_in || '08:45:00'}</td>
-                        <td style={{ padding: '10px' }}>{minutesLate} Menit</td>
-                        <td style={{ padding: '10px' }}>{formatRupiah(deduction)}</td>
+                        <td style={{ padding: '10px' }}>{log.minutesLate || 0} Menit</td>
+                        <td style={{ padding: '10px' }}>{formatRupiah(log.deduction || 0)}</td>
                       </tr>
                     );
                   }) : (

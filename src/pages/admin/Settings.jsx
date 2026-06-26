@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MapPin, Wifi, Palette, Bell, Building, Globe, Check, Upload, Database, Download, RefreshCw, AlertTriangle } from 'lucide-react';
+import { MapPin, Wifi, Palette, Bell, Building, Globe, Check, Upload, Database, Download, RefreshCw, AlertTriangle, Coins } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
 const Settings = () => {
@@ -23,6 +23,11 @@ const Settings = () => {
   const [networkSettings, setNetworkSettings] = useState({
     ipAddresses: '192.168.1.100, 114.120.30.22',
     requireIp: true
+  });
+
+  const [payrollSettings, setPayrollSettings] = useState({
+    lateDeductionType: 'proportional', // 'proportional', 'flat_minute', 'flat_incident'
+    lateDeductionAmount: '0'
   });
 
   useEffect(() => {
@@ -58,6 +63,15 @@ const Settings = () => {
         requireIp: savedRequireIp === 'true'
       });
     }
+
+    const savedLateType = localStorage.getItem(`payroll_late_type_${licenseCode}`);
+    const savedLateAmount = localStorage.getItem(`payroll_late_amount_${licenseCode}`);
+    if (savedLateType) {
+      setPayrollSettings({
+        lateDeductionType: savedLateType,
+        lateDeductionAmount: savedLateAmount || '0'
+      });
+    }
   };
 
   const handleSaveLocation = () => {
@@ -90,6 +104,17 @@ const Settings = () => {
     localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
     localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
     alert("✅ Pengaturan Jaringan berhasil disimpan!");
+  };
+
+  const handleSavePayroll = () => {
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!licenseCode) {
+      alert("Gagal: Kode lisensi tidak ditemukan!");
+      return;
+    }
+    localStorage.setItem(`payroll_late_type_${licenseCode}`, payrollSettings.lateDeductionType);
+    localStorage.setItem(`payroll_late_amount_${licenseCode}`, payrollSettings.lateDeductionAmount);
+    alert("✅ Pengaturan Penggajian berhasil disimpan!");
   };
 
   const handleProfileChange = (e) => {
@@ -242,6 +267,13 @@ const Settings = () => {
             >
               <div className="icon-box"><Building size={18} /></div>
               <span>Profil Perusahaan</span>
+            </button>
+            <button 
+              className={`settings-nav-item ${activeTab === 'penggajian' ? 'active' : ''}`}
+              onClick={() => setActiveTab('penggajian')}
+            >
+              <div className="icon-box"><Coins size={18} /></div>
+              <span>Penggajian & Potongan</span>
             </button>
             <button 
               className={`settings-nav-item ${activeTab === 'notifikasi' ? 'active' : ''}`}
@@ -506,6 +538,56 @@ const Settings = () => {
           )}
 
           {/* PERUSAHAAN TAB (Placeholder) */}
+          {activeTab === 'penggajian' && (
+            <div className="settings-card glass-panel fade-in">
+              <div className="settings-header">
+                <h3><Coins size={20} style={{ marginRight: '10px' }} /> Pengaturan Penggajian & Potongan</h3>
+                <p>Atur bagaimana sistem menghitung denda keterlambatan karyawan.</p>
+              </div>
+              <div className="settings-body">
+                <div className="form-group">
+                  <label>Metode Potongan Keterlambatan</label>
+                  <select 
+                    className="form-input"
+                    value={payrollSettings.lateDeductionType}
+                    onChange={(e) => setPayrollSettings({...payrollSettings, lateDeductionType: e.target.value})}
+                  >
+                    <option value="proportional">Proporsional (Dihitung per menit dari Gaji Harian)</option>
+                    <option value="flat_minute">Denda Tetap per Menit Keterlambatan</option>
+                    <option value="flat_incident">Denda Tetap per Kejadian (Sekali Telat)</option>
+                  </select>
+                  <div className="helper-text">
+                    Tentukan apakah karyawan dipotong sesuai harga per menit waktu kerjanya, atau nominal denda tetap (flat).
+                  </div>
+                </div>
+
+                {payrollSettings.lateDeductionType !== 'proportional' && (
+                  <div className="form-group">
+                    <label>Nominal Denda (Rp)</label>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      placeholder="Contoh: 10000"
+                      value={payrollSettings.lateDeductionAmount}
+                      onChange={(e) => setPayrollSettings({...payrollSettings, lateDeductionAmount: e.target.value})}
+                    />
+                    <div className="helper-text">
+                      {payrollSettings.lateDeductionType === 'flat_minute' 
+                        ? 'Nominal ini akan dikalikan dengan total menit keterlambatan (Misal: Telat 10 menit x Rp 10.000 = Rp 100.000).'
+                        : 'Nominal ini akan dipotong setiap kali karyawan tercatat terlambat, berapapun lama keterlambatannya (Misal: Rp 50.000/hari telat).'}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="settings-footer">
+                <button className="btn-primary" onClick={handleSavePayroll}>
+                  <Check size={18} style={{ marginRight: '8px' }} />
+                  Simpan Pengaturan
+                </button>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'perusahaan' && (
             <div className="settings-card glass-panel fade-in">
               <div className="settings-header">
