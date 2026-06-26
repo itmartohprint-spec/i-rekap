@@ -40,7 +40,7 @@ const UserDashboard = () => {
 
   const fetchTodayHistory = async () => {
     setIsLoadingHistory(true);
-    const today = new Date().toLocaleDateString('id-ID');
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
     
     const { data } = await supabase
       .from('attendance')
@@ -183,27 +183,57 @@ const UserDashboard = () => {
           <div className="date-display">{formatDate(currentTime)}</div>
           
           <div className="action-buttons">
-            <button className="btn-checkin" onClick={() => handleOpenAttendance('in')}>
+            <button 
+              className="btn-checkin" 
+              onClick={() => handleOpenAttendance('in')}
+              disabled={todayHistory.some(log => log.type === 'in')}
+              style={todayHistory.some(log => log.type === 'in') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <LogIn size={24} />
-              Absen Masuk
+              {todayHistory.some(log => log.type === 'in') ? 'Sudah Masuk' : 'Absen Masuk'}
             </button>
-            <button className="btn-checkout" onClick={() => handleOpenAttendance('out')}>
+            <button 
+              className="btn-checkout" 
+              onClick={() => handleOpenAttendance('out')}
+              disabled={todayHistory.some(log => log.type === 'out')}
+              style={todayHistory.some(log => log.type === 'out') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <LogOut size={24} />
-              Absen Pulang
+              {todayHistory.some(log => log.type === 'out') ? 'Sudah Pulang' : 'Absen Pulang'}
             </button>
-            <button className="btn-leave" onClick={() => handleOpenAttendance('leave')}>
+            <button 
+              className="btn-leave" 
+              onClick={() => handleOpenAttendance('leave')}
+              disabled={todayHistory.some(log => log.type === 'leave' || log.type === 'Sakit' || log.type === 'Izin')}
+              style={todayHistory.some(log => log.type === 'leave' || log.type === 'Sakit' || log.type === 'Izin') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <Activity size={24} />
               Izin / Sakit
             </button>
-            <button className="btn-early" onClick={() => handleOpenAttendance('early')}>
+            <button 
+              className="btn-early" 
+              onClick={() => handleOpenAttendance('early')}
+              disabled={todayHistory.some(log => log.type === 'early')}
+              style={todayHistory.some(log => log.type === 'early') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <Timer size={24} />
               Pulang Cepat
             </button>
-            <button className="btn-overtime-in" onClick={() => handleOpenAttendance('overtime_in')}>
+            <button 
+              className="btn-overtime-in" 
+              onClick={() => handleOpenAttendance('overtime_in')}
+              disabled={todayHistory.some(log => log.type === 'overtime_in')}
+              style={todayHistory.some(log => log.type === 'overtime_in') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <Zap size={24} />
               Lembur Masuk
             </button>
-            <button className="btn-overtime-out" onClick={() => handleOpenAttendance('overtime_out')}>
+            <button 
+              className="btn-overtime-out" 
+              onClick={() => handleOpenAttendance('overtime_out')}
+              disabled={todayHistory.some(log => log.type === 'overtime_out')}
+              style={todayHistory.some(log => log.type === 'overtime_out') ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            >
               <ZapOff size={24} />
               Lembur Keluar
             </button>
@@ -223,9 +253,9 @@ const UserDashboard = () => {
                   </div>
                   <div className="history-details">
                     <strong style={{ textTransform: 'capitalize' }}>{log.type.replace('_', ' ')}</strong>
-                    <span>{log.status === 'late' ? 'Terlambat' : 'Sesuai Lokasi & IP'}</span>
+                    <span>{log.status === 'late' || log.status === 'Terlambat' ? 'Terlambat' : 'Sesuai Lokasi & IP'}</span>
                   </div>
-                  <div className="history-time">{log.check_in_time}</div>
+                  <div className="history-time">{log.time_in || log.time_out}</div>
                 </div>
               ))
             ) : (
