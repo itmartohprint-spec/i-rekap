@@ -35,7 +35,10 @@ const Payroll = () => {
         .single();
         
       if (companyData) {
-        setCompanyInfo(companyData);
+        setCompanyInfo({
+          company_name: companyData.company_name || savedName,
+          logo_url: companyData.logo_url || savedLogo
+        });
       } else {
         setCompanyInfo({ company_name: savedName, logo_url: savedLogo });
       }
