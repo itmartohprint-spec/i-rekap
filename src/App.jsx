@@ -23,6 +23,7 @@ import LiveMonitor from './pages/LiveMonitor';
 import TrackGPS from './pages/admin/TrackGPS';
 import LeaveManagement from './pages/admin/LeaveManagement';
 import CashAdvance from './pages/admin/CashAdvance';
+import AdminSidak from './pages/admin/AdminSidak';
 import ShiftSchedule from './pages/admin/ShiftSchedule';
 import Payroll from './pages/admin/Payroll';
 
@@ -64,6 +65,7 @@ function App() {
           <Route path="reports" element={<AttendanceReports />} />
           <Route path="leave" element={<LeaveManagement />} />
           <Route path="cash-advance" element={<CashAdvance />} />
+          <Route path="sidak" element={<AdminSidak />} />
           <Route path="shift" element={<ShiftSchedule />} />
           <Route path="payroll" element={<Payroll />} />
           <Route path="settings" element={<Settings />} />

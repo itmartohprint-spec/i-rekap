@@ -165,6 +165,10 @@ const AdminLayout = () => {
             <Wallet size={20} />
             <span>Kasbon</span>
           </NavLink>
+          <NavLink to="/admin/sidak" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Riwayat Sidak">
+            <Camera size={20} />
+            <span>Riwayat Sidak</span>
+          </NavLink>
           <NavLink to="/admin/shift" onClick={handleRestrictedAccess} className={({isActive}) => isActive ? "nav-item active" : "nav-item"} title="Jadwal Shift">
             <CalendarDays size={20} />
             <span>Jadwal Shift {adminRole === 'demo' && '🔒'}</span>

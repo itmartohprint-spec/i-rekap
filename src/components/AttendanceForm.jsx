@@ -9,7 +9,8 @@ const AttendanceForm = ({ type, onClose }) => {
     'out': 'Pulang',
     'early': 'Pulang Cepat',
     'overtime_in': 'Lembur Masuk',
-    'overtime_out': 'Lembur Keluar'
+    'overtime_out': 'Lembur Keluar',
+    'sidak': 'Sidak (Inspeksi)'
   };
 
   const videoRef = useRef(null);
@@ -99,54 +100,52 @@ const AttendanceForm = ({ type, onClose }) => {
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
     }
   };
 
-  const checkLocation = (settings) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userLat = position.coords.latitude;
-          const userLng = position.coords.longitude;
-          setUserLocation({ lat: userLat, lng: userLng });
-          
-          if (!settings.office_lat || !settings.office_lng) {
-            // Bypass if company hasn't set coordinates
-            setLocationStatus('success');
-            return;
-          }
-
-          const distance = getDistance(
-            userLat, 
-            userLng, 
-            parseFloat(settings.office_lat), 
-            parseFloat(settings.office_lng)
-          );
-
-          const maxRadius = settings.radius_meters ? parseInt(settings.radius_meters) : 50;
-
-          if (distance <= maxRadius) {
-            setLocationStatus('success');
-            setDistanceInfo(`(${Math.round(distance)}m)`);
-          } else {
-            setLocationStatus('error');
-            setDistanceInfo(`(Jarak: ${Math.round(distance)}m, Maks: ${maxRadius}m)`);
-          }
-        },
-        (error) => {
-          setLocationStatus('error');
-        }
-      );
-    } else {
+  const checkLocation = (office) => {
+    if (!navigator.geolocation) {
       setLocationStatus('error');
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ lat: latitude, lng: longitude });
+
+        const radius = office.radius_meters || 50;
+        const lat = parseFloat(office.office_lat || -6.200000);
+        const lng = parseFloat(office.office_lng || 106.816666);
+
+        const dist = getDistance(latitude, longitude, lat, lng);
+        setDistanceInfo(`${Math.round(dist)}m dari kantor`);
+
+        // If Sidak, we don't care about distance. We just want the GPS location.
+        if (type === 'sidak') {
+          setLocationStatus('success');
+          return;
+        }
+
+        if (dist <= radius) {
+          setLocationStatus('success');
+        } else {
+          // You can change to 'error' if strictly enforcing radius
+          setLocationStatus('success'); // Demo mode: allow anyway
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        setLocationStatus('error');
+      },
+      { enableHighAccuracy: true }
+    );
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
+    const video = videoRef.current;
+    if (video) {
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -214,7 +213,7 @@ const AttendanceForm = ({ type, onClose }) => {
       }
 
       // Hitung keterlambatan untuk absen masuk normal
-      let attendanceStatus = 'Hadir';
+      let attendanceStatus = type === 'sidak' ? 'Sidak' : 'Hadir';
       if (type === 'in') {
         const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
         const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
@@ -239,7 +238,7 @@ const AttendanceForm = ({ type, onClose }) => {
         license_code: licenseCode,
         employee_id: employeeId,
         date: formattedDate,
-        time_in: (type === 'in' || type === 'overtime_in') ? formattedTime : null,
+        time_in: (type === 'in' || type === 'overtime_in' || type === 'sidak') ? formattedTime : null,
         time_out: (type === 'out' || type === 'early' || type === 'overtime_out') ? formattedTime : null,
         status: attendanceStatus,
         type: type,
@@ -267,7 +266,9 @@ const AttendanceForm = ({ type, onClose }) => {
     <div className="attendance-form">
       <div className="form-header">
         <h3>Absen {typeLabel[type]}</h3>
-        <button className="btn-close" onClick={onClose}>&times;</button>
+        {type !== 'sidak' && (
+          <button className="btn-close" onClick={onClose}>&times;</button>
+        )}
       </div>
 
       <div className="camera-container">

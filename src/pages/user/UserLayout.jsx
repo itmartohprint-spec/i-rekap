@@ -1,11 +1,13 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { Home, Clock, Calendar, Wallet, Bell } from 'lucide-react';
+import SidakOverlay from '../../components/SidakOverlay';
 import './UserLayout.css';
 
 const UserLayout = () => {
   return (
     <div className="mobile-app-container">
+      <SidakOverlay />
       <main className="mobile-main-content">
         <Outlet />
       </main>

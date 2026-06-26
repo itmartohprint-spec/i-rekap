@@ -64,6 +64,10 @@ const LiveMonitor = () => {
 
   const [officeLocation, setOfficeLocation] = useState([-6.200000, 106.816666]);
 
+  // New States for Sidak
+  const [employeesList, setEmployeesList] = useState([]);
+  const [sidakHistory, setSidakHistory] = useState([]);
+
   useEffect(() => {
     if (!licenseCode) {
       navigate('/');
@@ -96,11 +100,12 @@ const LiveMonitor = () => {
       // 1. Get Total Employees
       const { data: employees, count: empCount } = await supabase
         .from('employees')
-        .select('name', { count: 'exact' })
+        .select('id, name', { count: 'exact' })
         .eq('license_code', licenseCode);
 
       if (employees && employees.length > 0) {
         setCompanyName('Monitor Eksekutif');
+        setEmployeesList(employees);
       }
       const totalEmp = empCount || 0;
 
@@ -125,8 +130,9 @@ const LiveMonitor = () => {
         .eq('date', today)
         .order('created_at', { ascending: false });
 
-      // Calculate stats based on today
+      // Calculate stats based on today (only regular in)
       const todaysInLogs = attendanceData ? attendanceData.filter(log => log.type === 'in') : [];
+      const sidakLogs = attendanceData ? attendanceData.filter(log => log.type === 'sidak') : [];
       
       const presentEmployees = new Set(todaysInLogs.map(log => log.employee_id));
       const present = presentEmployees.size;
@@ -164,6 +170,15 @@ const LiveMonitor = () => {
           }
         });
         setGpsLogs(uniqueGPS);
+
+        // Format Sidak History
+        const formattedSidak = sidakLogs.map(log => ({
+          id: log.id,
+          employeeName: log.employees ? log.employees.name : log.employee_id,
+          time: log.time_in,
+          photo_url: log.photo_url,
+        }));
+        setSidakHistory(formattedSidak);
       }
 
       // 3. Get Leave Requests (Pending)
@@ -196,6 +211,28 @@ const LiveMonitor = () => {
     if (error) {
       alert("Gagal memproses pengajuan: " + error.message);
       fetchRealData(); // refresh on fail
+    }
+  };
+
+  const handleTriggerSidak = async (employeeId) => {
+    const targetName = employeeId === 'all' ? 'SEMUA KARYAWAN' : employeesList.find(e => e.id === employeeId)?.name;
+    const confirmMsg = `Anda yakin ingin melakukan Sidak Mendadak kepada ${targetName}? Layar HP mereka akan terkunci sampai mereka mengambil foto selfie dan GPS.`;
+    
+    if (window.confirm(confirmMsg)) {
+      const { error } = await supabase
+        .from('announcements')
+        .insert([{
+          title: 'SIDAK',
+          content: employeeId, // 'all' or specific ID
+          type: 'sidak',
+          license_code: licenseCode
+        }]);
+      
+      if (!error) {
+        alert(`Perintah Sidak ke ${targetName} berhasil dikirim! Silakan tunggu beberapa saat untuk melihat foto mereka masuk di riwayat bawah.`);
+      } else {
+        alert('Gagal mengirim perintah sidak.');
+      }
     }
   };
 
@@ -237,7 +274,7 @@ const LiveMonitor = () => {
       {/* Recent Logs List */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
         <h3 style={{ fontSize: '1.05rem', margin: 0, color: '#f8fafc' }}>Presensi Masuk Terbaru</h3>
-        <button onClick={() => setActiveTab('logs')} style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.85rem' }}>Lihat Semua</button>
+        <button onClick={() => setActiveTab('logs')} style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.85rem', cursor: 'pointer' }}>Lihat Semua</button>
       </div>
       
       <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '10px', borderRadius: '15px' }}>
@@ -439,6 +476,67 @@ const LiveMonitor = () => {
     </>
   );
 
+  const renderSidak = () => (
+    <>
+      <h3 style={{ fontSize: '1.2rem', marginBottom: '15px', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ color: '#ef4444' }}>🚨</span> Eksekusi Sidak
+      </h3>
+      
+      <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '15px', borderRadius: '15px', marginBottom: '20px' }}>
+        <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '15px', lineHeight: '1.5' }}>
+          Gunakan fitur ini untuk meminta foto <b>Selfie + Lokasi GPS</b> seketika dari karyawan. Layar HP karyawan akan terkunci oleh peringatan Sidak sampai mereka merespons.
+        </p>
+        
+        <button 
+          onClick={() => handleTriggerSidak('all')}
+          style={{ width: '100%', padding: '12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(239, 68, 68, 0.4)' }}
+        >
+          🚨 SIDAK MASSAL (SEMUA KARYAWAN)
+        </button>
+      </div>
+
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '10px', color: '#f8fafc' }}>Atau Sidak Individu:</h3>
+      <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '10px', borderRadius: '15px', marginBottom: '25px', maxHeight: '200px', overflowY: 'auto' }}>
+        {employeesList.map(emp => (
+          <div key={emp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', borderBottom: '1px solid #334155' }}>
+            <span style={{ color: '#fff', fontSize: '0.9rem' }}>{emp.name}</span>
+            <button 
+              onClick={() => handleTriggerSidak(emp.id)}
+              style={{ background: 'transparent', color: '#f59e0b', border: '1px solid #f59e0b', padding: '4px 10px', borderRadius: '5px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}
+            >
+              Sidak
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '10px', color: '#f8fafc' }}>Hasil Sidak Hari Ini:</h3>
+      <div style={{ background: '#1e293b', border: '1px solid #334155', padding: '10px', borderRadius: '15px' }}>
+        {sidakHistory.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {sidakHistory.map(log => (
+              <div key={log.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '10px', borderBottom: '1px solid #334155' }}>
+                <img 
+                  src={log.photo_url || `https://ui-avatars.com/api/?name=${log.employeeName}&background=0D8ABC&color=fff`} 
+                  alt="avatar" 
+                  style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover', border: '2px solid #ef4444' }}
+                />
+                <div>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#ffffff' }}>{log.employeeName}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#10b981' }}>Merespons: {log.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '0.85rem' }}>
+            Belum ada data foto sidak yang masuk hari ini.
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div style={{ background: '#020617', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
       <div style={{ 
@@ -486,6 +584,7 @@ const LiveMonitor = () => {
           {activeTab === 'logs' && renderLogs()}
           {activeTab === 'gps' && renderGPS()}
           {activeTab === 'leave' && renderLeave()}
+          {activeTab === 'sidak' && renderSidak()}
         </div>
         
         <div style={{ textAlign: 'center', marginTop: '30px', fontSize: '0.7rem', color: '#64748b' }}>
@@ -504,46 +603,56 @@ const LiveMonitor = () => {
           borderBottomRightRadius: window.innerWidth > 500 ? '15px' : '0',
           display: 'flex',
           justifyContent: 'space-around',
-          padding: '12px 10px',
+          padding: '12px 5px',
           zIndex: 1000,
           boxShadow: '0 -4px 10px rgba(0,0,0,0.2)'
         }}>
           
           <div 
             onClick={() => setActiveTab('dashboard')} 
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'dashboard' ? '#38bdf8' : '#94a3b8' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'dashboard' ? '#38bdf8' : '#94a3b8', flex: 1 }}
           >
-            <TrendingUp size={22} />
-            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal' }}>Dashboard</span>
+            <TrendingUp size={20} />
+            <span style={{ fontSize: '0.6rem', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal' }}>Beranda</span>
           </div>
 
           <div 
             onClick={() => setActiveTab('logs')} 
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'logs' ? '#38bdf8' : '#94a3b8' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'logs' ? '#38bdf8' : '#94a3b8', flex: 1 }}
           >
-            <ClipboardList size={22} />
-            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>Log Absen</span>
+            <ClipboardList size={20} />
+            <span style={{ fontSize: '0.6rem', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>Log Absen</span>
           </div>
 
           <div 
             onClick={() => setActiveTab('gps')} 
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'gps' ? '#38bdf8' : '#94a3b8' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'gps' ? '#38bdf8' : '#94a3b8', flex: 1 }}
           >
-            <MapIcon size={22} />
-            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'gps' ? 'bold' : 'normal' }}>Peta GPS</span>
+            <MapIcon size={20} />
+            <span style={{ fontSize: '0.6rem', fontWeight: activeTab === 'gps' ? 'bold' : 'normal' }}>Peta</span>
           </div>
 
           <div 
             onClick={() => setActiveTab('leave')} 
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', position: 'relative', color: activeTab === 'leave' ? '#38bdf8' : '#94a3b8' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', position: 'relative', color: activeTab === 'leave' ? '#38bdf8' : '#94a3b8', flex: 1 }}
           >
-            <FileText size={22} />
-            <span style={{ fontSize: '0.65rem', fontWeight: activeTab === 'leave' ? 'bold' : 'normal' }}>Pengajuan</span>
+            <FileText size={20} />
+            <span style={{ fontSize: '0.6rem', fontWeight: activeTab === 'leave' ? 'bold' : 'normal' }}>Pengajuan</span>
             {leaveRequests.length > 0 && (
-              <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: '#fff', fontSize: '0.6rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>
+              <span style={{ position: 'absolute', top: '-5px', right: '5px', background: '#ef4444', color: '#fff', fontSize: '0.55rem', padding: '2px 5px', borderRadius: '50%', fontWeight: 'bold' }}>
                 {leaveRequests.length}
               </span>
             )}
+          </div>
+
+          <div 
+            onClick={() => setActiveTab('sidak')} 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: 'pointer', color: activeTab === 'sidak' ? '#ef4444' : '#94a3b8', flex: 1 }}
+          >
+            <div style={{ background: activeTab === 'sidak' ? 'rgba(239,68,68,0.2)' : 'transparent', padding: '2px', borderRadius: '50%' }}>
+              <Users size={20} />
+            </div>
+            <span style={{ fontSize: '0.6rem', fontWeight: activeTab === 'sidak' ? 'bold' : 'normal' }}>Sidak</span>
           </div>
 
         </div>
