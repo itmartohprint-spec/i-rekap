@@ -421,7 +421,7 @@
 }
 
 .nav-mascot {
-  height: 40px;
+  height: 60px;
   width: auto;
   animation: mascotWave 2.5s infinite ease-in-out;
   transform-origin: bottom center;
