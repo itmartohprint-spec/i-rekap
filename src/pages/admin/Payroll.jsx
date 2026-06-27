@@ -201,6 +201,37 @@ const Payroll = () => {
     }
   };
 
+  const handleExportExcel = () => {
+    if (payrollData.length === 0) {
+      alert('Tidak ada data untuk diexport');
+      return;
+    }
+
+    let csvContent = "Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
+
+    payrollData.forEach(emp => {
+      const name = `"${emp.name}"`;
+      const days = emp.daysPresent;
+      const base = emp.totalBaseSalary;
+      const kasbon = emp.cashAdvanceDeduction;
+      const late = emp.lateDeductionTotal;
+      const total = emp.takeHomePay;
+      
+      csvContent += `${name},${days},${base},${kasbon},${late},${total}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_Gaji_${selectedMonth}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -213,6 +244,12 @@ const Payroll = () => {
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
+          <button 
+            onClick={handleExportExcel}
+            style={{ padding: '0.8rem 1.2rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Proses Excel
+          </button>
           <button className="btn-primary" onClick={markAsPaid}>Kirim Slip Gaji</button>
         </div>
       </div>
