@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Lock, QrCode, Building } from 'lucide-react';
+import { CheckCircle, Lock, QrCode, Building, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import './Checkout.css';
 
@@ -123,6 +123,14 @@ const Checkout = () => {
         {/* Left Side: Order Summary */}
         <div className="checkout-summary">
           <div>
+            <button 
+              onClick={() => navigate('/')} 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', cursor: 'pointer', marginBottom: '2rem', fontSize: '0.9rem', padding: '0.5rem 1rem', borderRadius: '8px', transition: 'background 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            >
+              <ArrowLeft size={18} /> Kembali
+            </button>
             <div className="summary-header">
               <h2>Ringkasan Pesanan</h2>
               <p>Selesaikan pembayaran untuk mulai menggunakan i-Rekap.</p>
