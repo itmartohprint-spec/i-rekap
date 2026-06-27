@@ -28,14 +28,6 @@ const UserHistory = () => {
       .eq('employee_id', userId)
       .order('date', { ascending: false });
 
-    // 2. Fetch leave/sick requests
-    const { data: leaveData } = await supabase
-      .from('leave_requests')
-      .select('*')
-      .eq('license_code', licenseCode)
-      .eq('employee_id', userId)
-      .order('start_date', { ascending: false });
-
     const grouped = {};
 
     if (attendanceData) {
@@ -52,23 +44,6 @@ const UserHistory = () => {
           if (grouped[log.date].status === '-') {
             grouped[log.date].status = 'Hadir'; // if they only checked out
           }
-        }
-      });
-    }
-
-    if (leaveData) {
-      leaveData.forEach(leave => {
-        const d = leave.start_date;
-        // Extract "Izin" or "Sakit" from "[Izin] Reason..."
-        let leaveType = 'Cuti/Izin';
-        if (leave.reason && leave.reason.startsWith('[')) {
-          leaveType = leave.reason.split(']')[0].replace('[', '');
-        }
-
-        if (!grouped[d]) {
-          grouped[d] = { id: `leave-${leave.id}`, date: d, timeIn: '-', timeOut: '-', status: leaveType };
-        } else {
-          grouped[d].status = leaveType; // override status if there's a leave on that date
         }
       });
     }
