@@ -43,7 +43,10 @@ const QuickLeaveForm = ({ onClose }) => {
     }
 
     const leaveTypeString = leaveType === 'izin' ? 'Izin' : 'Sakit';
-    const finalReason = `[${leaveTypeString}] ${reason}`;
+    let finalReason = `[${leaveTypeString}] ${reason}`;
+    if (attachment) {
+      finalReason += ` (File lampiran diserahkan: ${attachment.name})`;
+    }
     
     const submitToSupabase = async () => {
       const { error } = await supabase.from('leave_requests').insert([{
@@ -52,8 +55,7 @@ const QuickLeaveForm = ({ onClose }) => {
         start_date: formattedDate,
         end_date: formattedDate,
         reason: finalReason,
-        status: 'pending',
-        attachment_url: attachment ? attachment.name : null
+        status: 'pending'
       }]);
 
       if (error) {
