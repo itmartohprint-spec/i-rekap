@@ -170,6 +170,27 @@ const LandingPage = () => {
         </div>
       </section>
 
+      <section className="clients-section">
+        <h2 className="section-title">Pelanggan Kami</h2>
+        <div className="clients-grid">
+          <div className="client-logo-wrapper">
+            <img src="/logo-ass.jpg" alt="ASS (Anugrah Stainless Steel)" title="ASS (Anugrah Stainless Steel)" />
+          </div>
+          <div className="client-logo-wrapper">
+            <img src="/logo-jskm.png" alt="PT. Jasa Service Komputer Mart" title="PT. Jasa Service Komputer Mart" />
+          </div>
+          <div className="client-logo-wrapper">
+            <img src="/logo-rag.png" alt="RAG Indonesia" title="RAG Indonesia" />
+          </div>
+          <div className="client-logo-wrapper">
+            <img src="/logo-pkl-jskm.png" alt="PKL JSKM" title="PKL JSKM" />
+          </div>
+          <div className="client-logo-wrapper empty">
+            <span>(Menunggu Logo ke-5)</span>
+          </div>
+        </div>
+      </section>
+
       <footer className="landing-footer">
         <p>&copy; 2026 i-rekap SaaS. Hak Cipta Dilindungi.</p>
       </footer>
