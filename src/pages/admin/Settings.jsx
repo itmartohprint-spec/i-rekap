@@ -94,14 +94,7 @@ const Settings = () => {
     let licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return alert("Sesi tidak valid!");
 
-    // Simpan di LocalStorage (sebagai cache)
-    localStorage.setItem(`office_address_${licenseCode}`, locationSettings.officeAddress);
-    localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
-    localStorage.setItem(`office_lng_${licenseCode}`, locationSettings.officeLng);
-    localStorage.setItem(`radius_meters_${licenseCode}`, locationSettings.radiusMeters);
-    localStorage.setItem(`lateness_tolerance_${licenseCode}`, locationSettings.latenessTolerance);
-
-    // Simpan ke Supabase
+    // Simpan ke Supabase terlebih dahulu
     const success = await updateSupabase({
       office_address: locationSettings.officeAddress,
       office_lat: locationSettings.officeLat,
@@ -111,6 +104,13 @@ const Settings = () => {
     });
 
     if (success) {
+      // Hanya simpan di LocalStorage jika berhasil di Cloud
+      localStorage.setItem(`office_address_${licenseCode}`, locationSettings.officeAddress);
+      localStorage.setItem(`office_lat_${licenseCode}`, locationSettings.officeLat);
+      localStorage.setItem(`office_lng_${licenseCode}`, locationSettings.officeLng);
+      localStorage.setItem(`radius_meters_${licenseCode}`, locationSettings.radiusMeters);
+      localStorage.setItem(`lateness_tolerance_${licenseCode}`, locationSettings.latenessTolerance);
+      
       window.dispatchEvent(new Event('locationSettingsUpdated'));
       alert("✅ Pengaturan Lokasi berhasil disimpan dan disinkronkan ke seluruh perangkat!");
     }
@@ -120,30 +120,32 @@ const Settings = () => {
     let licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return alert("Sesi tidak valid!");
     
-    localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
-    localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
-    
     const success = await updateSupabase({
       network_ips: networkSettings.ipAddresses,
       require_ip: networkSettings.requireIp
     });
 
-    if (success) alert("✅ Pengaturan Jaringan berhasil disinkronkan!");
+    if (success) {
+      localStorage.setItem(`network_ips_${licenseCode}`, networkSettings.ipAddresses);
+      localStorage.setItem(`network_require_${licenseCode}`, networkSettings.requireIp);
+      alert("✅ Pengaturan Jaringan berhasil disinkronkan!");
+    }
   };
 
   const handleSavePayroll = async () => {
     let licenseCode = localStorage.getItem('valid-license');
     if (!licenseCode) return alert("Sesi tidak valid!");
 
-    localStorage.setItem(`payroll_late_type_${licenseCode}`, payrollSettings.lateDeductionType);
-    localStorage.setItem(`payroll_late_amount_${licenseCode}`, payrollSettings.lateDeductionAmount);
-    
     const success = await updateSupabase({
       late_deduction_type: payrollSettings.lateDeductionType,
       late_deduction_amount: payrollSettings.lateDeductionAmount
     });
 
-    if (success) alert("✅ Pengaturan Penggajian berhasil disinkronkan!");
+    if (success) {
+      localStorage.setItem(`payroll_late_type_${licenseCode}`, payrollSettings.lateDeductionType);
+      localStorage.setItem(`payroll_late_amount_${licenseCode}`, payrollSettings.lateDeductionAmount);
+      alert("✅ Pengaturan Penggajian berhasil disinkronkan!");
+    }
   };
 
   const handleProfileChange = (e) => {
@@ -162,10 +164,6 @@ const Settings = () => {
   };
 
   const handleSaveProfile = async () => {
-    localStorage.setItem('company-logo', companyProfile.logo);
-    localStorage.setItem('company-name', companyProfile.name);
-    localStorage.setItem('company-hr-email', companyProfile.hrEmail);
-    
     const success = await updateSupabase({
       logo_url: companyProfile.logo,
       name: companyProfile.name,
@@ -173,6 +171,9 @@ const Settings = () => {
     });
 
     if (success) {
+      localStorage.setItem('company-logo', companyProfile.logo);
+      localStorage.setItem('company-name', companyProfile.name);
+      localStorage.setItem('company-hr-email', companyProfile.hrEmail);
       window.dispatchEvent(new Event('profileUpdated'));
       alert("✅ Profil perusahaan berhasil disinkronkan!");
     }

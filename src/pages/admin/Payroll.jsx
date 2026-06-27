@@ -52,13 +52,16 @@ const Payroll = () => {
         .lte('date', endDate);
 
       // 3. Fetch Approved Cash Advances for selected month
-      const { data: cashAdvances } = await supabase
+      const { data: cashAdvances, error: caError } = await supabase
         .from('cash_advances')
         .select('*')
         .eq('license_code', licenseCode)
         .eq('status', 'approved')
         .gte('created_at', `${startDate}T00:00:00.000Z`)
         .lte('created_at', `${endDate}T23:59:59.999Z`);
+      
+      console.log('DEBUG KASBON for', selectedMonth, ':', cashAdvances, 'Error:', caError);
+      window.__debugKasbon = cashAdvances;
 
       if (employees) {
         const computedPayroll = employees.map(emp => {
@@ -395,7 +398,7 @@ const Payroll = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2>Penggajian & Lembur</h2>
+        <h2>Penggajian & Lembur <span style={{fontSize: '12px', color: 'red'}}>(Debug: {window.__debugKasbon ? window.__debugKasbon.length : 0} kasbon found)</span></h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <input 
             type="month" 
