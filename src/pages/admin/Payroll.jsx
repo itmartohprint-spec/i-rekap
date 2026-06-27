@@ -265,19 +265,22 @@ const Payroll = () => {
       return;
     }
 
-    let csvContent = "No Rekening,Nama Bank,Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
+    // Format standar untuk Copy-Paste ke Template BCA KlikBCA Bisnis (Multi Auto Transfer)
+    let csvContent = "No Rekening Penerima,Nama Penerima,Nominal,Keterangan\n";
 
     payrollData.forEach(emp => {
-      const rek = emp.account_number ? `="${emp.account_number}"` : "-";
-      const bank = emp.bank_name || "-";
-      const name = `"${emp.name}"`;
-      const days = emp.daysPresent;
-      const base = emp.totalBaseSalary;
-      const kasbon = emp.cashAdvanceDeduction;
-      const late = emp.lateDeductionTotal;
-      const total = emp.takeHomePay;
+      // Gunakan kutip tunggal di awal rekening agar Excel tidak menghilangkan angka 0 di depan
+      const rek = emp.account_number ? `'${emp.account_number}` : "-";
+      const name = emp.name || "-";
+      const nominal = emp.takeHomePay || 0;
       
-      csvContent += `${rek},${bank},${name},${days},${base},${kasbon},${late},${total}\n`;
+      // Bulan format MM-YYYY
+      const dateObj = new Date(selectedMonth + '-01');
+      const monthName = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      const keterangan = `Gaji ${monthName}`;
+      
+      // Bungkus dengan tanda kutip agar koma di nama tidak merusak CSV
+      csvContent += `"${rek}","${name}","${nominal}","${keterangan}"\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -285,7 +288,7 @@ const Payroll = () => {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `Laporan_Gaji_Transfer_${selectedMonth}.csv`);
+    link.setAttribute("download", `Format_BCA_Payroll_${selectedMonth}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
