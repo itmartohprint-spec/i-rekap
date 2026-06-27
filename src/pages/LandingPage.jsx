@@ -58,27 +58,35 @@ const LandingPage = () => {
         <div className="features-grid" style={{ marginBottom: '5rem' }}>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_k1.webp')} style={{ cursor: 'pointer' }}><img src="/feat_k1.webp" alt="Absensi Mobile" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><MapPin size={32} /></div>
-            <h3>Absensi Mobile (GPS & Selfie)</h3>
-            <p>Absen mudah dari HP dengan deteksi lokasi akurat (GPS) dan verifikasi wajah (Selfie) untuk menghindari penitipan absen.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><MapPin size={32} /></div>
+              <h3>Absensi Mobile (GPS & Selfie)</h3>
+              <p>Absen mudah dari HP dengan deteksi lokasi akurat (GPS) dan verifikasi wajah (Selfie) untuk menghindari penitipan absen.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_k2.webp')} style={{ cursor: 'pointer' }}><img src="/feat_k2.webp" alt="Pengajuan Cuti" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><CalendarRange size={32} /></div>
-            <h3>Pengajuan Cuti & Izin</h3>
-            <p>Ajukan cuti, izin, atau sakit langsung dari genggaman tanpa perlu mengisi form kertas lagi. Pantau status persetujuannya secara real-time.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><CalendarRange size={32} /></div>
+              <h3>Pengajuan Cuti & Izin</h3>
+              <p>Ajukan cuti, izin, atau sakit langsung dari genggaman tanpa perlu mengisi form kertas lagi. Pantau status persetujuannya secara real-time.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_k3.webp')} style={{ cursor: 'pointer' }}><img src="/feat_k3.webp" alt="Pengajuan Kasbon" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><Banknote size={32} /></div>
-            <h3>Pengajuan Kasbon (Cash Advance)</h3>
-            <p>Fasilitas pengajuan pinjaman karyawan/kasbon dengan sistem pemotongan otomatis pada saat penggajian.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><Banknote size={32} /></div>
+              <h3>Pengajuan Kasbon (Cash Advance)</h3>
+              <p>Fasilitas pengajuan pinjaman karyawan/kasbon dengan sistem pemotongan otomatis pada saat penggajian.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_k4.webp')} style={{ cursor: 'pointer' }}><img src="/feat_k4.webp" alt="Slip Gaji Digital" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><FileText size={32} /></div>
-            <h3>Riwayat & Slip Gaji Digital</h3>
-            <p>Pantau riwayat absensi harian dan unduh slip gaji bulanan secara mandiri dengan mudah dan aman.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><FileText size={32} /></div>
+              <h3>Riwayat & Slip Gaji Digital</h3>
+              <p>Pantau riwayat absensi harian dan unduh slip gaji bulanan secara mandiri dengan mudah dan aman.</p>
+            </div>
           </div>
         </div>
 
@@ -91,27 +99,35 @@ const LandingPage = () => {
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a1.webp')} style={{ cursor: 'pointer' }}><img src="/feat_a1.webp" alt="Live Tracking" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><Wifi size={32} /></div>
-            <h3>Live Tracking & Validasi IP</h3>
-            <p>Pantau lokasi karyawan secara langsung dan validasi jaringan internet (IP Address) yang mereka gunakan saat absen.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><Wifi size={32} /></div>
+              <h3>Live Tracking & Validasi IP</h3>
+              <p>Pantau lokasi karyawan secara langsung dan validasi jaringan internet (IP Address) yang mereka gunakan saat absen.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a2.webp')} style={{ cursor: 'pointer' }}><img src="/feat_a2.webp" alt="Manajemen Shift" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><Clock size={32} /></div>
-            <h3>Manajemen Shift & Jadwal</h3>
-            <p>Atur jadwal kerja fleksibel, shift bergulir, dan toleransi keterlambatan sesuai kebijakan perusahaan Anda.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><Clock size={32} /></div>
+              <h3>Manajemen Shift & Jadwal</h3>
+              <p>Atur jadwal kerja fleksibel, shift bergulir, dan toleransi keterlambatan sesuai kebijakan perusahaan Anda.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a3.webp')} style={{ cursor: 'pointer' }}><img src="/feat_a3.webp" alt="Approval System" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><CheckCircle size={32} /></div>
-            <h3>Approval System 1-Klik</h3>
-            <p>Setujui atau tolak pengajuan cuti, lembur, dan kasbon karyawan hanya dengan satu klik dari dashboard Anda.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><CheckCircle size={32} /></div>
+              <h3>Approval System 1-Klik</h3>
+              <p>Setujui atau tolak pengajuan cuti, lembur, dan kasbon karyawan hanya dengan satu klik dari dashboard Anda.</p>
+            </div>
           </div>
           <div className="feature-card">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a4.webp')} style={{ cursor: 'pointer' }}><img src="/feat_a4.webp" alt="Payroll Otomatis" /></div>
-            <div className="feature-icon" style={{ marginTop: '1.5rem' }}><DollarSign size={32} /></div>
-            <h3>Payroll & Ekspor Laporan Otomatis</h3>
-            <p>Sistem rekap gaji otomatis berdasarkan kehadiran dan kasbon. Ekspor laporan ke PDF atau Excel dengan instan.</p>
+            <div className="feature-content">
+              <div className="feature-icon"><DollarSign size={32} /></div>
+              <h3>Payroll & Ekspor Laporan Otomatis</h3>
+              <p>Sistem rekap gaji otomatis berdasarkan kehadiran dan kasbon. Ekspor laporan ke PDF atau Excel dengan instan.</p>
+            </div>
           </div>
         </div>
       </section>

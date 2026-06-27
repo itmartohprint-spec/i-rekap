@@ -151,25 +151,35 @@
 
 .feature-card {
   background: var(--surface-color);
-  padding: 2.5rem;
+  padding: 0;
   border-radius: var(--radius-xl);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
   text-align: left;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.feature-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .feature-icon {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
   color: var(--primary-color);
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -288,11 +298,9 @@
 .feature-img-container {
   width: 100%;
   aspect-ratio: 16/9;
-  border-radius: 8px;
   overflow: hidden;
   background: #f1f5f9;
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
