@@ -3,6 +3,8 @@ import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Send, CheckCircle } from 'lucide-react';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 const Payroll = () => {
   const [payrollData, setPayrollData] = useState([]);
@@ -260,58 +262,132 @@ const Payroll = () => {
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (payrollData.length === 0) {
       alert('Tidak ada data untuk diexport');
       return;
     }
 
-    let csvContent = "";
-    
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Payroll');
+    const dateObj = new Date(selectedMonth + '-01');
+    const monthName = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
     if (exportBankFormat === 'BCA') {
-      csvContent = "No Rekening Penerima,Nama Penerima,Nominal,Keterangan\n";
+      worksheet.columns = [
+        { header: 'No Rekening Penerima', key: 'rek', width: 25 },
+        { header: 'Nama Penerima', key: 'name', width: 30 },
+        { header: 'Nominal', key: 'nominal', width: 20 },
+        { header: 'Keterangan', key: 'ket', width: 35 },
+      ];
+
       payrollData.forEach(emp => {
         const rek = emp.account_number ? `'${emp.account_number}` : "-";
-        const name = emp.name || "-";
-        const nominal = emp.takeHomePay || 0;
-        const dateObj = new Date(selectedMonth + '-01');
-        const monthName = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-        const keterangan = `Gaji ${monthName}`;
-        csvContent += `"${rek}","${name}","${nominal}","${keterangan}"\n`;
+        worksheet.addRow({
+          rek: rek,
+          name: emp.name || "-",
+          nominal: emp.takeHomePay || 0,
+          ket: `Gaji ${monthName}`
+        });
       });
+
     } else if (exportBankFormat === 'Mandiri') {
-      csvContent = "Rekening Tujuan,Nama Tujuan,Mata Uang,Jumlah,Berita 1\n";
+      worksheet.columns = [
+        { header: 'Rekening Tujuan', key: 'rek', width: 25 },
+        { header: 'Nama Tujuan', key: 'name', width: 30 },
+        { header: 'Mata Uang', key: 'currency', width: 15 },
+        { header: 'Jumlah', key: 'nominal', width: 20 },
+        { header: 'Berita 1', key: 'ket', width: 35 },
+      ];
+
       payrollData.forEach(emp => {
         const rek = emp.account_number ? `'${emp.account_number}` : "-";
-        const name = emp.name || "-";
-        const nominal = emp.takeHomePay || 0;
-        csvContent += `"${rek}","${name}","IDR","${nominal}","Gaji ${selectedMonth}"\n`;
+        worksheet.addRow({
+          rek: rek,
+          name: emp.name || "-",
+          currency: 'IDR',
+          nominal: emp.takeHomePay || 0,
+          ket: `Gaji ${monthName}`
+        });
       });
+      
     } else if (exportBankFormat === 'Lengkap') {
-      csvContent = "No Rekening,Nama Bank,Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
-      payrollData.forEach(emp => {
-        const rek = emp.account_number ? `="${emp.account_number}"` : "-";
-        const bank = emp.bank_name || "-";
-        const name = `"${emp.name}"`;
-        const days = emp.daysPresent;
-        const base = emp.totalBaseSalary;
-        const kasbon = emp.cashAdvanceDeduction;
-        const late = emp.lateDeductionTotal;
-        const total = emp.takeHomePay;
-        csvContent += `${rek},${bank},${name},${days},${base},${kasbon},${late},${total}\n`;
+      worksheet.mergeCells('A1:H1');
+      const titleRow = worksheet.getCell('A1');
+      titleRow.value = `LAPORAN PENGGAJIAN KARYAWAN - ${monthName.toUpperCase()}`;
+      titleRow.font = { name: 'Arial', size: 16, bold: true };
+      titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
+      
+      const compRow = worksheet.getCell('A2');
+      worksheet.mergeCells('A2:H2');
+      compRow.value = companyInfo ? companyInfo.company_name : 'Perusahaan';
+      compRow.font = { name: 'Arial', size: 12, bold: true };
+      compRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+      worksheet.addRow([]); // baris 3 kosong
+
+      worksheet.getRow(4).values = ['No Rekening', 'Nama Bank', 'Nama Karyawan', 'Kehadiran (Hari)', 'Gaji Pokok', 'Potongan Kasbon', 'Potongan Telat', 'Total Diterima (THP)'];
+      worksheet.getRow(4).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      worksheet.getRow(4).alignment = { vertical: 'middle', horizontal: 'center' };
+      
+      ['A','B','C','D','E','F','G','H'].forEach(col => {
+        const cell = worksheet.getCell(`${col}4`);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      });
+
+      worksheet.columns = [
+        { key: 'rek', width: 22 },
+        { key: 'bank', width: 18 },
+        { key: 'name', width: 30 },
+        { key: 'days', width: 18 },
+        { key: 'base', width: 20 },
+        { key: 'kasbon', width: 20 },
+        { key: 'late', width: 20 },
+        { key: 'total', width: 25 }
+      ];
+
+      payrollData.forEach((emp) => {
+        const rek = emp.account_number ? `'${emp.account_number}` : "-";
+        const row = worksheet.addRow({
+          rek: rek,
+          bank: emp.bank_name || "-",
+          name: emp.name,
+          days: emp.daysPresent,
+          base: emp.totalBaseSalary,
+          kasbon: emp.cashAdvanceDeduction,
+          late: emp.lateDeductionTotal,
+          total: emp.takeHomePay
+        });
+        
+        row.eachCell((cell, colNumber) => {
+          cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+          if (colNumber >= 5 && colNumber <= 8) {
+            cell.numFmt = '"Rp" #,##0'; // format rupiah di excel
+          }
+        });
       });
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Format_${exportBankFormat}_Payroll_${selectedMonth}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (exportBankFormat !== 'Lengkap') {
+      worksheet.getRow(1).font = { bold: true, color: { argb: 'FF0F172A' } };
+      worksheet.getRow(1).eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      });
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) {
+          row.eachCell((cell, colNumber) => {
+             cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+             if (exportBankFormat === 'BCA' && colNumber === 3) cell.numFmt = '#,##0';
+             if (exportBankFormat === 'Mandiri' && colNumber === 4) cell.numFmt = '#,##0';
+          });
+        }
+      });
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `Format_${exportBankFormat}_Payroll_${selectedMonth}.xlsx`);
   };
 
   return (
