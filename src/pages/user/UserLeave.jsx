@@ -44,8 +44,6 @@ const UserLeave = () => {
             style={{ padding: '1rem', borderRadius: '12px', border: '1px solid #cbd5e1', outline: 'none', background: 'white', fontSize: '1rem' }}
           >
             <option value="Tahunan">Cuti Tahunan</option>
-            <option value="Sakit">Sakit (dengan Surat Dokter)</option>
-            <option value="Penting">Izin Keperluan Penting</option>
             <option value="Melahirkan">Cuti Melahirkan</option>
           </select>
         </div>
