@@ -675,3 +675,44 @@
   75% { transform: rotate(0deg); }
   100% { transform: rotate(0deg); }
 }
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .landing-header {
+    padding: 0.5rem 1rem;
+    margin: 1rem 3% 1rem 3%;
+    border-radius: 50px;
+    gap: 0.5rem;
+  }
+
+  .landing-logo {
+    font-size: 1.25rem;
+    white-space: nowrap;
+    gap: 0.25rem;
+  }
+
+  .nav-mascot {
+    height: 40px;
+  }
+
+  .landing-nav {
+    gap: 0.5rem;
+  }
+
+  .nav-link-btn {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .landing-nav .btn-secondary {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-link-btn {
+    display: none; /* Sembunyikan Fitur dan Harga di layar sangat kecil agar tidak sempit */
+  }
+}
