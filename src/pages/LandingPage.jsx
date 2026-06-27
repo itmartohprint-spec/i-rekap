@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText, DollarSign, CalendarRange, Users, Banknote, Star } from 'lucide-react';
+import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText, DollarSign, CalendarRange, Users, Banknote, Star, Activity } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -128,6 +128,22 @@ const LandingPage = () => {
               <div className="feature-icon"><DollarSign size={32} /></div>
               <h3>Payroll & Ekspor Laporan Otomatis</h3>
               <p>Sistem rekap gaji otomatis berdasarkan kehadiran dan kasbon. Ekspor laporan ke PDF atau Excel dengan instan.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '3rem auto 0 auto', textAlign: 'left', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+            <Activity size={28} color="var(--primary-color)" />
+            <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>Fitur untuk Eksekutif & Pimpinan</h3>
+          </div>
+        </div>
+        <div className="features-grid bento-layout">
+          <div className="feature-card bento-large">
+            <div className="feature-content" style={{ padding: '3rem 2rem' }}>
+              <div className="feature-icon"><Activity size={32} /></div>
+              <h3>Live Monitor Kehadiran</h3>
+              <p>Dashboard khusus pimpinan untuk memantau kehadiran karyawan secara real-time. Ketahui siapa yang hadir, terlambat, sakit, atau cuti hari ini hanya dalam satu layar, dari mana saja dan kapan saja. Sangat cocok untuk Direktur, Manajer, atau Pemilik Usaha yang mobilitasnya tinggi.</p>
             </div>
           </div>
         </div>
