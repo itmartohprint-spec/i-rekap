@@ -11,6 +11,7 @@ const Payroll = () => {
   const [selectedSlip, setSelectedSlip] = useState(null);
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [companyInfo, setCompanyInfo] = useState(null);
+  const [exportBankFormat, setExportBankFormat] = useState('BCA');
 
   useEffect(() => {
     generatePayroll();
@@ -265,30 +266,48 @@ const Payroll = () => {
       return;
     }
 
-    // Format standar untuk Copy-Paste ke Template BCA KlikBCA Bisnis (Multi Auto Transfer)
-    let csvContent = "No Rekening Penerima,Nama Penerima,Nominal,Keterangan\n";
-
-    payrollData.forEach(emp => {
-      // Gunakan kutip tunggal di awal rekening agar Excel tidak menghilangkan angka 0 di depan
-      const rek = emp.account_number ? `'${emp.account_number}` : "-";
-      const name = emp.name || "-";
-      const nominal = emp.takeHomePay || 0;
-      
-      // Bulan format MM-YYYY
-      const dateObj = new Date(selectedMonth + '-01');
-      const monthName = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-      const keterangan = `Gaji ${monthName}`;
-      
-      // Bungkus dengan tanda kutip agar koma di nama tidak merusak CSV
-      csvContent += `"${rek}","${name}","${nominal}","${keterangan}"\n`;
-    });
+    let csvContent = "";
+    
+    if (exportBankFormat === 'BCA') {
+      csvContent = "No Rekening Penerima,Nama Penerima,Nominal,Keterangan\n";
+      payrollData.forEach(emp => {
+        const rek = emp.account_number ? `'${emp.account_number}` : "-";
+        const name = emp.name || "-";
+        const nominal = emp.takeHomePay || 0;
+        const dateObj = new Date(selectedMonth + '-01');
+        const monthName = dateObj.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        const keterangan = `Gaji ${monthName}`;
+        csvContent += `"${rek}","${name}","${nominal}","${keterangan}"\n`;
+      });
+    } else if (exportBankFormat === 'Mandiri') {
+      csvContent = "Rekening Tujuan,Nama Tujuan,Mata Uang,Jumlah,Berita 1\n";
+      payrollData.forEach(emp => {
+        const rek = emp.account_number ? `'${emp.account_number}` : "-";
+        const name = emp.name || "-";
+        const nominal = emp.takeHomePay || 0;
+        csvContent += `"${rek}","${name}","IDR","${nominal}","Gaji ${selectedMonth}"\n`;
+      });
+    } else if (exportBankFormat === 'Lengkap') {
+      csvContent = "No Rekening,Nama Bank,Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
+      payrollData.forEach(emp => {
+        const rek = emp.account_number ? `="${emp.account_number}"` : "-";
+        const bank = emp.bank_name || "-";
+        const name = `"${emp.name}"`;
+        const days = emp.daysPresent;
+        const base = emp.totalBaseSalary;
+        const kasbon = emp.cashAdvanceDeduction;
+        const late = emp.lateDeductionTotal;
+        const total = emp.takeHomePay;
+        csvContent += `${rek},${bank},${name},${days},${base},${kasbon},${late},${total}\n`;
+      });
+    }
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `Format_BCA_Payroll_${selectedMonth}.csv`);
+    link.setAttribute("download", `Format_${exportBankFormat}_Payroll_${selectedMonth}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -307,6 +326,16 @@ const Payroll = () => {
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
+          <select 
+            value={exportBankFormat}
+            onChange={(e) => setExportBankFormat(e.target.value)}
+            className="form-input"
+            style={{ width: 'auto', background: '#f8fafc', border: '1px solid #cbd5e1' }}
+          >
+            <option value="BCA">Format BCA</option>
+            <option value="Mandiri">Format Mandiri</option>
+            <option value="Lengkap">Data Lengkap</option>
+          </select>
           <button 
             onClick={handleExportExcel}
             style={{ padding: '0.8rem 1.2rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
