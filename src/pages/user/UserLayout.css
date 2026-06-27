@@ -2,7 +2,8 @@
   width: 100%;
   max-width: 414px;
   margin: 0 auto;
-  height: 100vh; /* Fixed height for the app container */
+  height: 100vh; /* Fallback for older browsers */
+  height: 100dvh; /* Dynamic height for modern mobile browsers */
   display: flex;
   flex-direction: column;
   position: relative;
