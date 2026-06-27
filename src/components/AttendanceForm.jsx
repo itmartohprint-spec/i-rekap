@@ -21,6 +21,8 @@ const AttendanceForm = ({ type, onClose }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [distanceInfo, setDistanceInfo] = useState('');
+  const [companyShiftIn, setCompanyShiftIn] = useState('08:00');
+  const [companyTolerance, setCompanyTolerance] = useState(15);
   
   useEffect(() => {
     startCamera();
@@ -45,11 +47,13 @@ const AttendanceForm = ({ type, onClose }) => {
 
     const { data, error } = await supabase
       .from('companies')
-      .select('office_lat, office_lng, radius_meters')
+      .select('office_lat, office_lng, radius_meters, shift_in, lateness_tolerance')
       .eq('license_code', licenseCode)
       .single();
 
     if (data) {
+      if (data.shift_in) setCompanyShiftIn(data.shift_in.substring(0, 5));
+      if (data.lateness_tolerance !== null) setCompanyTolerance(data.lateness_tolerance);
       checkLocation(data);
     } else {
       setLocationStatus('error');
@@ -204,8 +208,14 @@ const AttendanceForm = ({ type, onClose }) => {
         const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
         const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
         const shiftId = savedEmpShifts[employeeId] || 'default';
-        const shift = savedMasterShifts.find(s => s.id === shiftId);
-        const tolerance = parseInt(localStorage.getItem(`lateness_tolerance_${licenseCode}`) || '15', 10);
+        let shift = savedMasterShifts.find(s => s.id === shiftId);
+        
+        // Fallback to cloud setting if localStorage is empty (user on their own device)
+        if (!shift) {
+          shift = { startTime: companyShiftIn };
+        }
+        
+        const tolerance = parseInt(localStorage.getItem(`lateness_tolerance_${licenseCode}`) || companyTolerance, 10);
         
         if (shift && shift.startTime) {
           const [shiftHour, shiftMin] = shift.startTime.split(':').map(Number);
