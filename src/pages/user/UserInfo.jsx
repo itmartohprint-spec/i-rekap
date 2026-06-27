@@ -1,10 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Info, AlertTriangle, Megaphone, Clock } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const UserInfo = () => {
   const [infoData, setInfoData] = useState([]);
 
-  const loadAnnouncements = () => {
+  const fetchSupabaseNotifications = async () => {
+    const employeeId = localStorage.getItem('user-id');
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!employeeId || !licenseCode) return [];
+
+    let notifications = [];
+
+    // Fetch Kasbon
+    const { data: kasbonData } = await supabase
+      .from('cash_advances')
+      .select('*')
+      .eq('license_code', licenseCode)
+      .eq('employee_id', employeeId)
+      .neq('status', 'pending');
+
+    if (kasbonData) {
+      kasbonData.forEach(kasbon => {
+        const isApproved = kasbon.status === 'approved' || kasbon.status === 'Disetujui';
+        const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(kasbon.amount);
+        notifications.push({
+          id: `kasbon-${kasbon.id}`,
+          type: isApproved ? 'info' : 'important',
+          title: `Pengajuan Kasbon ${isApproved ? 'Disetujui' : 'Ditolak'}`,
+          date: new Date(kasbon.created_at || Date.now()).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+          content: `Pengajuan kasbon Anda sebesar ${formattedAmount} telah ${isApproved ? 'disetujui' : 'ditolak'} oleh Admin.`,
+          timestamp: new Date(kasbon.created_at || Date.now()).getTime()
+        });
+      });
+    }
+
+    // Fetch Cuti/Izin
+    const { data: leaveData } = await supabase
+      .from('leave_requests')
+      .select('*')
+      .eq('license_code', licenseCode)
+      .eq('employee_id', employeeId)
+      .neq('status', 'pending');
+
+    if (leaveData) {
+      leaveData.forEach(leave => {
+        const isApproved = leave.status === 'approved' || leave.status === 'Disetujui';
+        let typeLabel = "Cuti/Izin";
+        if (leave.type === 'izin') typeLabel = 'Izin';
+        if (leave.type === 'sakit') typeLabel = 'Sakit';
+        if (leave.reason?.includes('Cuti')) typeLabel = 'Cuti';
+        
+        notifications.push({
+          id: `leave-${leave.id}`,
+          type: isApproved ? 'info' : 'important',
+          title: `Pengajuan ${typeLabel} ${isApproved ? 'Disetujui' : 'Ditolak'}`,
+          date: new Date(leave.created_at || Date.now()).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+          content: `Pengajuan ${typeLabel.toLowerCase()} Anda untuk tanggal ${leave.start_date} telah ${isApproved ? 'disetujui' : 'ditolak'} oleh Admin.`,
+          timestamp: new Date(leave.created_at || Date.now()).getTime()
+        });
+      });
+    }
+
+    // Sort by newest first
+    notifications.sort((a, b) => b.timestamp - a.timestamp);
+    return notifications;
+  };
+
+  const loadAnnouncements = async () => {
     // Default mock data
     const defaultData = [
       {
@@ -20,27 +83,19 @@ const UserInfo = () => {
         title: 'Jadwal Libur Idul Adha',
         date: '15 Juni 2026',
         content: 'Diberitahukan kepada seluruh karyawan bahwa libur nasional jatuh pada hari Senin-Rabu. Kantor akan kembali beroperasi normal pada hari Kamis.',
-      },
-      {
-        id: 3,
-        type: 'announcement',
-        title: 'Pengingat Aturan Seragam Baru',
-        date: '10 Juni 2026',
-        content: 'Mengingatkan kembali bahwa mulai Senin depan, seragam batik wajib dikenakan setiap hari Jumat.',
       }
     ];
 
     const dynamicData = JSON.parse(localStorage.getItem('hr-announcements') || '[]');
-    setInfoData([...dynamicData, ...defaultData]);
+    const dbNotifications = await fetchSupabaseNotifications();
+    
+    setInfoData([...dbNotifications, ...dynamicData, ...defaultData]);
   };
 
   useEffect(() => {
     loadAnnouncements();
 
-    // Listen to custom event (same window)
     window.addEventListener('hrAnnouncementSent', loadAnnouncements);
-    
-    // Listen to storage event (other tabs)
     window.addEventListener('storage', loadAnnouncements);
 
     return () => {
