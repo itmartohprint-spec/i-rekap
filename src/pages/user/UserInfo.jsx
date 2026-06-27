@@ -68,28 +68,10 @@ const UserInfo = () => {
   };
 
   const loadAnnouncements = async () => {
-    // Default mock data
-    const defaultData = [
-      {
-        id: 1,
-        type: 'important',
-        title: 'Pemeliharaan Sistem Server',
-        date: '24 Juni 2026',
-        content: 'Akan dilakukan pemeliharaan server pada pukul 23:00 - 02:00 WIB. Fitur absensi tetap bisa digunakan dalam mode offline dan akan sinkron otomatis.',
-      },
-      {
-        id: 2,
-        type: 'info',
-        title: 'Jadwal Libur Idul Adha',
-        date: '15 Juni 2026',
-        content: 'Diberitahukan kepada seluruh karyawan bahwa libur nasional jatuh pada hari Senin-Rabu. Kantor akan kembali beroperasi normal pada hari Kamis.',
-      }
-    ];
-
     const dynamicData = JSON.parse(localStorage.getItem('hr-announcements') || '[]');
     const dbNotifications = await fetchSupabaseNotifications();
     
-    setInfoData([...dbNotifications, ...dynamicData, ...defaultData]);
+    setInfoData([...dbNotifications, ...dynamicData]);
   };
 
   useEffect(() => {
