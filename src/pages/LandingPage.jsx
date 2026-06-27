@@ -56,8 +56,8 @@ const LandingPage = () => {
             <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>Fitur untuk Karyawan</h3>
           </div>
         </div>
-        <div className="features-grid" style={{ marginBottom: '5rem' }}>
-          <div className="feature-card">
+        <div className="features-grid bento-layout" style={{ marginBottom: '5rem' }}>
+          <div className="feature-card bento-large">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_k1.webp')} style={{ cursor: 'pointer' }}><img src="/feat_k1.webp" alt="Absensi Mobile" /></div>
             <div className="feature-content">
               <div className="feature-icon"><MapPin size={32} /></div>
@@ -97,8 +97,8 @@ const LandingPage = () => {
             <h3 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>Fitur untuk HR & Admin</h3>
           </div>
         </div>
-        <div className="features-grid">
-          <div className="feature-card">
+        <div className="features-grid bento-layout">
+          <div className="feature-card bento-large">
             <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a1.webp')} style={{ cursor: 'pointer' }}><img src="/feat_a1.webp" alt="Live Tracking" /></div>
             <div className="feature-content">
               <div className="feature-icon"><Wifi size={32} /></div>
