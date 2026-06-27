@@ -18,6 +18,7 @@ const LandingPage = () => {
     <div className="landing-container">
       <header className="landing-header">
         <div className="landing-logo">
+          <img src="/mascot_header.png" alt="Mascot" className="nav-mascot" />
           i-Rekap
         </div>
         <nav className="landing-nav">

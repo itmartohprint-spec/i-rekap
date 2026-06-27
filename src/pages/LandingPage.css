@@ -419,3 +419,20 @@
   max-height: 100%;
   object-fit: contain;
 }
+
+.nav-mascot {
+  height: 40px;
+  width: auto;
+  animation: mascotWave 2.5s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+
+@keyframes mascotWave {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-10deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
