@@ -70,6 +70,7 @@ const UserLeave = () => {
     const { error } = await supabase.from('leave_requests').insert([{
       license_code: licenseCode,
       employee_id: employeeId,
+      type: 'cuti',
       start_date: formData.startDate,
       end_date: formData.endDate,
       reason: finalReason,
