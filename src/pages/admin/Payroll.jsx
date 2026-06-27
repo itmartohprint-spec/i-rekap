@@ -234,19 +234,6 @@ const Payroll = () => {
     document.body.removeChild(link);
   };
 
-  const handleDownloadManualTemplate = () => {
-    const csvContent = "ID Karyawan,Nama Karyawan,Gaji Pokok,Tunjangan Kehadiran,Lembur,Potongan Kasbon,Potongan BPJS,Total Gaji Bersih\nEMP-01,Budi Santoso,5000000,500000,0,0,150000,5350000\n";
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Template_Hitung_Gaji_Manual.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -259,12 +246,6 @@ const Payroll = () => {
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
-          <button 
-            onClick={handleDownloadManualTemplate}
-            style={{ padding: '0.8rem 1.2rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Template Manual
-          </button>
           <button 
             onClick={handleExportExcel}
             style={{ padding: '0.8rem 1.2rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
