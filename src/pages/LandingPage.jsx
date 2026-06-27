@@ -140,7 +140,10 @@ const LandingPage = () => {
         </div>
         <div className="features-grid bento-layout">
           <div className="feature-card bento-large">
-            <div className="feature-content" style={{ padding: '3rem 2rem' }}>
+            <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a1.webp')} style={{ cursor: 'pointer', height: '300px' }}>
+              <img src="/feat_a1.webp" alt="Live Monitor Kehadiran" style={{ objectPosition: 'top' }} />
+            </div>
+            <div className="feature-content" style={{ padding: '2rem' }}>
               <div className="feature-icon"><Activity size={32} /></div>
               <h3>Live Monitor Kehadiran</h3>
               <p>Dashboard khusus pimpinan untuk memantau kehadiran karyawan secara real-time. Ketahui siapa yang hadir, terlambat, sakit, atau cuti hari ini hanya dalam satu layar, dari mana saja dan kapan saja. Sangat cocok untuk Direktur, Manajer, atau Pemilik Usaha yang mobilitasnya tinggi.</p>
