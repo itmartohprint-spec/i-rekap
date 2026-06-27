@@ -12,6 +12,8 @@ const Checkout = () => {
   const [timeLeft, setTimeLeft] = useState(9 * 60);
   const [showUpload, setShowUpload] = useState(false);
   const [paymentProof, setPaymentProof] = useState('');
+  const [duration, setDuration] = useState(1); // 1, 12, 24, 36
+
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -44,17 +46,19 @@ const Checkout = () => {
   const planDetails = {
     standar: {
       name: 'Paket Standar',
-      price: 'Rp 499.000',
+      basePrice: 499000,
       features: ['Hingga 50 Karyawan', 'Validasi Lokasi (GPS)', 'Laporan Standar']
     },
     pro: {
       name: 'Paket Pro',
-      price: 'Rp 999.000',
+      basePrice: 999000,
       features: ['Hingga 200 Karyawan', 'Validasi Lokasi & IP', 'Verifikasi Selfie', 'Ekspor PDF & Excel']
     }
   };
 
-  const currentPlan = planDetails[plan];
+  const currentPlan = planDetails[plan] || planDetails['pro'];
+  const totalPrice = currentPlan.basePrice * duration;
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -91,6 +95,7 @@ const Checkout = () => {
         email: formData.email,
         admin_password: formData.password,
         plan: plan,
+        duration_months: duration,
         status: 'active', // Langsung aktif karena sudah dapat lisensi (MVP)
         payment_proof: paymentProof,
         license_code: generatedLicense
@@ -125,7 +130,25 @@ const Checkout = () => {
 
             <div className="plan-details">
               <div className="plan-name-display">{currentPlan.name}</div>
-              <div className="plan-price-display">{currentPlan.price}<span>/bulan</span></div>
+              <div className="plan-price-display">Rp {totalPrice.toLocaleString('id-ID')}</div>
+              <p style={{marginTop: '-0.5rem', marginBottom: '1.5rem', color: '#e2e8f0', fontSize: '0.95rem'}}>
+                Total tagihan untuk {duration === 1 ? '1 Bulan' : (duration/12) + ' Tahun'}
+              </p>
+
+              <div className="duration-selector" style={{marginBottom: '1.5rem', textAlign: 'left'}}>
+                <label style={{display: 'block', fontSize: '0.9rem', color: '#cbd5e1', marginBottom: '0.5rem'}}>Durasi Berlangganan:</label>
+                <select 
+                  value={duration} 
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  style={{width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', outline: 'none', fontSize: '1rem', cursor: 'pointer'}}
+                >
+                  <option value={1} style={{color: 'black'}}>1 Bulan</option>
+                  <option value={12} style={{color: 'black'}}>1 Tahun (12 Bulan)</option>
+                  <option value={24} style={{color: 'black'}}>2 Tahun (24 Bulan)</option>
+                  <option value={36} style={{color: 'black'}}>3 Tahun (36 Bulan)</option>
+                </select>
+              </div>
+
               <ul className="summary-features">
                 {currentPlan.features.map((feat, idx) => (
                   <li key={idx}><CheckCircle size={18} color="#4ade80" /> {feat}</li>
