@@ -3,7 +3,6 @@ import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Receipt, Download, X } from 'lucide-react';
-import './UserPayslip.css';
 
 const UserPayslip = () => {
   const [payslips, setPayslips] = useState([]);
