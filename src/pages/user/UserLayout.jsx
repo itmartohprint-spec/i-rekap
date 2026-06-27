@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Home, Clock, Calendar, Wallet, Bell } from 'lucide-react';
+import { Home, Clock, Calendar, Wallet, Receipt } from 'lucide-react';
 import SidakOverlay from '../../components/SidakOverlay';
 import './UserLayout.css';
 
@@ -28,6 +28,10 @@ const UserLayout = () => {
         <NavLink to="/user/cash-advance" className={({isActive}) => isActive ? "mobile-nav-item active" : "mobile-nav-item"}>
           <Wallet size={24} />
           <span>Kasbon</span>
+        </NavLink>
+        <NavLink to="/user/payslip" className={({isActive}) => isActive ? "mobile-nav-item active" : "mobile-nav-item"}>
+          <Receipt size={24} />
+          <span>Slip Gaji</span>
         </NavLink>
       </nav>
     </div>

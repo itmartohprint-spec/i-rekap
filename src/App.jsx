@@ -7,6 +7,7 @@ import UserHistory from './pages/user/UserHistory';
 import UserLeave from './pages/user/UserLeave';
 import UserCashAdvance from './pages/user/UserCashAdvance';
 import UserInfo from './pages/user/UserInfo';
+import UserPayslip from './pages/user/UserPayslip';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EmployeeList from './pages/admin/EmployeeList';
@@ -75,6 +76,7 @@ function App() {
           <Route path="history" element={<UserHistory />} />
           <Route path="leave" element={<UserLeave />} />
           <Route path="cash-advance" element={<UserCashAdvance />} />
+          <Route path="payslip" element={<UserPayslip />} />
           <Route path="info" element={<UserInfo />} />
         </Route>
 

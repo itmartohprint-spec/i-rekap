@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Send, CheckCircle } from 'lucide-react';
 
 const Payroll = () => {
   const [payrollData, setPayrollData] = useState([]);
@@ -171,8 +172,65 @@ const Payroll = () => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
   };
 
-  const markAsPaid = () => {
-    alert("Slip gaji berhasil dikirim ke email semua karyawan!");
+  const markAsPaid = async () => {
+    if (payrollData.length === 0) {
+      alert("Tidak ada data untuk dikirim.");
+      return;
+    }
+    
+    if (!confirm("Kirim slip gaji ke semua karyawan di daftar ini?")) return;
+    
+    setIsLoading(true);
+    const licenseCode = localStorage.getItem('valid-license');
+    
+    const payloads = payrollData.map(emp => ({
+      license_code: licenseCode,
+      employee_id: emp.id,
+      month: selectedMonth,
+      data: emp
+    }));
+
+    // Because upsert might fail if not properly configured with unique constraint on Supabase,
+    // we'll try to delete existing ones for this month first to be safe, then insert.
+    await supabase.from('payslips').delete()
+      .eq('license_code', licenseCode)
+      .eq('month', selectedMonth);
+
+    const { error } = await supabase.from('payslips').insert(payloads);
+    
+    setIsLoading(false);
+    
+    if (error) {
+      alert("Gagal mengirim slip gaji massal: " + error.message);
+    } else {
+      alert("Slip gaji massal berhasil dipublikasikan ke aplikasi karyawan!");
+    }
+  };
+
+  const handleSendIndividual = async (emp) => {
+    if (!confirm(`Kirim slip gaji untuk ${emp.name}?`)) return;
+    
+    const licenseCode = localStorage.getItem('valid-license');
+    const payload = {
+      license_code: licenseCode,
+      employee_id: emp.id,
+      month: selectedMonth,
+      data: emp
+    };
+
+    // Safe upsert by delete then insert
+    await supabase.from('payslips').delete()
+      .eq('license_code', licenseCode)
+      .eq('employee_id', emp.id)
+      .eq('month', selectedMonth);
+
+    const { error } = await supabase.from('payslips').insert([payload]);
+    
+    if (error) {
+      alert("Gagal mengirim slip gaji: " + error.message);
+    } else {
+      alert(`Slip gaji ${emp.name} berhasil dipublikasikan!`);
+    }
   };
 
   const handleDownloadSlip = async () => {
@@ -291,7 +349,14 @@ const Payroll = () => {
                   <td><strong style={{ color: '#10b981' }}>{formatRupiah(emp.takeHomePay)}</strong></td>
                   <td><span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600, background: '#fef3c7', color: '#d97706' }}>Draft</span></td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button 
+                        onClick={() => handleSendIndividual(emp)}
+                        title="Kirim ke Aplikasi Karyawan"
+                        style={{ padding: '6px', background: '#e0e7ff', color: '#4f46e5', border: '1px solid #c7d2fe', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Send size={16} />
+                      </button>
                       <button 
                         onClick={() => setSelectedSlip(emp)}
                         style={{ padding: '6px 12px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
