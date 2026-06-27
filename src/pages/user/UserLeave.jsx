@@ -83,14 +83,6 @@ const UserLeave = () => {
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: '#334155' }}>Lampiran (Opsional)</label>
-          <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', background: '#f1f5f9' }}>
-            <Upload size={24} color="#64748b" style={{ margin: '0 auto 0.5rem' }} />
-            <div style={{ fontSize: '0.9rem', color: '#64748b' }}>Klik untuk unggah foto/dokumen</div>
-          </div>
-        </div>
-
         <button type="submit" style={{ 
           marginTop: '1rem',
           background: 'linear-gradient(135deg, #0062ff, #3b82f6)', 
