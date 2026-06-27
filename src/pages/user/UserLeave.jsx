@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Calendar, FileText, Upload, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, FileText, Send } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
 
 const UserLeave = () => {
   const [formData, setFormData] = useState({
@@ -8,32 +9,86 @@ const UserLeave = () => {
     endDate: '',
     reason: '',
   });
+  const [leaveQuota, setLeaveQuota] = useState(12);
+  const [usedLeave, setUsedLeave] = useState(0);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchQuota = async () => {
+      const employeeId = localStorage.getItem('user-id');
+      const licenseCode = localStorage.getItem('valid-license');
+      if (!employeeId || !licenseCode) return;
+
+      const { data: empData } = await supabase
+        .from('employees')
+        .select('leave_quota')
+        .eq('id', employeeId)
+        .eq('license_code', licenseCode)
+        .single();
+      
+      if (empData && empData.leave_quota !== undefined) {
+        setLeaveQuota(empData.leave_quota);
+      }
+
+      const { data: leaveData } = await supabase
+        .from('leave_requests')
+        .select('start_date, end_date, status, reason')
+        .eq('employee_id', employeeId)
+        .eq('license_code', licenseCode)
+        .like('reason', '%Cuti Tahunan%');
+
+      if (leaveData) {
+        let totalUsed = 0;
+        leaveData.forEach(req => {
+          if (req.status !== 'Ditolak' && req.status !== 'ditolak') {
+            const start = new Date(req.start_date);
+            const end = new Date(req.end_date);
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+              const diffTime = Math.abs(end - start);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+              totalUsed += diffDays;
+            }
+          }
+        });
+        setUsedLeave(totalUsed);
+      }
+    };
+    fetchQuota();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const requestEntry = {
-      id: Date.now().toString(),
-      employeeId: 'EMP-001',
-      employeeName: 'Budi Santoso',
-      date: formData.startDate + ' s/d ' + formData.endDate,
-      type: formData.type,
-      reason: formData.reason,
-      status: 'Menunggu',
-      attachment: null // simplified for mock
-    };
+    const employeeId = localStorage.getItem('user-id');
+    const licenseCode = localStorage.getItem('valid-license');
+    if (!employeeId || !licenseCode) {
+      alert("Sesi login tidak valid.");
+      return;
+    }
 
-    const existingRequests = JSON.parse(localStorage.getItem('leave_requests')) || [];
-    localStorage.setItem('leave_requests', JSON.stringify([requestEntry, ...existingRequests]));
+    const finalReason = `[${formData.type === 'Tahunan' ? 'Cuti Tahunan' : 'Cuti Melahirkan'}] ${formData.reason}`;
 
-    alert('Pengajuan cuti berhasil dikirim!');
-    setFormData({ type: 'Tahunan', startDate: '', endDate: '', reason: '' });
+    const { error } = await supabase.from('leave_requests').insert([{
+      license_code: licenseCode,
+      employee_id: employeeId,
+      start_date: formData.startDate,
+      end_date: formData.endDate,
+      reason: finalReason,
+      status: 'pending'
+    }]);
+
+    if (error) {
+      alert('Terjadi kesalahan: ' + error.message);
+    } else {
+      alert('Pengajuan cuti berhasil dikirim!');
+      setFormData({ type: 'Tahunan', startDate: '', endDate: '', reason: '' });
+      window.location.reload();
+    }
   };
 
   return (
     <div style={{ padding: '1.5rem', background: '#f8fafc', minHeight: '100vh' }}>
       <h1 style={{ fontSize: '1.5rem', color: '#0f172a', marginBottom: '0.5rem', fontWeight: 700 }}>Pengajuan Cuti</h1>
-      <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Sisa Cuti Tahunan: <strong>10 Hari</strong></p>
+      <p style={{ color: '#64748b', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Sisa Cuti Tahunan: <strong>{leaveQuota - usedLeave} Hari</strong></p>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
