@@ -6,6 +6,7 @@ import './LandingPage.css';
 const LandingPage = () => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [activeMonitorTab, setActiveMonitorTab] = useState('beranda');
 
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
@@ -147,33 +148,61 @@ const LandingPage = () => {
                   <div className="lm-time">08.15.30</div>
                   <div className="lm-date">Sabtu, 27 Juni 2026</div>
                 </div>
-                <div className="lm-grid">
-                  <div className="lm-card">
-                    <Users size={20} color="#60a5fa" />
-                    <span>Total Karyawan</span>
-                    <strong>24</strong>
+                {activeMonitorTab === 'beranda' && (
+                  <div className="lm-grid">
+                    <div className="lm-card">
+                      <Users size={20} color="#60a5fa" />
+                      <span>Total Karyawan</span>
+                      <strong>24</strong>
+                    </div>
+                    <div className="lm-card">
+                      <CheckCircle size={20} color="#34d399" />
+                      <span>Hadir (Hari Ini)</span>
+                      <strong>22</strong>
+                    </div>
+                    <div className="lm-card">
+                      <Clock size={20} color="#fbbf24" />
+                      <span>Terlambat</span>
+                      <strong>2</strong>
+                    </div>
+                    <div className="lm-card">
+                      <span style={{ color: '#f87171', fontSize: '1.2rem', fontWeight: 'bold' }}>X</span>
+                      <span>Absen (Alpha)</span>
+                      <strong>0</strong>
+                    </div>
                   </div>
-                  <div className="lm-card">
-                    <CheckCircle size={20} color="#34d399" />
-                    <span>Hadir (Hari Ini)</span>
-                    <strong>22</strong>
+                )}
+                {activeMonitorTab === 'peta' && (
+                  <div style={{ height: '180px', background: '#1e293b', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', padding: '1rem', textAlign: 'center' }}>
+                    <MapPin size={40} color="#60a5fa" />
+                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Peta GPS Karyawan Aktif Hari Ini</span>
                   </div>
-                  <div className="lm-card">
-                    <Clock size={20} color="#fbbf24" />
-                    <span>Terlambat</span>
-                    <strong>2</strong>
+                )}
+                {activeMonitorTab === 'pengajuan' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', height: '180px', justifyContent: 'center' }}>
+                    <div style={{ background: '#1e293b', padding: '1rem', borderRadius: '12px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#60a5fa', marginBottom: '0.3rem', fontWeight: 'bold' }}>IZIN CUTI - Budi</div>
+                      <div style={{ fontSize: '0.85rem', color: 'white', marginBottom: '0.8rem' }}>Cuti tahunan tgl 28 Juni</div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button style={{ flex: 1, padding: '0.4rem', background: '#10b981', border: 'none', color: 'white', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}>Setujui</button>
+                        <button style={{ flex: 1, padding: '0.4rem', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}>Tolak</button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="lm-card">
-                    <span style={{ color: '#f87171', fontSize: '1.2rem', fontWeight: 'bold' }}>X</span>
-                    <span>Absen (Alpha)</span>
-                    <strong>0</strong>
+                )}
+                {activeMonitorTab === 'sidak' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', textAlign: 'center', padding: '0.5rem', height: '180px', justifyContent: 'center' }}>
+                    <Camera size={36} color="#f87171" />
+                    <p style={{ color: '#94a3b8', fontSize: '0.75rem', margin: 0 }}>Gunakan fitur ini untuk meminta foto Selfie + GPS seketika dari karyawan.</p>
+                    <button style={{ width: '100%', padding: '0.6rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>SIDAK MASSAL</button>
                   </div>
-                </div>
+                )}
+                
                 <div className="lm-tabs">
-                  <div className="lm-tab active"><Activity size={16}/>Beranda</div>
-                  <div className="lm-tab"><MapPin size={16}/>Peta</div>
-                  <div className="lm-tab"><FileText size={16}/>Pengajuan</div>
-                  <div className="lm-tab"><Camera size={16}/>Sidak</div>
+                  <div className={`lm-tab ${activeMonitorTab === 'beranda' ? 'active' : ''}`} onClick={() => setActiveMonitorTab('beranda')} style={{ cursor: 'pointer' }}><Activity size={16}/>Beranda</div>
+                  <div className={`lm-tab ${activeMonitorTab === 'peta' ? 'active' : ''}`} onClick={() => setActiveMonitorTab('peta')} style={{ cursor: 'pointer' }}><MapPin size={16}/>Peta</div>
+                  <div className={`lm-tab ${activeMonitorTab === 'pengajuan' ? 'active' : ''}`} onClick={() => setActiveMonitorTab('pengajuan')} style={{ cursor: 'pointer' }}><FileText size={16}/>Pengajuan</div>
+                  <div className={`lm-tab ${activeMonitorTab === 'sidak' ? 'active' : ''}`} onClick={() => setActiveMonitorTab('sidak')} style={{ cursor: 'pointer' }}><Camera size={16}/>Sidak</div>
                 </div>
               </div>
             </div>
