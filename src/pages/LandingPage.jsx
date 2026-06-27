@@ -139,6 +139,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="features-grid bento-layout">
+          <div className="feature-card bento-large">
             <div className="live-monitor-mockup-container">
               <div className="live-monitor-mockup">
                 <div className="lm-header">
