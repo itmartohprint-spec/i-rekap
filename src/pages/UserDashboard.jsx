@@ -112,14 +112,46 @@ const UserDashboard = () => {
   return (
     <div className="mobile-container">
       <div className="user-dashboard">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '-1.5rem', color: 'white', marginTop: '-1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px' }}>
-            <img src="/logo-irekap.png" alt="i-Rekap" style={{ height: '100%', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))' }} onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
-            <div style={{ display: 'none', background: 'white', padding: '0.5rem', borderRadius: '14px', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-              <Building size={28} color="#0062ff" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '-1.5rem', color: 'white', marginTop: '-1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px' }}>
+              <img src="/logo-irekap.png" alt="i-Rekap" style={{ height: '100%', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))' }} onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+              <div style={{ display: 'none', background: 'white', padding: '0.5rem', borderRadius: '14px', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                <Building size={28} color="#0062ff" />
+              </div>
             </div>
+            <span style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>i-Rekap</span>
           </div>
-          <span style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.5px', textShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>i-Rekap</span>
+          
+          <button 
+            onClick={() => {
+              if(window.confirm('Apakah Anda yakin ingin keluar?')) {
+                localStorage.removeItem('user-id');
+                localStorage.removeItem('user-name');
+                localStorage.removeItem('user-dept');
+                navigate('/login');
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#fee2e2',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '999px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              backdropFilter: 'blur(10px)',
+              marginRight: '0.5rem'
+            }}
+            title="Logout"
+          >
+            <Power size={14} />
+            Logout
+          </button>
         </div>
         <header className="dashboard-header">
           <div className="user-greeting">
@@ -175,35 +207,6 @@ const UserDashboard = () => {
             >
               {userPhoto ? <img src={userPhoto} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'B'}
             </div>
-            <button 
-              onClick={() => {
-                if(window.confirm('Apakah Anda yakin ingin keluar?')) {
-                  localStorage.removeItem('user-id');
-                  localStorage.removeItem('user-name');
-                  localStorage.removeItem('user-dept');
-                  navigate('/login');
-                }
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                background: 'rgba(239, 68, 68, 0.2)',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
-                color: '#fee2e2',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '999px',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)',
-                marginLeft: '0.2rem'
-              }}
-              title="Logout"
-            >
-              <Power size={14} />
-              Logout
-            </button>
           </div>
         </header>
 
