@@ -139,14 +139,47 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="features-grid bento-layout">
-          <div className="feature-card bento-large">
-            <div className="feature-img-container" onClick={() => setSelectedImage('/feat_monitor.webp')} style={{ cursor: 'pointer', height: '300px' }}>
-              <img src="/feat_monitor.webp" alt="Live Monitor Kehadiran" style={{ objectPosition: 'top' }} />
+            <div className="live-monitor-mockup-container">
+              <div className="live-monitor-mockup">
+                <div className="lm-header">
+                  <div className="lm-pill"><Activity size={12} /> Monitor Eksekutif</div>
+                  <div className="lm-time">08.15.30</div>
+                  <div className="lm-date">Sabtu, 27 Juni 2026</div>
+                </div>
+                <div className="lm-grid">
+                  <div className="lm-card">
+                    <Users size={20} color="#60a5fa" />
+                    <span>Total Karyawan</span>
+                    <strong>24</strong>
+                  </div>
+                  <div className="lm-card">
+                    <CheckCircle size={20} color="#34d399" />
+                    <span>Hadir (Hari Ini)</span>
+                    <strong>22</strong>
+                  </div>
+                  <div className="lm-card">
+                    <Clock size={20} color="#fbbf24" />
+                    <span>Terlambat</span>
+                    <strong>2</strong>
+                  </div>
+                  <div className="lm-card">
+                    <span style={{ color: '#f87171', fontSize: '1.2rem', fontWeight: 'bold' }}>X</span>
+                    <span>Absen (Alpha)</span>
+                    <strong>0</strong>
+                  </div>
+                </div>
+                <div className="lm-tabs">
+                  <div className="lm-tab active"><Activity size={16}/>Beranda</div>
+                  <div className="lm-tab"><MapPin size={16}/>Peta</div>
+                  <div className="lm-tab"><FileText size={16}/>Pengajuan</div>
+                  <div className="lm-tab"><Camera size={16}/>Sidak</div>
+                </div>
+              </div>
             </div>
             <div className="feature-content" style={{ padding: '2rem' }}>
               <div className="feature-icon"><Activity size={32} /></div>
-              <h3>Live Monitor Kehadiran</h3>
-              <p>Dashboard khusus pimpinan untuk memantau kehadiran karyawan secara real-time. Ketahui siapa yang hadir, terlambat, sakit, atau cuti hari ini hanya dalam satu layar, dari mana saja dan kapan saja. Sangat cocok untuk Direktur, Manajer, atau Pemilik Usaha yang mobilitasnya tinggi.</p>
+              <h3>Live Monitor Kehadiran (Eksekutif)</h3>
+              <p>Dashboard khusus pimpinan untuk memantau kehadiran karyawan secara real-time. Dilengkapi fitur pantauan <strong>Peta GPS</strong>, persetujuan <strong>Pengajuan</strong> dalam satu klik, hingga fitur <strong>Sidak (Selfie Mendadak)</strong> langsung dari layar Anda.</p>
             </div>
           </div>
         </div>
