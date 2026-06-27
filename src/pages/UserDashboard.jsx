@@ -240,29 +240,7 @@ const UserDashboard = () => {
           </div>
         </section>
 
-        <section className="history-section">
-          <h2>Riwayat Hari Ini</h2>
-          <div className="history-list">
-            {isLoadingHistory ? (
-              <p style={{ textAlign: 'center', opacity: 0.7, fontSize: '0.9rem', padding: '1rem' }}>Memuat riwayat...</p>
-            ) : todayHistory.length > 0 ? (
-              todayHistory.map((log) => (
-                <div className="history-item" key={log.id}>
-                  <div className={`history-icon ${log.type === 'check_in' || log.type.includes('in') ? 'icon-in' : 'icon-out'}`}>
-                    {log.type === 'check_in' || log.type.includes('in') ? <LogIn size={20} /> : <LogOut size={20} />}
-                  </div>
-                  <div className="history-details">
-                    <strong style={{ textTransform: 'capitalize' }}>{log.type.replace('_', ' ')}</strong>
-                    <span>{log.status === 'late' || log.status === 'Terlambat' ? 'Terlambat' : 'Sesuai Lokasi & IP'}</span>
-                  </div>
-                  <div className="history-time">{log.time_in || log.time_out}</div>
-                </div>
-              ))
-            ) : (
-              <p style={{ textAlign: 'center', opacity: 0.7, fontSize: '0.9rem', padding: '1rem' }}>Belum ada presensi hari ini.</p>
-            )}
-          </div>
-        </section>
+
       </div>
 
       {showAttendanceForm && (
