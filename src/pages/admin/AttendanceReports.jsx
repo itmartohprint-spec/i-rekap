@@ -18,7 +18,7 @@ const AttendanceReports = () => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   
   // Date filters
-  const [selectedMonthLog, setSelectedMonthLog] = useState(new Date().toISOString().substring(0, 7));
+  const [selectedDateLog, setSelectedDateLog] = useState(new Date().toISOString().substring(0, 10));
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   
@@ -82,8 +82,8 @@ const AttendanceReports = () => {
       return false;
     }
     if (viewMode === 'list') {
-      if (!selectedMonthLog) return true;
-      return log.date.startsWith(selectedMonthLog);
+      if (!selectedDateLog) return true;
+      return log.date === selectedDateLog;
     }
     
     const logDate = new Date(log.date);
@@ -118,8 +118,8 @@ const AttendanceReports = () => {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(71, 85, 105);
-    const dateText = selectedMonthLog 
-      ? `Bulan: ${selectedMonthLog}` 
+    const dateText = selectedDateLog 
+      ? `Tanggal: ${selectedDateLog}` 
       : 'Periode: Semua Waktu';
     doc.text(dateText, 45, 32);
     const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
@@ -154,7 +154,7 @@ const AttendanceReports = () => {
     
     const companyName = localStorage.getItem('company-name') || 'PT. JASA SERVICE KOMPUTER MART';
     const companyLogo = localStorage.getItem('company-logo') || '/maskot.png';
-    const periodStr = selectedMonthLog ? `Bulan: ${selectedMonthLog}` : 'Periode: Semua Waktu';
+    const periodStr = selectedDateLog ? `Tanggal: ${selectedDateLog}` : 'Periode: Semua Waktu';
     const divText = selectedDivision ? `Divisi: ${selectedDivision}` : 'Divisi: Semua Divisi';
     
     // Cleanup display none and clone table
@@ -298,8 +298,8 @@ ${base64Data}
                 </select>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Bulan:</span>
-                <input type="month" className="form-input" style={{ width: 'auto' }} value={selectedMonthLog} onChange={e => setSelectedMonthLog(e.target.value)} />
+                <span style={{ fontSize: '0.9rem', color: '#64748b' }}>Tanggal:</span>
+                <input type="date" className="form-input" style={{ width: 'auto' }} value={selectedDateLog} onChange={e => setSelectedDateLog(e.target.value)} />
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button className="btn-primary" onClick={handleExportPDF} disabled={filteredLogs.length === 0}>Export PDF</button>
