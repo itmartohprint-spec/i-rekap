@@ -140,8 +140,8 @@ const LandingPage = () => {
         </div>
         <div className="features-grid bento-layout">
           <div className="feature-card bento-large">
-            <div className="feature-img-container" onClick={() => setSelectedImage('/feat_a1.webp')} style={{ cursor: 'pointer', height: '300px' }}>
-              <img src="/feat_a1.webp" alt="Live Monitor Kehadiran" style={{ objectPosition: 'top' }} />
+            <div className="feature-img-container" onClick={() => setSelectedImage('/feat_monitor.webp')} style={{ cursor: 'pointer', height: '300px' }}>
+              <img src="/feat_monitor.webp" alt="Live Monitor Kehadiran" style={{ objectPosition: 'top' }} />
             </div>
             <div className="feature-content" style={{ padding: '2rem' }}>
               <div className="feature-icon"><Activity size={32} /></div>
