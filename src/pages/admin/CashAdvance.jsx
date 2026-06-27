@@ -93,17 +93,26 @@ const CashAdvance = () => {
                 <td style={{ fontWeight: 600 }}>{formatRupiah(req.amount)}</td>
                 <td>{req.reason}</td>
                 <td>
-                  <span className={`status-badge badge-${req.status === 'pending' ? 'warning' : req.status === 'approved' ? 'success' : 'danger'}`}>
-                    {req.status === 'pending' ? 'Menunggu' : req.status === 'approved' ? 'Disetujui' : 'Ditolak'}
+                  <span className={`status-badge badge-${req.status === 'pending' ? 'warning' : req.status === 'approved' ? 'success' : req.status === 'paid' ? 'primary' : 'danger'}`}>
+                    {req.status === 'pending' ? 'Menunggu' : req.status === 'approved' ? 'Disetujui' : req.status === 'paid' ? 'Lunas' : 'Ditolak'}
                   </span>
                 </td>
                 <td>
-                  {req.status === 'pending' ? (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="btn-primary" onClick={() => updateStatus(req.id, 'approved')} style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}}>Approve</button>
-                      <button className="btn-secondary" onClick={() => updateStatus(req.id, 'rejected')} style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem', color: 'var(--danger-color)', borderColor: 'var(--danger-color)'}}>Tolak</button>
-                    </div>
-                  ) : '-'}
+                  {req.status === 'pending' && (
+                    <>
+                      <button className="btn-success" onClick={() => updateStatus(req.id, 'approved')} style={{ marginRight: '0.5rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Setujui</button>
+                      <button className="btn-danger" onClick={() => updateStatus(req.id, 'rejected')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Tolak</button>
+                    </>
+                  )}
+                  {req.status === 'approved' && (
+                    <button className="btn-primary" onClick={() => updateStatus(req.id, 'paid')} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Tandai Lunas</button>
+                  )}
+                  {req.status === 'paid' && (
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Selesai</span>
+                  )}
+                  {req.status === 'rejected' && (
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>-</span>
+                  )}
                 </td>
               </tr>
             )) : (
