@@ -52,6 +52,7 @@ const QuickLeaveForm = ({ onClose }) => {
       const { error } = await supabase.from('leave_requests').insert([{
         license_code: licenseCode,
         employee_id: employeeId,
+        type: leaveType === 'izin' ? 'izin' : 'sakit',
         start_date: formattedDate,
         end_date: formattedDate,
         reason: finalReason,
