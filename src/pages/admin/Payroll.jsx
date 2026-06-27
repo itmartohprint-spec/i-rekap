@@ -51,12 +51,14 @@ const Payroll = () => {
         .gte('date', startDate)
         .lte('date', endDate);
 
-      // 3. Fetch Approved Cash Advances
+      // 3. Fetch Approved Cash Advances for selected month
       const { data: cashAdvances } = await supabase
         .from('cash_advances')
         .select('*')
         .eq('license_code', licenseCode)
-        .eq('status', 'approved');
+        .eq('status', 'approved')
+        .gte('created_at', `${startDate}T00:00:00.000Z`)
+        .lte('created_at', `${endDate}T23:59:59.999Z`);
 
       if (employees) {
         const computedPayroll = employees.map(emp => {
