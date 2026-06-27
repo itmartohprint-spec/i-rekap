@@ -355,7 +355,7 @@ const Payroll = () => {
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <h1 style={{ margin: '0 0 5px 0', color: '#0062ff', fontSize: '2rem', fontWeight: '900', letterSpacing: '1px' }}>SLIP GAJI</h1>
+                    <h1 style={{ margin: '0 0 5px 0', color: '#0062ff', fontSize: '1.6rem', fontWeight: '900', letterSpacing: '1px' }}>SLIP GAJI</h1>
                     <p style={{ margin: 0, color: '#0f172a', fontSize: '1rem', fontWeight: 'bold', background: '#e0e7ff', padding: '4px 12px', borderRadius: '4px', display: 'inline-block' }}>Periode: {new Date(selectedMonth + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
                   </div>
                 </div>
