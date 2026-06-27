@@ -95,6 +95,7 @@ const UserPayslip = () => {
     <div className="mobile-page-container">
       <div className="mobile-header">
         <h2>Slip Gaji Saya</h2>
+        <div style={{fontSize: '10px', color: '#64748b'}}>Debug: {localStorage.getItem('user-id')} | {localStorage.getItem('valid-license')}</div>
       </div>
 
       <div className="mobile-content" style={{ padding: '20px' }}>
