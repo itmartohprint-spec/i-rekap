@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText, DollarSign, CalendarRange, Users, Banknote } from 'lucide-react';
+import { Fingerprint, CheckCircle, MapPin, Camera, Wifi, Shield, Clock, FileText, DollarSign, CalendarRange, Users, Banknote, Star } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -204,6 +204,65 @@ const LandingPage = () => {
           </div>
           <div className="client-logo-wrapper empty">
             <span>(Menunggu Logo ke-5)</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="testimonials-section">
+        <h2 className="section-title">Apa Kata Mereka?</h2>
+        <div className="testimonials-grid">
+          <div className="testimonial-card">
+            <div className="stars">
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+            </div>
+            <p className="testimonial-text">"Semenjak pakai i-Rekap, urusan absen karyawan jadi sangat praktis. Fitur deteksi lokasi dan selfie-nya sangat akurat, tidak ada lagi yang bisa titip absen!"</p>
+            <div className="testimonial-author">
+              <div className="author-avatar">A</div>
+              <div>
+                <h4>Ahmad Syarif</h4>
+                <span>HR Manager, Retail</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="testimonial-card">
+            <div className="stars">
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+            </div>
+            <p className="testimonial-text">"Sistem approval cuti dan kasbon dalam satu klik benar-benar menghemat waktu saya sebagai pemilik usaha. Tampilan aplikasinya juga sangat elegan dan mudah dipahami."</p>
+            <div className="testimonial-author">
+              <div className="author-avatar">B</div>
+              <div>
+                <h4>Budi Santoso</h4>
+                <span>Business Owner</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="testimonial-card">
+            <div className="stars">
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+              <Star size={18} fill="#f59e0b" color="#f59e0b" />
+            </div>
+            <p className="testimonial-text">"Export laporan penggajian jadi hitungan detik. Dulu kami butuh berhari-hari untuk merekap absen dan lembur, sekarang semua otomatis. Sangat recommended!"</p>
+            <div className="testimonial-author">
+              <div className="author-avatar">C</div>
+              <div>
+                <h4>Citra Kirana</h4>
+                <span>Finance & Admin</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
