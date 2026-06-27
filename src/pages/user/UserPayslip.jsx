@@ -33,8 +33,7 @@ const UserPayslip = () => {
   const fetchPayslips = async () => {
     setIsLoading(true);
     const licenseCode = localStorage.getItem('valid-license');
-    const employeeData = JSON.parse(localStorage.getItem('employee-data') || '{}');
-    const employeeId = employeeData.id;
+    const employeeId = localStorage.getItem('user-id');
 
     if (!licenseCode || !employeeId) {
       setIsLoading(false);
