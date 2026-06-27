@@ -335,12 +335,12 @@ const Payroll = () => {
       {/* Slip Gaji Modal */}
       {selectedSlip && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
             
-            <div id="payslip-print-area" style={{ padding: '50px 40px', background: '#fff', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
+            <div id="payslip-print-area" style={{ padding: '50px 40px', background: '#fff', fontFamily: 'Arial, sans-serif', position: 'relative', color: '#000' }}>
               
               {/* WATERMARK */}
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-45deg)', fontSize: '8rem', color: 'rgba(0,0,0,0.03)', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0 }}>RAHASIA</div>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-45deg)', fontSize: '8rem', color: '#f8fafc', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0 }}>RAHASIA</div>
 
               <div style={{ position: 'relative', zIndex: 1 }}>
                 {/* Header */}
@@ -363,7 +363,7 @@ const Payroll = () => {
                 {/* Employee Details Box */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px', background: '#f8fafc', padding: '15px 20px', borderRadius: '8px', borderLeft: '4px solid #0062ff' }}>
                   <div>
-                    <table style={{ fontSize: '0.9rem', color: '#334155' }}>
+                    <table style={{ fontSize: '0.9rem', color: '#0f172a' }}>
                       <tbody>
                         <tr><td style={{ width: '120px', padding: '4px 0', color: '#64748b' }}>ID Karyawan</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.id}</td></tr>
                         <tr><td style={{ padding: '4px 0', color: '#64748b' }}>Nama Karyawan</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.name}</td></tr>
@@ -372,7 +372,7 @@ const Payroll = () => {
                     </table>
                   </div>
                   <div>
-                    <table style={{ fontSize: '0.9rem', color: '#334155' }}>
+                    <table style={{ fontSize: '0.9rem', color: '#0f172a' }}>
                       <tbody>
                         <tr><td style={{ width: '120px', padding: '4px 0', color: '#64748b' }}>Metode Gaji</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.salary_type || 'Harian'}</td></tr>
                         <tr><td style={{ padding: '4px 0', color: '#64748b' }}>Bank Penyalur</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.bank_name || '-'}</td></tr>
@@ -388,15 +388,15 @@ const Payroll = () => {
                   {/* PENERIMAAN */}
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: '0 0 10px 0', color: '#166534', background: '#dcfce7', padding: '8px 12px', borderRadius: '4px', borderLeft: '3px solid #166534', display: 'flex', justifyContent: 'space-between' }}><span>PENERIMAAN</span></h4>
-                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse' }}>
+                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse', color: '#0f172a' }}>
                       <tbody>
                         <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 5px' }}>{selectedSlip.salary_type === 'Bulanan' ? 'Gaji Pokok (Bulanan)' : `Gaji Pokok (${selectedSlip.daysPresent} Hari)`}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px' }}>{formatRupiah(selectedSlip.totalBaseSalary)}</td>
+                          <td style={{ padding: '10px 5px', color: '#0f172a' }}>{selectedSlip.salary_type === 'Bulanan' ? 'Gaji Pokok (Bulanan)' : `Gaji Pokok (${selectedSlip.daysPresent} Hari)`}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px', color: '#0f172a' }}>{formatRupiah(selectedSlip.totalBaseSalary)}</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 5px' }}>Tunjangan / Lembur</td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px' }}>Rp 0</td>
+                          <td style={{ padding: '10px 5px', color: '#0f172a' }}>Tunjangan / Lembur</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px', color: '#0f172a' }}>Rp 0</td>
                         </tr>
                       </tbody>
                     </table>
@@ -405,14 +405,14 @@ const Payroll = () => {
                   {/* POTONGAN */}
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: '0 0 10px 0', color: '#991b1b', background: '#fee2e2', padding: '8px 12px', borderRadius: '4px', borderLeft: '3px solid #991b1b', display: 'flex', justifyContent: 'space-between' }}><span>POTONGAN</span></h4>
-                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse' }}>
+                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse', color: '#0f172a' }}>
                       <tbody>
                         <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 5px' }}>Kasbon / Pinjaman</td>
+                          <td style={{ padding: '10px 5px', color: '#0f172a' }}>Kasbon / Pinjaman</td>
                           <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ef4444', padding: '10px 5px' }}>{selectedSlip.cashAdvanceDeduction > 0 ? '-' + formatRupiah(selectedSlip.cashAdvanceDeduction) : 'Rp 0'}</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 5px' }}>Denda Telat ({selectedSlip.lateLogs ? selectedSlip.lateLogs.reduce((sum, log) => sum + (log.minutesLate || 0), 0) : 0} Menit)</td>
+                          <td style={{ padding: '10px 5px', color: '#0f172a' }}>Denda Telat ({selectedSlip.lateLogs ? selectedSlip.lateLogs.reduce((sum, log) => sum + (log.minutesLate || 0), 0) : 0} Menit)</td>
                           <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ef4444', padding: '10px 5px' }}>{selectedSlip.lateDeductionTotal > 0 ? '-' + formatRupiah(selectedSlip.lateDeductionTotal) : 'Rp 0'}</td>
                         </tr>
                       </tbody>
@@ -435,11 +435,11 @@ const Payroll = () => {
                 <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', padding: '0 40px' }}>
                   <div style={{ textAlign: 'center' }}>
                     <p style={{ margin: '0 0 70px 0', fontSize: '0.9rem', color: '#334155' }}>Penerima / Karyawan,</p>
-                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px' }}>{selectedSlip.name}</p>
+                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px', color: '#0f172a' }}>{selectedSlip.name}</p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <p style={{ margin: '0 0 70px 0', fontSize: '0.9rem', color: '#334155' }}>Disetujui Oleh,</p>
-                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px' }}>Finance / HRD</p>
+                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px', color: '#0f172a' }}>Finance / HRD</p>
                   </div>
                 </div>
               </div>
