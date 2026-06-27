@@ -399,8 +399,9 @@ const Payroll = () => {
                         <td style={{ padding: '10px' }}>{log.date}</td>
                         <td style={{ padding: '10px' }}>
                           {(() => {
-                            const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${licenseCode}`) || '{}');
-                            const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${licenseCode}`) || '[]');
+                            const locLicense = localStorage.getItem('valid-license');
+                            const savedEmpShifts = JSON.parse(localStorage.getItem(`employee_shifts_${locLicense}`) || '{}');
+                            const savedMasterShifts = JSON.parse(localStorage.getItem(`master_shifts_${locLicense}`) || '[]');
                             const shiftId = savedEmpShifts[selectedDetail.id] || 'default';
                             const shift = savedMasterShifts.find(s => s.id === shiftId);
                             return shift ? `${shift.name} (${shift.startTime} - ${shift.endTime})` : 'Shift Normal (08:00 - 17:00)';
