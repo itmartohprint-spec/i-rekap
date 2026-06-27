@@ -167,6 +167,14 @@ const UserDashboard = () => {
               <Bell size={18} />
               <span style={{ position: 'absolute', top: 0, right: 0, width: '10px', height: '10px', background: '#ef4444', borderRadius: '50%', border: '2px solid #3b82f6' }}></span>
             </button>
+            <div 
+              className="avatar" 
+              onClick={() => setShowProfileModal(true)} 
+              style={{ cursor: 'pointer', overflow: 'hidden' }}
+              title="Edit Profil"
+            >
+              {userPhoto ? <img src={userPhoto} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'B'}
+            </div>
             <button 
               onClick={() => {
                 if(window.confirm('Apakah Anda yakin ingin keluar?')) {
@@ -179,29 +187,23 @@ const UserDashboard = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '0.4rem',
                 background: 'rgba(239, 68, 68, 0.2)',
                 border: '1px solid rgba(239, 68, 68, 0.4)',
                 color: '#fee2e2',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '999px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
                 cursor: 'pointer',
                 backdropFilter: 'blur(10px)',
-                marginLeft: '2px'
+                marginLeft: '0.2rem'
               }}
               title="Logout"
             >
-              <Power size={18} />
+              <Power size={14} />
+              Logout
             </button>
-            <div 
-              className="avatar" 
-              onClick={() => setShowProfileModal(true)} 
-              style={{ cursor: 'pointer', overflow: 'hidden' }}
-              title="Edit Profil"
-            >
-              {userPhoto ? <img src={userPhoto} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'B'}
-            </div>
           </div>
         </header>
 
