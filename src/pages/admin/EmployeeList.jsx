@@ -11,7 +11,7 @@ const EmployeeList = () => {
   const [formData, setFormData] = useState({
     id: '', name: '', nik: '', birthDate: '', religion: '', dept: '', position: '',
     address: '', whatsapp: '', password: '', dailySalary: '', salaryType: 'Harian', overtimeRate: '',
-    leaveQuota: '12', status: 'Aktif Bekerja', isMock: false
+    leaveQuota: '12', status: 'Aktif Bekerja', isMock: false, bankName: '', accountNumber: ''
   });
   const [budiPhoto, setBudiPhoto] = useState('');
   const [budiPassword, setBudiPassword] = useState('*****');
@@ -58,7 +58,9 @@ const EmployeeList = () => {
         overtimeRate: emp.overtime_rate,
         leaveQuota: emp.leave_quota,
         status: emp.status,
-        isMock: emp.is_mock
+        isMock: emp.is_mock,
+        bankName: emp.bank_name || '',
+        accountNumber: emp.account_number || ''
       }));
       setEmployees(formattedData);
     }
@@ -162,7 +164,9 @@ const EmployeeList = () => {
       overtime_rate: formData.overtimeRate ? parseFloat(formData.overtimeRate) : null,
       leave_quota: formData.leaveQuota ? parseInt(formData.leaveQuota) : 12,
       status: formData.status,
-      is_mock: formData.isMock
+      is_mock: formData.isMock,
+      bank_name: formData.bankName,
+      account_number: formData.accountNumber
     };
 
     if (editMode) {
@@ -331,6 +335,14 @@ const EmployeeList = () => {
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Jatah Cuti Tahunan (Hari)</label>
                     <input type="number" className="form-input" value={formData.leaveQuota || '12'} onChange={e => setFormData({...formData, leaveQuota: e.target.value})} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Nama Bank</label>
+                    <input type="text" className="form-input" value={formData.bankName || ''} onChange={e => setFormData({...formData, bankName: e.target.value})} placeholder="Contoh: BCA, Mandiri, BRI" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#334155' }}>Nomor Rekening</label>
+                    <input type="text" className="form-input" value={formData.accountNumber || ''} onChange={e => setFormData({...formData, accountNumber: e.target.value})} placeholder="Contoh: 1234567890" />
                   </div>
                 </div>
               </div>

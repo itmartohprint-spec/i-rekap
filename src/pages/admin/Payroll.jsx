@@ -207,9 +207,11 @@ const Payroll = () => {
       return;
     }
 
-    let csvContent = "Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
+    let csvContent = "No Rekening,Nama Bank,Nama Karyawan,Kehadiran (Hari),Gaji Pokok,Potongan Kasbon,Potongan Telat,Total Diterima\n";
 
     payrollData.forEach(emp => {
+      const rek = emp.account_number ? `="${emp.account_number}"` : "-";
+      const bank = emp.bank_name || "-";
       const name = `"${emp.name}"`;
       const days = emp.daysPresent;
       const base = emp.totalBaseSalary;
@@ -217,7 +219,7 @@ const Payroll = () => {
       const late = emp.lateDeductionTotal;
       const total = emp.takeHomePay;
       
-      csvContent += `${name},${days},${base},${kasbon},${late},${total}\n`;
+      csvContent += `${rek},${bank},${name},${days},${base},${kasbon},${late},${total}\n`;
     });
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -225,7 +227,20 @@ const Payroll = () => {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `Laporan_Gaji_${selectedMonth}.csv`);
+    link.setAttribute("download", `Laporan_Gaji_Transfer_${selectedMonth}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadManualTemplate = () => {
+    const csvContent = "ID Karyawan,Nama Karyawan,Gaji Pokok,Tunjangan Kehadiran,Lembur,Potongan Kasbon,Potongan BPJS,Total Gaji Bersih\nEMP-01,Budi Santoso,5000000,500000,0,0,150000,5350000\n";
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Template_Hitung_Gaji_Manual.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -244,6 +259,12 @@ const Payroll = () => {
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           />
+          <button 
+            onClick={handleDownloadManualTemplate}
+            style={{ padding: '0.8rem 1.2rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Template Manual
+          </button>
           <button 
             onClick={handleExportExcel}
             style={{ padding: '0.8rem 1.2rem', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -316,77 +337,110 @@ const Payroll = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
             
-            <div id="payslip-print-area" style={{ padding: '40px', background: '#fff' }}>
-              {/* Header */}
-              <div style={{ textAlign: 'center', borderBottom: '2px dashed #cbd5e1', paddingBottom: '20px', marginBottom: '20px' }}>
-                {companyInfo && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', marginBottom: '15px' }}>
-                    {companyInfo.logo_url && (
-                      <img src={companyInfo.logo_url} alt="Logo" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
+            <div id="payslip-print-area" style={{ padding: '50px 40px', background: '#fff', fontFamily: 'Arial, sans-serif', position: 'relative' }}>
+              
+              {/* WATERMARK */}
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-45deg)', fontSize: '8rem', color: 'rgba(0,0,0,0.03)', fontWeight: 'bold', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0 }}>RAHASIA</div>
+
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #0f172a', paddingBottom: '20px', marginBottom: '25px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {companyInfo && companyInfo.logo_url && (
+                      <img src={companyInfo.logo_url} alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     )}
-                    <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.2rem', fontWeight: '800' }}>{companyInfo.company_name}</h3>
+                    <div>
+                      <h2 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '1.4rem', fontWeight: '900', textTransform: 'uppercase' }}>{companyInfo ? companyInfo.company_name : 'Perusahaan'}</h2>
+                      <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>Dokumen Resmi Penggajian</p>
+                    </div>
                   </div>
-                )}
-                <h2 style={{ margin: '0 0 5px 0', color: '#0f172a', fontSize: '1.5rem' }}>SLIP GAJI KARYAWAN</h2>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Periode: {new Date(selectedMonth + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
-              </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <h1 style={{ margin: '0 0 5px 0', color: '#0062ff', fontSize: '2rem', fontWeight: '900', letterSpacing: '1px' }}>SLIP GAJI</h1>
+                    <p style={{ margin: 0, color: '#0f172a', fontSize: '1rem', fontWeight: 'bold', background: '#e0e7ff', padding: '4px 12px', borderRadius: '4px', display: 'inline-block' }}>Periode: {new Date(selectedMonth + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
+                  </div>
+                </div>
 
-              {/* Employee Details */}
-              <table style={{ width: '100%', marginBottom: '20px', fontSize: '0.95rem' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ width: '40%', padding: '4px 0', color: '#64748b' }}>Nama Karyawan</td>
-                    <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.name}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '4px 0', color: '#64748b' }}>ID Karyawan</td>
-                    <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.id}</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '4px 0', color: '#64748b' }}>Posisi / Bagian</td>
-                    <td style={{ padding: '4px 0', fontWeight: 'bold', color: '#0f172a' }}>: {selectedSlip.dept || 'Staff'}</td>
-                  </tr>
-                </tbody>
-              </table>
+                {/* Employee Details Box */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px', background: '#f8fafc', padding: '15px 20px', borderRadius: '8px', borderLeft: '4px solid #0062ff' }}>
+                  <div>
+                    <table style={{ fontSize: '0.9rem', color: '#334155' }}>
+                      <tbody>
+                        <tr><td style={{ width: '120px', padding: '4px 0', color: '#64748b' }}>ID Karyawan</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.id}</td></tr>
+                        <tr><td style={{ padding: '4px 0', color: '#64748b' }}>Nama Karyawan</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.name}</td></tr>
+                        <tr><td style={{ padding: '4px 0', color: '#64748b' }}>Jabatan / Divisi</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.dept || '-'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div>
+                    <table style={{ fontSize: '0.9rem', color: '#334155' }}>
+                      <tbody>
+                        <tr><td style={{ width: '120px', padding: '4px 0', color: '#64748b' }}>Metode Gaji</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.salary_type || 'Harian'}</td></tr>
+                        <tr><td style={{ padding: '4px 0', color: '#64748b' }}>Bank Penyalur</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.bank_name || '-'}</td></tr>
+                        <tr><td style={{ padding: '4px 0', color: '#64748b' }}>No. Rekening</td><td style={{ fontWeight: 'bold' }}>: {selectedSlip.account_number || '-'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-              {/* Earnings & Deductions */}
-              <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px', color: '#334155' }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#0f172a', borderBottom: '1px solid #cbd5e1', paddingBottom: '5px' }}>PENERIMAAN</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
-                  <span>
-                    {selectedSlip.salary_type === 'Bulanan' 
-                      ? `Gaji Pokok (Bulanan Tetap)` 
-                      : `Gaji Pokok (${selectedSlip.daysPresent} Hari x ${formatRupiah(selectedSlip.daily_salary)})`
-                    }
-                  </span>
-                  <span style={{ fontWeight: 'bold' }}>{formatRupiah(selectedSlip.totalBaseSalary)}</span>
+                {/* Earnings & Deductions Tables side by side */}
+                <div style={{ display: 'flex', gap: '25px', marginBottom: '30px' }}>
+                  
+                  {/* PENERIMAAN */}
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#166534', background: '#dcfce7', padding: '8px 12px', borderRadius: '4px', borderLeft: '3px solid #166534', display: 'flex', justifyContent: 'space-between' }}><span>PENERIMAAN</span></h4>
+                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse' }}>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 5px' }}>{selectedSlip.salary_type === 'Bulanan' ? 'Gaji Pokok (Bulanan)' : `Gaji Pokok (${selectedSlip.daysPresent} Hari)`}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px' }}>{formatRupiah(selectedSlip.totalBaseSalary)}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 5px' }}>Tunjangan / Lembur</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', padding: '10px 5px' }}>Rp 0</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* POTONGAN */}
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#991b1b', background: '#fee2e2', padding: '8px 12px', borderRadius: '4px', borderLeft: '3px solid #991b1b', display: 'flex', justifyContent: 'space-between' }}><span>POTONGAN</span></h4>
+                    <table style={{ width: '100%', fontSize: '0.95rem', borderCollapse: 'collapse' }}>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 5px' }}>Kasbon / Pinjaman</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ef4444', padding: '10px 5px' }}>{selectedSlip.cashAdvanceDeduction > 0 ? '-' + formatRupiah(selectedSlip.cashAdvanceDeduction) : 'Rp 0'}</td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 5px' }}>Denda Telat ({selectedSlip.lateLogs ? selectedSlip.lateLogs.reduce((sum, log) => sum + (log.minutesLate || 0), 0) : 0} Menit)</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#ef4444', padding: '10px 5px' }}>{selectedSlip.lateDeductionTotal > 0 ? '-' + formatRupiah(selectedSlip.lateDeductionTotal) : 'Rp 0'}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div style={{ border: '2px solid #0f172a', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 25px', background: '#0f172a', color: '#fff' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>TOTAL DITERIMA (TAKE HOME PAY)</span>
+                    <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#10b981' }}>{formatRupiah(selectedSlip.takeHomePay)}</span>
+                  </div>
+                  <div style={{ background: '#f8fafc', padding: '10px 25px', color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic', textAlign: 'center', borderTop: '1px solid #334155' }}>
+                    Ditransfer ke Rekening {selectedSlip.bank_name || '...'} - {selectedSlip.account_number || '...'}
+                  </div>
                 </div>
                 
-                <h4 style={{ margin: '15px 0 10px 0', color: '#0f172a', borderBottom: '1px solid #cbd5e1', paddingBottom: '5px' }}>POTONGAN</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
-                  <span>Pinjaman / Kasbon</span>
-                  <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{selectedSlip.cashAdvanceDeduction > 0 ? '-' + formatRupiah(selectedSlip.cashAdvanceDeduction) : 'Rp 0'}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.95rem' }}>
-                  <span>Keterlambatan ({selectedSlip.lateLogs ? selectedSlip.lateLogs.reduce((sum, log) => sum + (log.minutesLate || 0), 0) : 0} Menit)</span>
-                  <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{selectedSlip.lateDeductionTotal > 0 ? '-' + formatRupiah(selectedSlip.lateDeductionTotal) : 'Rp 0'}</span>
-                </div>
-              </div>
-
-              {/* Total */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', background: '#0f172a', color: '#fff', borderRadius: '8px' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>TOTAL DITERIMA</span>
-                <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#10b981' }}>{formatRupiah(selectedSlip.takeHomePay)}</span>
-              </div>
-              
-              <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', textAlign: 'center' }}>
-                <div>
-                  <p style={{ margin: '0 0 50px 0', fontSize: '0.85rem' }}>Penerima,</p>
-                  <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', padding: '0 20px' }}>{selectedSlip.name}</p>
-                </div>
-                <div>
-                  <p style={{ margin: '0 0 50px 0', fontSize: '0.85rem' }}>HR Manager,</p>
-                  <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', padding: '0 20px' }}>________________</p>
+                {/* Signatures */}
+                <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'space-between', padding: '0 40px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 70px 0', fontSize: '0.9rem', color: '#334155' }}>Penerima / Karyawan,</p>
+                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px' }}>{selectedSlip.name}</p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 70px 0', fontSize: '0.9rem', color: '#334155' }}>Disetujui Oleh,</p>
+                    <p style={{ margin: 0, fontWeight: 'bold', borderBottom: '1px solid #000', display: 'inline-block', minWidth: '150px' }}>Finance / HRD</p>
+                  </div>
                 </div>
               </div>
             </div>
